@@ -1,0 +1,60 @@
+services:
+  db:
+    image: postgres:16-alpine
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: mindease
+      POSTGRES_PASSWORD: mindease_dev
+      POSTGRES_DB: mindease
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mindease -d mindease"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      db: { condition: service_healthy }
+      redis: { condition: service_started }
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; r=urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health'); exit(0 if r.getcode()==200 else 1)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    environment:
+      DATABASE_URL: postgresql+asyncpg://mindease:mindease_dev@db:5432/mindease
+      SECRET_KEY: dev-secret-change-me
+      FRONTEND_URL: http://localhost:3000
+      REDIS_URL: redis://redis:6379/0
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Empty = same-origin; browser calls /api/* and Next rewrites to backend (no CORS)
+        NEXT_PUBLIC_API_URL: ""
+        NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID:-}
+        BACKEND_PROXY_URL: http://backend:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend: { condition: service_healthy }
+    environment:
+      NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID:-}
+
+volumes:
+  postgres_data:

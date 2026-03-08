@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #f8fafb;
+  --foreground: #1e293b;
+  --primary: #4a90a4;
+  --primary-light: #6ba5b5;
+  --primary-dark: #3a7385;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Google Sign-In button: full width */
+.g_id_signin,
+.g_id_signin > div {
+  width: 100% !important;
+  max-width: 100% !important;
+}
