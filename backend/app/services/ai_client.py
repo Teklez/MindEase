@@ -1,0 +1,71 @@
+import json
+
+import httpx
+
+from app.config import get_settings
+
+settings = get_settings()
+
+
+class AIClient:
+    """HTTP client for the AI microservice."""
+
+    def __init__(self):
+        self.base_url = settings.AI_SERVICE_URL.rstrip("/")
+
+    async def check_crisis(self, text: str) -> dict:
+        """POST to {base_url}/check-crisis
+        Body: {"text": text}
+        Returns the crisis detection result dict.
+        """
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                f"{self.base_url}/check-crisis",
+                json={"text": text},
+                timeout=30.0,
+            )
+            resp.raise_for_status()
+            return resp.json()
+
+    async def generate_response(self, messages: list[dict]) -> str:
+        """POST to {base_url}/generate with stream=false
+        Returns the full response string.
+        """
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                f"{self.base_url}/generate",
+                json={"messages": messages, "stream": False},
+                timeout=120.0,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            return data.get("response") or ""
+
+    async def generate_response_stream(
+        self, messages: list[dict], *, user_lang: str | None = None
+    ):
+        """POST to {base_url}/generate with stream=true
+        The ai-service returns Server-Sent Events.
+        user_lang: optional "en" or "am"; when "am", ai-service translates to/from Amharic.
+        """
+        body: dict = {"messages": messages, "stream": True}
+        if user_lang in ("en", "am"):
+            body["user_lang"] = user_lang
+        async with httpx.AsyncClient() as client:
+            async with client.stream(
+                "POST",
+                f"{self.base_url}/generate",
+                json=body,
+                timeout=120.0,
+            ) as response:
+                response.raise_for_status()
+                async for line in response.aiter_lines():
+                    if line.startswith("data: "):
+                        json_str = line[6:]
+                        try:
+                            data = json.loads(json_str)
+                        except json.JSONDecodeError:
+                            continue
+                        if data.get("done"):
+                            break
+                        yield data.get("token", "")

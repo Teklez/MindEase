@@ -1,23 +1,79 @@
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;500;600;700&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #f8fafb;
-  --foreground: #1e293b;
-  --primary: #4a90a4;
-  --primary-light: #6ba5b5;
-  --primary-dark: #3a7385;
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-}
+/* MindEase calming mental health palette (overrides below in @layer base) */
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-slide-down {
+  animation: slide-down 0.3s ease-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in {
+  animation: fade-in 0.25s ease-out;
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+.animate-slide-in-right {
+  animation: slide-in-right 0.25s ease-out;
+}
+
+@keyframes blink-cursor {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+.animate-blink-cursor {
+  animation: blink-cursor 1s step-end infinite;
+}
+
+@keyframes bounce-dot {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+.animate-bounce-dot {
+  animation: bounce-dot 0.6s ease-in-out infinite;
+}
+
+/* Subtle transitions for interactive elements */
+@media (prefers-reduced-motion: no-preference) {
+  [data-state="open"].animate-in,
+  [data-state="closed"].animate-out {
+    animation-duration: 0.25s;
   }
 }
 
@@ -26,4 +82,90 @@ body {
 .g_id_signin > div {
   width: 100% !important;
   max-width: 100% !important;
+}
+
+@layer base {
+  :root {
+    /* Clean white base – Notion/Linear style, teal accents */
+    --background: hsl(0 0% 100%);
+    --foreground: hsl(222 47% 11%);
+    --card: hsl(0 0% 100%);
+    --card-foreground: hsl(222 47% 11%);
+    --popover: hsl(0 0% 100%);
+    --popover-foreground: hsl(222 47% 11%);
+    --primary: hsl(193 39% 49%); /* teal #4A90A4 */
+    --primary-foreground: hsl(0 0% 100%);
+    --secondary: hsl(210 20% 96%);
+    --secondary-foreground: hsl(222 47% 11%);
+    --muted: hsl(210 20% 97%);
+    --muted-foreground: hsl(215 14% 46%);
+    --accent: hsl(193 39% 49%);
+    --accent-foreground: hsl(0 0% 100%);
+    --destructive: hsl(0 72% 51%);
+    --border: hsl(214 20% 92%);
+    --input: hsl(214 20% 92%);
+    --ring: hsl(193 39% 49%);
+    --chart-1: hsl(193 39% 49%);
+    --chart-2: hsl(160 40% 45%);
+    --chart-3: hsl(215 14% 46%);
+    --chart-4: hsl(222 47% 11%);
+    --chart-5: hsl(210 20% 97%);
+    --radius: 0.75rem;
+    --sidebar: hsl(210 20% 97%);
+    --sidebar-foreground: hsl(222 47% 11%);
+    --sidebar-primary: hsl(193 39% 49%);
+    --sidebar-primary-foreground: hsl(0 0% 100%);
+    --sidebar-accent: hsl(210 20% 96%);
+    --sidebar-accent-foreground: hsl(222 47% 11%);
+    --sidebar-border: hsl(214 20% 92%);
+    --sidebar-ring: hsl(193 39% 49%);
+  }
+  .dark {
+    --background: hsl(222 47% 8%);
+    --foreground: hsl(210 40% 96%);
+    --card: hsl(222 47% 10%);
+    --card-foreground: hsl(210 40% 96%);
+    --popover: hsl(222 47% 10%);
+    --popover-foreground: hsl(210 40% 96%);
+    --primary: hsl(193 50% 55%);
+    --primary-foreground: hsl(222 47% 11%);
+    --secondary: hsl(217 33% 15%);
+    --secondary-foreground: hsl(210 40% 96%);
+    --muted: hsl(217 33% 15%);
+    --muted-foreground: hsl(215 14% 60%);
+    --accent: hsl(217 33% 18%);
+    --accent-foreground: hsl(210 40% 96%);
+    --destructive: hsl(0 72% 51%);
+    --border: hsl(217 33% 18%);
+    --input: hsl(217 33% 18%);
+    --ring: hsl(193 50% 55%);
+    --sidebar: hsl(222 47% 10%);
+    --sidebar-foreground: hsl(210 40% 96%);
+    --sidebar-primary: hsl(193 50% 55%);
+    --sidebar-primary-foreground: hsl(222 47% 11%);
+    --sidebar-accent: hsl(217 33% 18%);
+    --sidebar-accent-foreground: hsl(210 40% 96%);
+    --sidebar-border: hsl(217 33% 18%);
+    --sidebar-ring: hsl(193 50% 55%);
+  }
+  .theme {
+    --font-sans: var(--font-sans);
+  }
+  * {
+    border-color: var(--border);
+  }
+  *:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+  html {
+    font-family: var(--font-inter), system-ui, sans-serif;
+  }
+  html[data-locale="am"] {
+    font-family: "Noto Sans Ethiopic", system-ui, sans-serif;
+  }
 }

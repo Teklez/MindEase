@@ -56,10 +56,6 @@ export async function apiRequest<T>(
     return { ok: false, status: 0, error: message };
   }
   clearTimeout(timeoutId);
-  if (res.status === 401) {
-    redirectToLogin();
-    return { ok: false, status: 401 };
-  }
 
   const text = await res.text();
   let data: T | undefined;
@@ -77,6 +73,10 @@ export async function apiRequest<T>(
       const d = (data as { detail?: string | unknown[] }).detail;
       error = Array.isArray(d) ? (d[0] && typeof d[0] === "object" && "msg" in d[0] ? String((d[0] as { msg: string }).msg) : String(d)) : String(d);
     }
+    // Only redirect to login on 401 when it's not the login/register request (e.g. expired token on protected page)
+    if (res.status === 401 && !path.includes("/auth/login") && !path.includes("/auth/register")) {
+      redirectToLogin();
+    }
     return { ok: false, status: res.status, error };
   }
   return { ok: true, data: data as T };
@@ -84,4 +84,59 @@ export async function apiRequest<T>(
 
 export async function getMe(): Promise<ApiResponse<{ user_id: string; email: string; display_name: string; is_verified: boolean; account_status: string; created_at: string }>> {
   return apiRequest("/api/v1/auth/me");
+}
+
+// Chat API types
+export type ConversationResponse = {
+  conversation_id: string;
+  user_id: string;
+  title: string | null;
+  started_at: string;
+  last_message_at: string;
+  status: string;
+  total_messages: number;
+  crisis_detected: boolean;
+};
+
+export type MessageResponse = {
+  message_id: string;
+  conversation_id: string;
+  sender_type: string;
+  content: string;
+  detected_emotion: string | null;
+  timestamp: string;
+  is_crisis_flagged: boolean;
+};
+
+export type ConversationWithMessages = ConversationResponse & {
+  messages: MessageResponse[];
+};
+
+export async function getChatConversations(): Promise<ApiResponse<ConversationResponse[]>> {
+  return apiRequest("/api/v1/chat/conversations");
+}
+
+export async function createConversation(title?: string | null): Promise<ApiResponse<ConversationResponse>> {
+  return apiRequest("/api/v1/chat/conversations", {
+    method: "POST",
+    body: JSON.stringify({ title: title ?? null }),
+  });
+}
+
+export async function getConversation(conversationId: string): Promise<ApiResponse<ConversationWithMessages>> {
+  return apiRequest(`/api/v1/chat/conversations/${conversationId}`);
+}
+
+export async function updateConversation(
+  conversationId: string,
+  title: string | null
+): Promise<ApiResponse<ConversationResponse>> {
+  return apiRequest(`/api/v1/chat/conversations/${conversationId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ title }),
+  });
+}
+
+export async function archiveConversation(conversationId: string): Promise<ApiResponse<null>> {
+  return apiRequest(`/api/v1/chat/conversations/${conversationId}`, { method: "DELETE" });
 }
