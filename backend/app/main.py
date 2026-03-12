@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.api.v1.router import api_router
+from app.api.v1.chat import websocket_chat
 
 settings = get_settings()
 
@@ -45,3 +46,4 @@ app.add_middleware(
 )
 
 app.include_router(api_router, prefix="/api/v1")
+app.websocket("/ws/chat/{conversation_id}")(websocket_chat)

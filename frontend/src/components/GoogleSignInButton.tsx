@@ -3,11 +3,14 @@
 import { GoogleLogin } from "@react-oauth/google";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { apiRequest, setStoredToken } from "@/lib/api";
 
 type Variant = "signin" | "signup";
 
 export default function GoogleSignInButton({ variant = "signin" }: { variant?: Variant }) {
+  const t = useTranslations("auth.login");
+  const tReg = useTranslations("auth.register");
   const router = useRouter();
   const [error, setError] = useState("");
 
@@ -36,7 +39,7 @@ export default function GoogleSignInButton({ variant = "signin" }: { variant?: V
         className="w-full rounded-lg border border-slate-300 py-2.5 text-slate-400 font-medium flex items-center justify-center gap-2 cursor-not-allowed"
       >
         <GoogleIcon />
-        {variant === "signup" ? "Sign up with Google" : "Sign in with Google"} (not configured)
+        {variant === "signup" ? tReg("signUpGoogle") : t("signInGoogle")} (not configured)
       </button>
     );
   }

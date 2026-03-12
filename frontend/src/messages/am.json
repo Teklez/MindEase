@@ -1,0 +1,184 @@
+{
+  "common": {
+    "appName": "ማይንድኢዝ",
+    "tagline": "ለአእምሮ ጤንነት የእርስዎ ደህንነት ቦታ",
+    "loading": "በመጫን ላይ...",
+    "error": "የሆነ ችግር ተፈጥሯል",
+    "save": "አስቀምጥ",
+    "cancel": "ይቅር",
+    "delete": "ሰርዝ",
+    "confirm": "አረጋግጥ",
+    "close": "ዝጋ",
+    "back": "ተመለስ",
+    "next": "ቀጣይ",
+    "comingSoon": "በቅርብ ቀን",
+    "skipToContent": "ወደ ይዘት ይሂዱ",
+    "privacyPolicy": "የግላዊነት ፖሊሲ",
+    "termsOfService": "የአገልግሎት ውል",
+    "dismissDisclaimer": "ማስታወቂያ ይዝጋ",
+    "expandSidebar": "ጎን አሞሌ አስፋ",
+    "collapseSidebar": "ጎን አሞሌ አጥብቅ",
+    "newChat": "አዲስ ውይይት",
+    "userMenu": "የተጠቃሚ ምናሌ",
+    "openMenu": "ምናሌ ክፈት"
+  },
+  "disclaimer": {
+    "banner": "ማይንድኢዝ የ AI ጓደኛ ነው፣ የባለሙያ ሕክምና ምትክ አይደለም።",
+    "full": "ማይንድኢዝ የባለሙያ ሕክምና ምትክ አይደለም። በአስቸኳይ ጊዜ እባክዎ የአስቸኳይ ጊዜ አገልግሎቶችን ያግኙ።",
+    "chat": "ማይንድኢዝ የ AI ጓደኛ ነው እናም ስህተት ሊሰራ ይችላል። የባለሙያ እርዳታ ምትክ አይደለም።"
+  },
+  "nav": {
+    "dashboard": "ዳሽቦርድ",
+    "chat": "ውይይት",
+    "moodTracker": "የስሜት ተከታታይ",
+    "resources": "ግብዓቶች",
+    "assessments": "ራስን መገምገም",
+    "settings": "ቅንብሮች",
+    "logout": "ውጣ",
+    "language": "ቋንቋ",
+    "darkMode": "ጨለማ ሁነታ"
+  },
+  "landing": {
+    "hero": "ለአእምሮ ጤንነት የእርስዎ ደህንነት ቦታ",
+    "subtitle": "ለማዳመጥ፣ ለመደገፍ እና መረጋጋት ለማግኘት 24/7 የሚገኝ በ AI የተጎለበተ ጓደኛ። የግል፣ ያለ ፍርድ፣ ሁልጊዜ እዚህ።",
+    "getStarted": "ጀምር",
+    "signIn": "ግባ",
+    "features": {
+      "support": {
+        "title": "ሰው ወዳድ ድጋፍ",
+        "description": "CBT፣ mindfulness እና ንቁ ማዳመጥን ጨምሮ በሕክምና ዘዴዎች የሰለጠኑ የ AI ጓደኞች።"
+      },
+      "privacy": {
+        "title": "የግል እና ደህንነቱ የተጠበቀ",
+        "description": "ውይይቶችዎ የተመሰጠሩ ናቸው እና በጭራሽ አይጋሩም። የአእምሮ ጤንነት ጉዞዎ የእርስዎ ብቻ ነው።"
+      },
+      "language": {
+        "title": "አማርኛ እና እንግሊዝኛ",
+        "description": "በሚመርጡት ቋንቋ ያወያዩ። ማይንድኢዝ አማርኛንም እንግሊዝኛንም ይደግፋል።"
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "እንኳን ደህና መጡ",
+      "subtitle": "ጉዞዎን ለመቀጠል ይግቡ",
+      "email": "ኢሜይል",
+      "password": "የይለፍ ቃል",
+      "signIn": "ግባ",
+      "signInGoogle": "በ Google ግባ",
+      "forgotPassword": "የይለፍ ቃል ረሱ?",
+      "noAccount": "መለያ የለዎትም?",
+      "signUp": "ይመዝገቡ",
+      "orContinueWith": "ወይም በኢሜይል ይቀጥሉ",
+      "errors": {
+        "invalid": "ልክ ያልሆነ ኢሜይል ወይም የይለፍ ቃል",
+        "required": "ይህ መስክ ያስፈልጋል"
+      },
+      "signingIn": "በመግባት ላይ…"
+    },
+    "register": {
+      "title": "መለያዎን ይፍጠሩ",
+      "subtitle": "የአእምሮ ጤንነት ጉዞዎን ይጀምሩ",
+      "displayName": "ስም",
+      "email": "ኢሜይል",
+      "password": "የይለፍ ቃል",
+      "confirmPassword": "የይለፍ ቃል ያረጋግጡ",
+      "createAccount": "መለያ ፍጠር",
+      "signUpGoogle": "በ Google ይመዝገቡ",
+      "orContinueWith": "ወይም በኢሜይል ይቀጥሉ",
+      "hasAccount": "አስቀድመው መለያ አለዎት?",
+      "signIn": "ይግቡ",
+      "agreeTerms": "የአገልግሎት ውልን እና የግላዊነት ፖሊሲን እስማማለሁ",
+      "passwordHint": "ቢያንስ 8 ቁምፊዎች፣ አቢይ ሆሄ፣ ትንሽ ሆሄ እና ቁጥር",
+      "requirements": {
+        "minChars": "ቢያንስ 8 ቁምፊዎች",
+        "uppercase": "አቢይ ሆሄ",
+        "lowercase": "ትንሽ ሆሄ",
+        "number": "ቁጥር"
+      },
+      "errors": {
+        "emailExists": "ኢሜይል አስቀድሞ ተመዝግቧል",
+        "passwordMismatch": "የይለፍ ቃሎች አይመሳሰሉም",
+        "passwordWeak": "የይለፍ ቃል መስፈርቶችን አያሟላም",
+        "required": "ይህ መስክ ያስፈልጋል"
+      },
+      "creatingAccount": "መለያ በመፍጠር ላይ…",
+      "passwordsMatch": "የይለፍ ቃሎች ይጣጣማሉ"
+    }
+  },
+  "dashboard": {
+    "welcomeMorning": "መልካም ጥዋት፣ {name}!",
+    "welcomeAfternoon": "መልካም ከሰዓት፣ {name}!",
+    "welcomeEvening": "መልካም ምሽት፣ {name}!",
+    "startChat": "አዲስ ውይይት ጀምር",
+    "startChatDesc": "ከ AI ጓደኛዎ ጋር ያናግሩ",
+    "recentChats": "የቅርብ ጊዜ ውይይቶች",
+    "noChats": "ገና ምንም ውይይት የለም። የመጀመሪያ ውይይትዎን ይጀምሩ!",
+    "totalConversations": "ጠቅላላ ውይይቶች",
+    "thisWeek": "በዚህ ሳምንት",
+    "streak": "ተከታታይ",
+    "startChatDescLong": "ለስሜታዊ ድጋፍ፣ የመቋቋም ስልቶች እና ደህን ለማንጸባረቅ ከማይንድኢዝ ጋር ያናግሩ።",
+    "viewAllConversations": "ሁሉንም ውይይቶች ይመልከቱ",
+    "goToChat": "ወደ ውይይት ይሂዱ",
+    "dailyTip": "ዕለታዊ ምክር",
+    "dailyTipComingSoon": "የግል የጤና ምክሮች በቅርብ ቀን።"
+  },
+  "chat": {
+    "newChat": "አዲስ ውይይት",
+    "conversations": "ውይይቶች",
+    "noConversations": "ገና ምንም ውይይት የለም",
+    "startFirst": "የመጀመሪያ ውይይትዎን ይጀምሩ!",
+    "welcomeMessage": "ዛሬ ምን ይሰማዎታል?",
+    "welcomeSubtitle": "ለማዳመጥ፣ ለመደገፍ እና መረጋጋት ለማግኘት እዚህ ነኝ።",
+    "placeholder": "ለማይንድኢዝ መልእክት ይላኩ...",
+    "thinkingPlaceholder": "ማይንድኢዝ እያሰበ ነው...",
+    "connecting": "በመገናኘት ላይ...",
+    "connectionLost": "ግንኙነት ጠፍቷል። እንደገና በመገናኘት ላይ...",
+    "connectionFailed": "መገናኘት አልተቻለም። እባክዎ ገጹን ያድሱ።",
+    "deleteConfirm": "ይህን ውይይት ይሰርዙ?",
+    "deleteConfirmDescription": "ይህ ድርጊት ሊቀለበስ አይችልም።",
+    "conversationCreated": "ውይይት ተፈጥሯል",
+    "conversationDeleted": "ውይይት ተሰርዟል",
+    "backToChatList": "ወደ ውይይት ዝርዝር ተመለስ",
+    "scrollToBottom": "ወደ ታች ግራድ",
+    "connectionProblem": "ግንኙነት ችግር። እባክዎ ገጹን ያድሱ።",
+    "reconnected": "እንደገና ተገናኝቷል",
+    "messageFailed": "መልእክት መላክ አልተሳካም",
+    "openConversationList": "ውይይት ዝርዝር ክፈት",
+    "rename": "ይለውጡ",
+    "creatingConversation": "ውይይት በመፍጠር ላይ…",
+    "choosePrompt": "ለመጀመር ምክር ይምረጡ።",
+    "sendMessage": "መልእክት ይላኩ",
+    "stopGeneration": "መፍጠር አቁም",
+    "starters": {
+      "anxious": "በቅርቡ ጭንቀት ይሰማኛል",
+      "stress": "ጭንቀትን ለመቋቋም እርዳታ እፈልጋለሁ",
+      "talk": "ከአንድ ሰው ጋር ማውራት ብቻ እፈልጋለሁ",
+      "breathing": "የመተንፈስ ልምምድ አሳየኝ"
+    },
+    "today": "ዛሬ",
+    "yesterday": "ትናንት",
+    "previous7": "ባለፉት 7 ቀናት",
+    "thisMonth": "በዚህ ወር",
+    "older": "ቀደም ያሉ"
+  },
+  "crisis": {
+    "title": "በአስቸኳይ ሁኔታ ውስጥ ከሆኑ፣ እባክዎ እርዳታ ይጠይቁ",
+    "dismiss": "ደህና ነኝ",
+    "ethiopia": "ኢትዮጵያ",
+    "international": "ዓለም አቀፍ"
+  },
+  "mood": {
+    "title": "የስሜት ተከታታይ",
+    "checkIn": "ምን ይሰማዎታል?",
+    "veryBad": "በጣም መጥፎ",
+    "bad": "መጥፎ",
+    "neutral": "መካከለኛ",
+    "good": "ጥሩ",
+    "veryGood": "በጣም ጥሩ",
+    "addNote": "ማስታወሻ ይጨምሩ (አማራጭ)",
+    "save": "ያስቀምጡ",
+    "history": "የስሜት ታሪክ",
+    "streak": "ተከታታይ ቀናት"
+  }
+}
