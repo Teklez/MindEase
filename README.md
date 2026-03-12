@@ -46,13 +46,70 @@ Or use the **Makefile** at the project root:
 Example:  
 `docker compose exec backend alembic revision --autogenerate -m "add sessions table"`
 
+## Architecture
+
+```
+Frontend (Next.js)  →  Backend (FastAPI)  →  AI Service (FastAPI)  →  Ollama (LLM)
+       |                      |                        |
+   Chat UI, Auth          REST + WebSocket         /generate, /check-crisis
+   /api/* proxied         DB (PostgreSQL)          llama3.2:3b
+```
+
+- **Frontend** talks to the backend via REST and WebSocket. When `NEXT_PUBLIC_API_URL` is empty, API requests are proxied through Next.js to the backend; for WebSocket, set `NEXT_PUBLIC_WS_URL` (e.g. `ws://localhost:8000`) if the API is proxied.
+- **Backend** handles auth, conversations, and messages; it calls the **AI service** for crisis detection and streaming responses. The backend never talks to Ollama directly.
+- **AI service** runs the MindEase system prompt and calls **Ollama** for inference. It also exposes `/check-crisis` for keyword-based crisis detection.
+
+## AI service and chat
+
+The chat feature is powered by a separate **AI microservice** (`ai-service/`) that uses [Ollama](https://ollama.ai/) for local LLM inference.
+
+### First-time setup: pull the model
+
+After starting the stack, pull the Ollama model (one-time, ~2 GB):
+
+```bash
+docker compose exec ollama ollama pull llama3.2:3b
+```
+
+### Chat overview
+
+- **Conversations** are created and listed via the backend; messages are stored in PostgreSQL.
+- The **frontend** opens a WebSocket to the backend at `/ws/chat/{conversation_id}?token=...`. The backend streams tokens from the AI service and forwards crisis alerts.
+- **Crisis detection** runs on each user message; if keywords are detected, a banner with resources (Ethiopia + international) is shown and the conversation is flagged.
+
+### AI service endpoints
+
+| Endpoint | Description |
+|---------|-------------|
+| `GET /health` | Service and model name |
+| `POST /generate` | Chat completion (body: `messages`, `stream`, optional `user_lang`: `"am"` \| `"en"`) |
+| `POST /translate` | Direct translation (body: `text`, `source_lang`, `target_lang`) |
+| `POST /check-crisis` | Crisis keyword check (body: `text`) |
+
+Configure via env: `OLLAMA_URL` (default `http://ollama:11434`), `MODEL_NAME` (default `llama3.2:3b`), `GEMINI_API_KEY` (optional; for Amharic chat translation).
+
+### Gemini API key (Amharic chat)
+
+To let users **chat in Amharic**, the AI service uses Google’s Gemini API to translate user messages to English (for Ollama) and AI responses back to Amharic.
+
+1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey).
+2. Sign in and click **Create API key**.
+3. Copy the key and add it to your `.env` file:
+   ```bash
+   GEMINI_API_KEY=your-api-key-here
+   ```
+4. Restart the stack so the ai-service picks up the variable.
+
+If `GEMINI_API_KEY` is not set, the service still runs; Amharic messages are not translated (user text is sent as-is to the model, and responses are not translated).
+
 ## Tech stack
 
 | Layer    | Stack |
 |----------|--------|
 | **Backend** | Python 3.11+, FastAPI, Uvicorn, SQLAlchemy 2.0 (async) + PostgreSQL, Alembic, Pydantic v2 |
 | **Frontend** | Next.js 14, TypeScript, App Router, Tailwind CSS |
-| **Infra** | Docker Compose: PostgreSQL 16, Redis 7, backend, frontend |
+| **AI service** | FastAPI, httpx, Ollama (llama3.2:3b) |
+| **Infra** | Docker Compose: PostgreSQL 16, Redis 7, Ollama, backend, ai-service, frontend |
 
 ## Environment variables
 
@@ -87,8 +144,9 @@ Without these variables, the Google button is shown but disabled or will indicat
 
 ```
 mindease/
+├── ai-service/       # AI microservice (Ollama client, prompts)
 ├── backend/          # FastAPI app (app/, alembic, Dockerfile)
-├── frontend/         # Next.js app (src/app, Dockerfile)
+├── frontend/        # Next.js app (src/app, Dockerfile)
 ├── docker-compose.yml
 ├── Makefile
 ├── .env.example

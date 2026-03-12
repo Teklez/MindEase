@@ -1,0 +1,184 @@
+{
+  "common": {
+    "appName": "MindEase",
+    "tagline": "Your Safe Space for Mental Wellness",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "comingSoon": "Coming Soon",
+    "skipToContent": "Skip to content",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "dismissDisclaimer": "Dismiss disclaimer",
+    "expandSidebar": "Expand sidebar",
+    "collapseSidebar": "Collapse sidebar",
+    "newChat": "New chat",
+    "userMenu": "User menu",
+    "openMenu": "Open menu"
+  },
+  "disclaimer": {
+    "banner": "MindEase is an AI companion, not a substitute for professional therapy.",
+    "full": "MindEase is not a substitute for professional therapy. If you're in crisis, please contact emergency services.",
+    "chat": "MindEase is an AI companion and may make mistakes. Not a substitute for professional help."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "chat": "Chat",
+    "moodTracker": "Mood Tracker",
+    "resources": "Resources",
+    "assessments": "Assessments",
+    "settings": "Settings",
+    "logout": "Logout",
+    "language": "Language",
+    "darkMode": "Dark Mode"
+  },
+  "landing": {
+    "hero": "Your Safe Space for Mental Wellness",
+    "subtitle": "An AI-powered companion available 24/7 to listen, support, and help you find calm. Private, judgment-free, always here.",
+    "getStarted": "Get Started",
+    "signIn": "Sign In",
+    "features": {
+      "support": {
+        "title": "Empathetic Support",
+        "description": "AI companions trained in therapeutic techniques including CBT, mindfulness, and active listening."
+      },
+      "privacy": {
+        "title": "Private & Secure",
+        "description": "Your conversations are encrypted and never shared. Your mental health journey stays yours."
+      },
+      "language": {
+        "title": "Amharic & English",
+        "description": "Chat in your preferred language. MindEase supports both Amharic and English."
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to continue your journey",
+      "email": "Email",
+      "password": "Password",
+      "signIn": "Sign In",
+      "signInGoogle": "Sign in with Google",
+      "forgotPassword": "Forgot password?",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up",
+      "orContinueWith": "or continue with email",
+      "errors": {
+        "invalid": "Invalid email or password",
+        "required": "This field is required"
+      },
+      "signingIn": "Signing in…"
+    },
+    "register": {
+      "title": "Create your account",
+      "subtitle": "Start your mental wellness journey",
+      "displayName": "Display Name",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "createAccount": "Create Account",
+      "signUpGoogle": "Sign up with Google",
+      "orContinueWith": "or continue with email",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "agreeTerms": "I agree to the Terms of Service and Privacy Policy",
+      "passwordHint": "Min 8 characters, uppercase, lowercase, and a number",
+      "requirements": {
+        "minChars": "Min 8 characters",
+        "uppercase": "Uppercase letter",
+        "lowercase": "Lowercase letter",
+        "number": "Number"
+      },
+      "errors": {
+        "emailExists": "Email already registered",
+        "passwordMismatch": "Passwords don't match",
+        "passwordWeak": "Password doesn't meet requirements",
+        "required": "This field is required"
+      },
+      "creatingAccount": "Creating account…",
+      "passwordsMatch": "Passwords match"
+    }
+  },
+  "dashboard": {
+    "welcomeMorning": "Good morning, {name}!",
+    "welcomeAfternoon": "Good afternoon, {name}!",
+    "welcomeEvening": "Good evening, {name}!",
+    "startChat": "Start New Chat",
+    "startChatDesc": "Talk to your AI companion",
+    "recentChats": "Recent Conversations",
+    "noChats": "No conversations yet. Start your first chat!",
+    "totalConversations": "Total Conversations",
+    "thisWeek": "This Week",
+    "streak": "Streak",
+    "startChatDescLong": "Talk to MindEase for emotional support, coping strategies, and a safe space to reflect.",
+    "viewAllConversations": "View all conversations",
+    "goToChat": "Go to Chat",
+    "dailyTip": "Daily tip",
+    "dailyTipComingSoon": "Personalized wellness tips coming soon."
+  },
+  "chat": {
+    "newChat": "New Chat",
+    "conversations": "Conversations",
+    "noConversations": "No conversations yet",
+    "startFirst": "Start your first conversation!",
+    "welcomeMessage": "How are you feeling today?",
+    "welcomeSubtitle": "I'm here to listen, support, and help you find calm.",
+    "placeholder": "Message MindEase...",
+    "thinkingPlaceholder": "MindEase is thinking...",
+    "connecting": "Connecting...",
+    "connectionLost": "Connection lost. Reconnecting...",
+    "connectionFailed": "Unable to connect. Please refresh the page.",
+    "deleteConfirm": "Delete this conversation?",
+    "deleteConfirmDescription": "This action cannot be undone.",
+    "conversationCreated": "Conversation created",
+    "conversationDeleted": "Conversation deleted",
+    "backToChatList": "Back to chat list",
+    "scrollToBottom": "Scroll to bottom",
+    "connectionProblem": "Connection problem. Please refresh the page.",
+    "reconnected": "Reconnected",
+    "messageFailed": "Message failed to send",
+    "openConversationList": "Open conversation list",
+    "rename": "Rename",
+    "creatingConversation": "Creating conversation…",
+    "choosePrompt": "Choose a prompt to get started.",
+    "sendMessage": "Send message",
+    "stopGeneration": "Stop generation",
+    "starters": {
+      "anxious": "I've been feeling anxious lately",
+      "stress": "I need help managing stress",
+      "talk": "I just want someone to talk to",
+      "breathing": "Guide me through a breathing exercise"
+    },
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "previous7": "Previous 7 Days",
+    "thisMonth": "This Month",
+    "older": "Older"
+  },
+  "crisis": {
+    "title": "If you're in crisis, please reach out for help",
+    "dismiss": "I'm okay",
+    "ethiopia": "Ethiopia",
+    "international": "International"
+  },
+  "mood": {
+    "title": "Mood Tracker",
+    "checkIn": "How are you feeling?",
+    "veryBad": "Very Bad",
+    "bad": "Bad",
+    "neutral": "Neutral",
+    "good": "Good",
+    "veryGood": "Very Good",
+    "addNote": "Add a note (optional)",
+    "save": "Save Entry",
+    "history": "Mood History",
+    "streak": "Day Streak"
+  }
+}

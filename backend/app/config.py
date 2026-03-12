@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str | None = None
     GOOGLE_CLIENT_SECRET: str | None = None
     FRONTEND_URL: str = "http://localhost:3000"
+    REDIS_URL: str = "redis://localhost:6379/0"
+    AI_SERVICE_URL: str = "http://ai-service:8001"
 
     class Config:
         env_file = ".env"
