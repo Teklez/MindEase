@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import Logo from "@/components/shared/Logo";
 import StarterPrompts from "@/components/chat/StarterPrompts";
 import ConversationList from "@/components/chat/ConversationList";
+import ChatInput from "@/components/chat/ChatInput";
 import { useConversationsContext } from "@/contexts/ConversationsContext";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -66,9 +67,9 @@ export default function ChatHomePage() {
 
   return (
     <>
-      {/* Desktop: centered welcome + starter prompts */}
+      {/* Desktop: centered welcome + starter prompts + input */}
       <div className="hidden md:flex flex-1 flex-col items-center justify-center min-h-0">
-        <div className="flex flex-col items-center text-center px-4 py-8">
+        <div className="flex flex-col items-center text-center px-4 py-8 w-full">
           <Logo size="lg" asLink={false} className="mb-6" />
           <StarterPrompts
             showLogo={false}
@@ -79,6 +80,9 @@ export default function ChatHomePage() {
           <p className="mt-4 text-xs text-muted-foreground">
             {creating ? t("creatingConversation") : t("choosePrompt")}
           </p>
+        </div>
+        <div className="w-full">
+          <ChatInput onSend={handleStarterSelect} disabled={creating} />
         </div>
       </div>
 

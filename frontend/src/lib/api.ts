@@ -140,3 +140,54 @@ export async function updateConversation(
 export async function archiveConversation(conversationId: string): Promise<ApiResponse<null>> {
   return apiRequest(`/api/v1/chat/conversations/${conversationId}`, { method: "DELETE" });
 }
+
+// Mood API types
+export type MoodEntryResponse = {
+  entry_id: string;
+  user_id: string;
+  mood_level: number;
+  note: string | null;
+  entry_source: string;
+  created_at: string;
+};
+
+export type BadgeResponse = {
+  badge_id: string;
+  name: string;
+  name_am: string | null;
+  description: string;
+  description_am: string | null;
+  icon: string;
+  earned_at: string | null;
+  is_earned: boolean;
+};
+
+export async function createMoodEntry(
+  mood_level: number,
+  note?: string
+): Promise<ApiResponse<{ entry: MoodEntryResponse; new_badges: BadgeResponse[] }>> {
+  return apiRequest("/api/v1/mood/entries", {
+    method: "POST",
+    body: JSON.stringify({ mood_level, note: note ?? null }),
+  });
+}
+
+export async function getMoodBadges(): Promise<ApiResponse<BadgeResponse[]>> {
+  return apiRequest("/api/v1/mood/badges");
+}
+
+export async function getMoodHistory(days: number = 90): Promise<ApiResponse<import("@/lib/types").MoodHistoryResponse>> {
+  return apiRequest(`/api/v1/mood/history?days=${days}`);
+}
+
+export async function getMoodTrends(days: number): Promise<ApiResponse<import("@/lib/types").MoodTrend[]>> {
+  return apiRequest(`/api/v1/mood/trends?days=${days}`);
+}
+
+export async function getMoodCalendar(year: number, month: number): Promise<ApiResponse<import("@/lib/types").MoodDayAggregate[]>> {
+  return apiRequest(`/api/v1/mood/calendar/${year}/${month}`);
+}
+
+export async function deleteMoodEntry(entryId: string): Promise<ApiResponse<null>> {
+  return apiRequest(`/api/v1/mood/entries/${entryId}`, { method: "DELETE" });
+}
