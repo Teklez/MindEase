@@ -7,7 +7,7 @@ def get_settings() -> "Settings":
 
 class Settings(BaseSettings):
     OLLAMA_URL: str = "http://ollama:11434"
-    MODEL_NAME: str = "llama3.2:3b"
+    MODEL_NAME: str = "llama3.1:8b"
     GEMINI_API_KEY: str = ""
 
     class Config:

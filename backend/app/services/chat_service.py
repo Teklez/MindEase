@@ -9,7 +9,40 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models import Conversation, Message
+from app.models.mood_entry import MoodEntry
 from app.services.ai_client import AIClient
+
+
+def _simple_emotion_to_mood(text: str) -> int:
+    """Keyword-based emotion detection — returns a mood level 1-5."""
+    t = text.lower()
+    if any(w in t for w in [
+        "hopeless", "worthless", "can't go on", "end it", "give up",
+        "terrible", "awful", "devastated", "helpless", "meaningless",
+    ]):
+        return 1
+    if any(w in t for w in [
+        "sad", "depress", "lonely", "crying", "anxious", "worried",
+        "stress", "angry", "frustrated", "scared", "overwhelmed",
+        "upset", "hurt", "pain", "miserable",
+    ]):
+        return 2
+    if any(w in t for w in [
+        "okay", " ok ", "alright", "fine", "so-so", "meh", "neutral",
+        "managing", "coping",
+    ]):
+        return 3
+    if any(w in t for w in [
+        "good", "well", "better", "happy", "positive", "calm",
+        "relaxed", "hopeful", "grateful", "content", "peaceful",
+    ]):
+        return 4
+    if any(w in t for w in [
+        "great", "amazing", "excellent", "wonderful", "fantastic",
+        "excited", "joy", "joyful", "thrilled", "elated", "awesome",
+    ]):
+        return 5
+    return 3
 
 
 class ChatService:
@@ -172,8 +205,10 @@ Core rules:
             await db.refresh(ai_message)
 
             conversation.last_message_at = ai_message.timestamp
-            was_first_exchange = (conversation.total_messages or 0) == 0
-            conversation.total_messages = (conversation.total_messages or 0) + 2
+            prev_total = conversation.total_messages or 0
+            was_first_exchange = prev_total == 0
+            conversation.total_messages = prev_total + 2
+            should_auto_log_mood = prev_total < 10 and conversation.total_messages >= 10
             if was_first_exchange:
                 conversation.title = (content[:50] + "…") if len(content) > 50 else content
             await db.commit()
@@ -182,6 +217,22 @@ Core rules:
                 "type": "done",
                 "message_id": str(ai_message.message_id),
             }
+
+            # Auto-log mood once when conversation reaches 10 messages (non-blocking)
+            if should_auto_log_mood:
+                try:
+                    mood_level = _simple_emotion_to_mood(content)
+                    auto_entry = MoodEntry(
+                        user_id=user_id,
+                        mood_level=mood_level,
+                        note="Auto-logged from chat session",
+                        entry_source="automatic",
+                    )
+                    db.add(auto_entry)
+                    await db.commit()
+                    logger.info("Auto-logged mood %d for user %s", mood_level, user_id)
+                except Exception as exc:
+                    logger.warning("Auto mood log failed: %s", exc)
 
         except Exception as e:
             logger.exception("Chat stream failed: %s", e)

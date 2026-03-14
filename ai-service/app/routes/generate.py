@@ -80,6 +80,22 @@ async def generate(
     if user_lang not in ("am", "en"):
         user_lang = "en"
 
+    # Inject language instruction into system message so the LLM responds in the correct language
+    lang_instruction = (
+        "Always respond in Amharic (አማርኛ)."
+        if user_lang == "am"
+        else "Always respond in English, regardless of the language of previous messages."
+    )
+    messages = [dict(m) for m in messages]
+    system_injected = False
+    for m in messages:
+        if (m.get("role") or "").lower() == "system":
+            m["content"] = m["content"].rstrip() + f"\n- {lang_instruction}"
+            system_injected = True
+            break
+    if not system_injected:
+        messages = [{"role": "system", "content": lang_instruction}] + messages
+
     # If Amharic: translate last user message to English for Ollama
     if user_lang == "am" and last_user_content:
         result = await translator.translate_to_english(last_user_content)

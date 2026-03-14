@@ -29,7 +29,7 @@ const NAV_LINKS: Array<{
 }> = [
   { href: "/dashboard", labelKey: "dashboard", icon: LayoutDashboard },
   { href: "/chat", labelKey: "chat", icon: MessageSquare },
-  { href: "/mood", labelKey: "moodTracker", icon: Smile, disabled: true },
+  { href: "/mood", labelKey: "moodTracker", icon: Smile },
   { href: "/resources", labelKey: "resources", icon: BookOpen, disabled: true },
 ];
 

@@ -1,14 +1,26 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.api.v1.router import api_router
 from app.api.v1.chat import websocket_chat
+from app.database import async_session_maker
+from app.seeds.badges import seed_badges
 
 settings = get_settings()
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with async_session_maker() as db:
+        await seed_badges(db)
+    yield
+
+
 # API errors use consistent format: {"detail": "error message"} (HTTPException and validation)
-app = FastAPI(title="MindEase API")
+app = FastAPI(title="MindEase API", lifespan=lifespan)
 
 
 @app.get("/")

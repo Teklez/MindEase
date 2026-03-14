@@ -8,9 +8,16 @@ import {
   getStoredToken,
   getMe,
   getChatConversations,
+  getMoodHistory,
   type ConversationResponse,
+  type MoodEntryResponse,
+  type BadgeResponse,
 } from "@/lib/api";
+import type { MoodTrend } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "@/hooks/use-toast";
+import MoodCheckIn from "@/components/mood/MoodCheckIn";
+import DashboardMoodWidget from "@/components/mood/DashboardMoodWidget";
 
 function formatRelativeTime(iso: string): string {
   const d = new Date(iso);
@@ -35,11 +42,25 @@ function getConversationsThisWeek(conversations: ConversationResponse[]): number
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
   const tChat = useTranslations("chat");
+  const tMood = useTranslations("mood");
   const tCommon = useTranslations("common");
   const router = useRouter();
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [conversations, setConversations] = useState<ConversationResponse[]>([]);
+  const [moodTrends, setMoodTrends] = useState<MoodTrend[]>([]);
+  const [moodStreak, setMoodStreak] = useState(0);
+  const [todayLoggedCount, setTodayLoggedCount] = useState(0);
   const [loading, setLoading] = useState(true);
+
+  function handleMoodCreated(entry: MoodEntryResponse, newBadges: BadgeResponse[]) {
+    setTodayLoggedCount((n) => n + 1);
+    toast({
+      title: tMood("logged"),
+      description: newBadges.length > 0
+        ? `${tMood("badgeEarned")} ${newBadges.map((b) => b.icon + " " + b.name).join(", ")}`
+        : undefined,
+    });
+  }
 
   const hour = typeof window !== "undefined" ? new Date().getHours() : 12;
   const welcomeKey = hour < 12 ? "welcomeMorning" : hour < 17 ? "welcomeAfternoon" : "welcomeEvening";
@@ -51,16 +72,25 @@ export default function DashboardPage() {
       router.replace("/login");
       return;
     }
-    Promise.all([getMe(), getChatConversations()]).then(([meRes, convRes]) => {
-      setLoading(false);
-      if (!meRes.ok) {
-        if (meRes.status === 401) return;
-        router.replace("/login");
-        return;
+    Promise.all([getMe(), getChatConversations(), getMoodHistory(7)]).then(
+      ([meRes, convRes, moodRes]) => {
+        setLoading(false);
+        if (!meRes.ok) {
+          if (meRes.status === 401) return;
+          router.replace("/login");
+          return;
+        }
+        setDisplayName(meRes.data.display_name);
+        if (convRes.ok) setConversations(convRes.data);
+        if (moodRes.ok) {
+          setMoodTrends(moodRes.data.daily_trends);
+          setMoodStreak(moodRes.data.stats.current_streak);
+          // Check if logged today from last trend entry (today = last in daily_trends)
+          const last = moodRes.data.daily_trends.at(-1);
+          if (last) setTodayLoggedCount(last.entry_count);
+        }
       }
-      setDisplayName(meRes.data.display_name);
-      if (convRes.ok) setConversations(convRes.data);
-    });
+    );
   }, [router]);
 
   if (loading) {
@@ -69,7 +99,8 @@ export default function DashboardPage() {
         <div className="max-w-2xl mx-auto px-4 py-8">
           <Skeleton className="h-8 w-64 mb-8 rounded-lg" />
           <div className="space-y-6">
-            <Skeleton className="h-32 w-full rounded-2xl" />
+            <Skeleton className="h-24 w-full rounded-2xl" />
+            <Skeleton className="h-20 w-full rounded-2xl" />
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <Skeleton className="h-24 rounded-xl" />
               <Skeleton className="h-24 rounded-xl" />
@@ -97,9 +128,36 @@ export default function DashboardPage() {
   return (
     <div className="min-h-full bg-background">
       <div className="max-w-2xl mx-auto px-4 py-8">
-        <p className="text-xl text-foreground mb-8" id="dashboard-heading">
+        <p className="text-xl text-foreground mb-6" id="dashboard-heading">
           {displayName ? welcome : tCommon("loading")}
         </p>
+
+        {/* Mood check-in — inviting prompt if not logged today */}
+        <div className="mb-4">
+          {todayLoggedCount === 0 ? (
+            <MoodCheckIn compact onEntryCreated={handleMoodCreated} />
+          ) : (
+            <div className="rounded-2xl bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 p-4 shadow-sm flex items-center gap-3 animate-fade-in">
+              <span className="text-xl">✓</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-green-700 dark:text-green-300">
+                  {tMood("loggedToday")}
+                </p>
+              </div>
+              <Link
+                href="/mood"
+                className="text-xs text-green-600 dark:text-green-400 font-medium hover:underline shrink-0"
+              >
+                {tMood("viewFullTracker")} →
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Mini mood widget — sparkline + streak */}
+        <div className="mb-8">
+          <DashboardMoodWidget trends={moodTrends} streak={moodStreak} />
+        </div>
 
         {/* Quick stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
@@ -112,8 +170,16 @@ export default function DashboardPage() {
             <p className="text-2xl font-semibold text-foreground mt-1">{thisWeek}</p>
           </div>
           <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-            <p className="text-sm text-muted-foreground">{t("streak")}</p>
-            <p className="text-lg font-semibold text-muted-foreground mt-1">{tCommon("comingSoon")}</p>
+            <p className="text-sm text-muted-foreground">{t("moodStreak")}</p>
+            {moodStreak > 0 ? (
+              <p className="text-2xl font-semibold text-foreground mt-1">
+                {moodStreak} <span className="text-xl">🔥</span>
+              </p>
+            ) : (
+              <Link href="/mood" className="text-sm text-primary mt-1 block hover:underline">
+                {tMood("startStreak")}
+              </Link>
+            )}
           </div>
         </div>
 
