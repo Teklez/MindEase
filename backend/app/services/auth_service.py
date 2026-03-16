@@ -2,8 +2,9 @@ import re
 import uuid
 from datetime import datetime, timezone
 
-import httpx
 from fastapi import HTTPException, status
+from google.auth.transport import requests as google_requests
+from google.oauth2 import id_token as google_id_token
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,8 +12,6 @@ from app.config import get_settings
 from app.core.security import create_access_token, hash_password, verify_password
 from app.models import User
 from app.schemas.user import TokenResponse, UserCreate, UserResponse
-
-GOOGLE_TOKENINFO_URL = "https://oauth2.googleapis.com/tokeninfo"
 
 
 def _validate_password(password: str) -> None:
@@ -98,19 +97,17 @@ class AuthService:
 
     @staticmethod
     async def google_oauth(db: AsyncSession, google_token: str) -> TokenResponse:
-        async with httpx.AsyncClient() as client:
-            resp = await client.get(f"{GOOGLE_TOKENINFO_URL}?id_token={google_token}")
-        if resp.status_code != 200:
+        settings = get_settings()
+        try:
+            data = google_id_token.verify_oauth2_token(
+                google_token,
+                google_requests.Request(),
+                settings.GOOGLE_CLIENT_ID,
+            )
+        except Exception:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid Google token",
-            )
-        data = resp.json()
-        settings = get_settings()
-        if settings.GOOGLE_CLIENT_ID and data.get("aud") != settings.GOOGLE_CLIENT_ID:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid Google token: audience mismatch",
             )
         email = data.get("email")
         name = data.get("name") or email or "User"
