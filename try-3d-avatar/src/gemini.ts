@@ -2,7 +2,7 @@ import { GoogleGenAI, Modality, type LiveConnectConfig, type Session } from '@go
 
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY as string;
 const BASE    = 'https://generativelanguage.googleapis.com/v1beta/models';
-const ai      = new GoogleGenAI({ apiKey: API_KEY, httpOptions: { apiVersion: 'v1alpha' } });
+const ai      = new GoogleGenAI({ apiKey: API_KEY });
 
 const SYSTEM_PROMPT = `You are Serenity, a warm and empathetic AI wellness companion. \
 You help people explore their feelings, provide emotional support, and offer gentle guidance \
@@ -101,14 +101,16 @@ export class VoiceSession {
   async open(voiceName?: GeminiVoiceId) {
     const config: LiveConnectConfig = {
       responseModalities: [Modality.AUDIO],
+      systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+      outputAudioTranscription: {},
+      realtimeInputConfig: { automaticActivityDetection: { disabled: true } },
       ...(voiceName && {
-        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
         speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName } } },
       }),
     };
 
     this.session = await ai.live.connect({
-      model: 'models/gemini-3.1-flash-live-preview',
+      model: 'models/gemini-2.5-flash-native-audio-latest',
       config,
       callbacks: {
         onopen:   ()    => this.onEvent({ type: 'ready' }),
@@ -142,11 +144,14 @@ export class VoiceSession {
     this.processor.connect(this.audioCtx.destination);
   }
 
-  startRecording() { this.recording = true; }
+  startRecording() {
+    this.recording = true;
+    this.session?.sendRealtimeInput({ activityStart: {} });
+  }
 
   stopRecording() {
     this.recording = false;
-    this.session?.sendClientContent({ turnComplete: true });
+    this.session?.sendRealtimeInput({ activityEnd: {} });
   }
 
   close() {
@@ -163,6 +168,10 @@ export class VoiceSession {
 
     const sc = m.serverContent as Record<string, unknown> | undefined;
     if (!sc) return;
+
+    // Native audio transcription comes separately as outputTranscription
+    const transcript = sc.outputTranscription as { text?: string } | undefined;
+    if (transcript?.text) this.rxText += transcript.text;
 
     const parts = (sc.modelTurn as { parts?: unknown[] } | undefined)?.parts ?? [];
     for (const p of parts as Record<string, unknown>[]) {
