@@ -3,11 +3,11 @@ Test: Gemini Live API speaking Amharic.
 Model: gemini-2.5-flash-native-audio-latest
 Sends an Amharic wellness message, saves + plays the audio response.
 """
-import asyncio, wave, subprocess
+import asyncio, os, wave, subprocess
 from google import genai
 from google.genai import types
 
-API_KEY = "REDACTED_API_KEY"
+API_KEY = os.environ["GEMINI_API_KEY"]
 MODEL   = "models/gemini-2.5-flash-native-audio-latest"
 
 USER_MESSAGE = "Hello, I don't feel happy today. I feel a bit down"
@@ -21,7 +21,7 @@ SYSTEM = (
 )
 
 async def run():
-    client = genai.Client(api_key=API_KEY)
+    client = genai.Client(api_key=API_KEY)  # noqa: E501  (key from env)
     config = types.LiveConnectConfig(
         response_modalities=["AUDIO"],
         system_instruction=SYSTEM,
