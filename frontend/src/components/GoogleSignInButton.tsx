@@ -36,7 +36,7 @@ export default function GoogleSignInButton({ variant = "signin" }: { variant?: V
       <button
         type="button"
         disabled
-        className="w-full rounded-lg border border-slate-300 py-2.5 text-slate-400 font-medium flex items-center justify-center gap-2 cursor-not-allowed"
+        className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-border bg-card py-2.5 font-medium text-muted-foreground"
       >
         <GoogleIcon />
         {variant === "signup" ? tReg("signUpGoogle") : t("signInGoogle")} (not configured)
@@ -47,7 +47,7 @@ export default function GoogleSignInButton({ variant = "signin" }: { variant?: V
   return (
     <div className="w-full">
       {error && (
-        <div className="mb-3 rounded-lg bg-red-50 text-red-700 text-sm px-4 py-3">
+        <div className="mb-3 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error}
         </div>
       )}

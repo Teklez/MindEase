@@ -1,10 +1,10 @@
 "use client";
 
-import { useRef, useEffect, useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { ArrowDown } from "lucide-react";
 import type { Message } from "@/lib/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
 import MessageBubble from "./MessageBubble";
 import StreamingMessage from "./StreamingMessage";
 import TypingIndicator from "./TypingIndicator";
@@ -40,8 +40,7 @@ export default function MessageList({
     const viewport = viewportRef.current;
     if (!viewport) return true;
     const { scrollTop, scrollHeight, clientHeight } = viewport;
-    const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-    return distanceFromBottom <= SCROLL_THRESHOLD;
+    return scrollHeight - scrollTop - clientHeight <= SCROLL_THRESHOLD;
   }, []);
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
@@ -56,35 +55,39 @@ export default function MessageList({
     return () => viewport.removeEventListener("scroll", handleScroll);
   }, [checkNearBottom]);
 
-  // Attach ref to ScrollArea viewport (first child of root is the viewport)
   useEffect(() => {
     const root = scrollRef.current;
     if (!root) return;
-    const viewport = (root.querySelector("[data-radix-scroll-area-viewport]") ?? root.firstElementChild) as HTMLDivElement | null;
+    const viewport = (root.querySelector("[data-radix-scroll-area-viewport]") ??
+      root.firstElementChild) as HTMLDivElement | null;
     if (viewport) viewportRef.current = viewport;
     return () => {
       viewportRef.current = null;
     };
   }, []);
 
-  // Auto-scroll when new messages or streaming content grows, only if user was near bottom
   useEffect(() => {
     const contentLength = messages.length + (streamingContent?.length ?? 0);
     const hadUpdate = contentLength !== prevContentLengthRef.current;
     prevContentLengthRef.current = contentLength;
-
-    if (hadUpdate && isNearBottom) {
-      scrollToBottom("smooth");
-    }
+    if (hadUpdate && isNearBottom) scrollToBottom("smooth");
   }, [messages.length, streamingContent, isNearBottom, scrollToBottom]);
 
   return (
-    <div className={cn("relative flex flex-col flex-1 min-h-0", className)}>
-      <ScrollArea ref={scrollRef} className="flex-1 min-h-0">
-        <div className="mx-auto w-full max-w-4xl px-4 py-4 space-y-4" role="log" aria-live="polite" aria-label="Chat messages">
+    <div className={cn("relative flex min-h-0 flex-1 flex-col", className)}>
+      <ScrollArea ref={scrollRef} className="min-h-0 flex-1">
+        <div
+          className="mx-auto w-full max-w-3xl space-y-5 px-4 py-6 md:px-6"
+          role="log"
+          aria-live="polite"
+          aria-label="Chat messages"
+        >
           {crisisBanner}
           {messages.map((msg) => (
-            <MessageBubble key={msg.message_id || `${msg.timestamp}-${msg.content.slice(0, 20)}`} message={msg} />
+            <MessageBubble
+              key={msg.message_id || `${msg.timestamp}-${msg.content.slice(0, 20)}`}
+              message={msg}
+            />
           ))}
           {isWaitingForResponse && !isStreaming && <TypingIndicator />}
           {isStreaming && streamingContent !== null && (
@@ -94,19 +97,17 @@ export default function MessageList({
         </div>
       </ScrollArea>
       {!isNearBottom && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
-          <Button
-            variant="secondary"
-            size="sm"
-            className="shadow-md"
-            onClick={() => {
-              scrollToBottom("smooth");
-              setIsNearBottom(true);
-            }}
-          >
-            {t("scrollToBottom")}
-          </Button>
-        </div>
+        <button
+          type="button"
+          onClick={() => {
+            scrollToBottom("smooth");
+            setIsNearBottom(true);
+          }}
+          className="absolute bottom-4 left-1/2 inline-flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground shadow-soft-md transition-all hover:-translate-y-px hover:shadow-soft-lg"
+        >
+          <ArrowDown className="h-3.5 w-3.5" strokeWidth={1.75} />
+          {t("scrollToBottom")}
+        </button>
       )}
     </div>
   );

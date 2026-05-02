@@ -56,14 +56,100 @@
         "title": "Amharic & English",
         "description": "Chat in your preferred language. MindEase supports both Amharic and English."
       }
+    },
+    "v2": {
+      "nav": {
+        "howItWorks": "How it works",
+        "privacy": "Privacy",
+        "resources": "Resources",
+        "signIn": "Sign in",
+        "cta": "Get started — free"
+      },
+      "disclaimerStrip": "MindEase is an AI companion, not a substitute for professional therapy.",
+      "crisisLink": "Crisis resources",
+      "hero": {
+        "eyebrow": "Available 24/7",
+        "headlineLead": "A quiet companion for the days that feel",
+        "headlineEm": "too loud.",
+        "lede": "MindEase is a calm space to think things through — gently, in your own time. Reflect, talk, and watch the line settle.",
+        "primaryCta": "Start your first session",
+        "secondaryCta": "How it works",
+        "trust": {
+          "encrypted": "End-to-end encrypted",
+          "evidence": "Evidence-based",
+          "noJudgment": "No judgment"
+        }
+      },
+      "preview": {
+        "moodPill": "Feeling: a little brighter",
+        "user": "I keep replaying that conversation from work.",
+        "assistant": "What part of it sticks? Sometimes the loop has one quiet line we can name."
+      },
+      "steps": {
+        "title": "Three small steps.",
+        "titleEm": "No pressure.",
+        "items": [
+          { "kicker": "01 / Check in", "title": "Notice how you feel", "body": "A quick mood check-in — one tap, no story required." },
+          { "kicker": "02 / Talk it out", "title": "Talk, in your own words", "body": "Reflect with a calm, private conversation. Your pace, your words." },
+          { "kicker": "03 / See the pattern", "title": "Watch the line settle", "body": "A gentle picture of how things shift. No metrics, just you." }
+        ]
+      },
+      "features": {
+        "title": "Built carefully,",
+        "titleEm": "on purpose.",
+        "items": [
+          { "title": "Conversations", "body": "Private, unhurried. Saved if you want them. Forgotten if you don't." },
+          { "title": "Mood tracking", "body": "Five honest words instead of ten metrics. A line that listens back." },
+          { "title": "Resources", "body": "Short, useful pieces — for the small in-between hours." },
+          { "title": "Crisis support", "body": "If it's heavier than us, we route you out — fast." }
+        ]
+      },
+      "testimonial": {
+        "quote": "It's the first time something tech-shaped didn't try to fix me. It just sat with me until I could think again.",
+        "attribution": "— Maya, 28, NYC"
+      },
+      "privacy": {
+        "title": "Your data, your rules.",
+        "items": [
+          { "title": "End-to-end encrypted", "body": "Conversations are encrypted in transit and at rest." },
+          { "title": "You own it", "body": "Export or delete everything, any time. No dark patterns." },
+          { "title": "Crisis, one tap away", "body": "Local hotlines surfaced when you need them most." }
+        ]
+      },
+      "finalCta": {
+        "headlineLead": "Some days the best thing you can do",
+        "headlineEm": "is talk to someone.",
+        "lede": "Free to start, no card required. Your conversations stay yours.",
+        "cta": "Start your first session",
+        "disclaimer": "MindEase is not a replacement for professional care. If you're in crisis, call or text 988."
+      },
+      "footer": {
+        "tagline": "A quieter place to think it through.",
+        "product": "Product",
+        "company": "Company",
+        "legal": "Legal",
+        "support": "Support",
+        "links": {
+          "howItWorks": "How it works",
+          "privacy": "Privacy",
+          "terms": "Terms",
+          "about": "About",
+          "contact": "Contact",
+          "crisis": "Crisis resources",
+          "dashboard": "Dashboard"
+        },
+        "copyright": "© 2026 MindEase"
+      }
     }
   },
   "auth": {
     "login": {
       "title": "Welcome back",
       "subtitle": "Sign in to continue your journey",
+      "eyebrow": "Sign in",
       "email": "Email",
       "password": "Password",
+      "rememberMe": "Remember me",
       "signIn": "Sign In",
       "signInGoogle": "Sign in with Google",
       "forgotPassword": "Forgot password?",
@@ -72,14 +158,22 @@
       "orContinueWith": "or continue with email",
       "errors": {
         "invalid": "Invalid email or password",
-        "required": "This field is required"
+        "required": "This field is required",
+        "invalidEmail": "Enter a valid email"
       },
-      "signingIn": "Signing in…"
+      "signingIn": "Signing in…",
+      "brand": {
+        "headlineLead": "Welcome back to your",
+        "headlineEm": "quiet space.",
+        "subcopy": "Pick up wherever you left off — a private, calm place to think things through.",
+        "caption": "Brand · Calm by design"
+      }
     },
     "register": {
       "title": "Create your account",
       "subtitle": "Start your mental wellness journey",
-      "displayName": "Display Name",
+      "eyebrow": "Create account",
+      "displayName": "Full name",
       "email": "Email",
       "password": "Password",
       "confirmPassword": "Confirm Password",
@@ -89,7 +183,18 @@
       "hasAccount": "Already have an account?",
       "signIn": "Sign in",
       "agreeTerms": "I agree to the Terms of Service and Privacy Policy",
+      "agreePrefix": "By creating an account you agree to the",
+      "agreeTerm": "Terms",
+      "agreeAnd": "and",
+      "agreePrivacy": "Privacy Policy",
+      "agreePeriod": ".",
       "passwordHint": "Min 8 characters, uppercase, lowercase, and a number",
+      "passwordStrength": {
+        "weak": "Weak",
+        "okay": "Okay",
+        "good": "Good",
+        "strong": "Strong"
+      },
       "requirements": {
         "minChars": "Min 8 characters",
         "uppercase": "Uppercase letter",
@@ -100,29 +205,65 @@
         "emailExists": "Email already registered",
         "passwordMismatch": "Passwords don't match",
         "passwordWeak": "Password doesn't meet requirements",
-        "required": "This field is required"
+        "required": "This field is required",
+        "invalidEmail": "Enter a valid email",
+        "nameTooShort": "Please enter your name"
       },
       "creatingAccount": "Creating account…",
-      "passwordsMatch": "Passwords match"
+      "passwordsMatch": "Passwords match",
+      "brand": {
+        "headlineLead": "Start with a single",
+        "headlineEm": "conversation.",
+        "subcopy": "MindEase is built for unhurried reflection — the small in-between hours that need a calmer place to land.",
+        "caption": "Brand · Calm by design"
+      }
     }
   },
   "dashboard": {
-    "welcomeMorning": "Good morning, {name}!",
-    "welcomeAfternoon": "Good afternoon, {name}!",
-    "welcomeEvening": "Good evening, {name}!",
+    "welcomeMorning": "Good morning, {name}",
+    "welcomeAfternoon": "Good afternoon, {name}",
+    "welcomeEvening": "Good evening, {name}",
+    "context": "It's been {days} days since you last checked in — no pressure.",
+    "contextToday": "You checked in today. Take it gently.",
+    "contextYesterday": "You checked in yesterday — welcome back.",
+    "startSession": "Start a session",
+    "quickCheckIn": "Quick mood check-in",
     "startChat": "Start New Chat",
     "startChatDesc": "Talk to your AI companion",
-    "recentChats": "Recent Conversations",
+    "recentChats": "Recent conversations",
+    "recentSubtitle": "Pick up where you left off.",
+    "viewAll": "View all",
     "noChats": "No conversations yet. Start your first chat!",
     "totalConversations": "Total Conversations",
-    "thisWeek": "This Week",
-    "streak": "Streak",
+    "thisWeek": "Sessions this week",
+    "streak": "Current streak",
+    "longest": "Longest: {days}",
+    "averageMood": "Average mood",
     "moodStreak": "Mood Streak",
     "startChatDescLong": "Talk to MindEase for emotional support, coping strategies, and a safe space to reflect.",
     "viewAllConversations": "View all conversations",
     "goToChat": "Go to Chat",
     "dailyTip": "Daily tip",
-    "dailyTipComingSoon": "Personalized wellness tips coming soon."
+    "dailyTipComingSoon": "Personalized wellness tips coming soon.",
+    "weeklyMood": "This week's mood",
+    "noMoodData": "No mood logs this week yet.",
+    "reflection": {
+      "eyebrow": "Today's reflection",
+      "prompt": "What's one small thing you can let go of today?",
+      "cta": "Reflect"
+    },
+    "resource": {
+      "eyebrow": "Suggested resource",
+      "title": "Three breaths, slowly.",
+      "body": "A 90-second pause that asks nothing of you. For the moments before you respond.",
+      "cta": "Read"
+    },
+    "footer": {
+      "reassurance": "Your data is yours. Always.",
+      "crisis": "Need help now? Crisis resources"
+    },
+    "days": "days",
+    "daySingular": "day"
   },
   "chat": {
     "newChat": "New Chat",
@@ -151,11 +292,18 @@
     "choosePrompt": "Choose a prompt to get started.",
     "sendMessage": "Send message",
     "stopGeneration": "Stop generation",
+    "emptyHeadline": "What would you like to think through today?",
+    "emptySubtitle": "A quiet, private place. Pick a starting point — or just start.",
+    "searchConversations": "Search conversations",
+    "newConversation": "New conversation",
+    "encryptedFooter": "End-to-end encrypted",
+    "keyboardHint": "Enter to send · Shift+Enter for new line",
+    "charsLeft": "{count} left",
     "starters": {
-      "anxious": "I've been feeling anxious lately",
-      "stress": "I need help managing stress",
-      "talk": "I just want someone to talk to",
-      "breathing": "Guide me through a breathing exercise"
+      "anxious": "Untangle a worry",
+      "stress": "Reflect on my day",
+      "talk": "Practice a hard conversation",
+      "breathing": "Just sit with me"
     },
     "today": "Today",
     "yesterday": "Yesterday",

@@ -9,17 +9,19 @@ type StreamingMessageProps = {
 
 export default function StreamingMessage({ tokens, isComplete }: StreamingMessageProps) {
   return (
-    <div className="flex gap-2 justify-start animate-fade-in">
-      <Avatar className="h-8 w-8 shrink-0 border border-border bg-primary/10">
-        <AvatarFallback className="text-primary text-xs font-medium">ME</AvatarFallback>
+    <div className="flex animate-fade-in items-start gap-3">
+      <Avatar className="mt-1 h-8 w-8 shrink-0 border border-border bg-card">
+        <AvatarFallback className="bg-card text-[10px] font-semibold uppercase tracking-wider text-primary">
+          ME
+        </AvatarFallback>
       </Avatar>
-      <div className="min-w-0 max-w-[75%] flex-1 rounded-2xl rounded-bl-md border border-border bg-card px-4 py-3 shadow-sm">
-        <div className="whitespace-pre-wrap break-words text-sm leading-relaxed">
+      <div className="min-w-0 max-w-[78%] flex-1 rounded-2xl rounded-tl-md border border-border bg-muted/60 px-4 py-3">
+        <div className="whitespace-pre-wrap break-words text-[14.5px] leading-relaxed text-foreground">
           {tokens}
           {!isComplete && (
             <span
-              className="inline-block w-0.5 h-4 align-middle bg-primary ml-0.5 animate-blink-cursor"
               aria-hidden
+              className="ml-0.5 inline-block h-4 w-0.5 animate-blink-cursor align-middle bg-primary"
             />
           )}
         </div>
