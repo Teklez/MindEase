@@ -1,70 +1,63 @@
 "use client";
 
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import {
-  getStoredToken,
-  getMe,
   getChatConversations,
+  getMe,
   getMoodHistory,
-  type ConversationResponse,
-  type MoodEntryResponse,
+  getStoredToken,
   type BadgeResponse,
+  type MoodEntryResponse,
 } from "@/lib/api";
-import type { MoodTrend } from "@/lib/types";
+import type { Conversation, MoodTrend, MoodStats } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import MoodCheckIn from "@/components/mood/MoodCheckIn";
+import GreetingHero from "@/components/dashboard/GreetingHero";
+import StatCards from "@/components/dashboard/StatCards";
+import ReflectionCard from "@/components/dashboard/ReflectionCard";
+import ResourceCard from "@/components/dashboard/ResourceCard";
+import RecentConversations from "@/components/dashboard/RecentConversations";
+import FooterBand from "@/components/dashboard/FooterBand";
 import DashboardMoodWidget from "@/components/mood/DashboardMoodWidget";
+import MoodCheckIn from "@/components/mood/MoodCheckIn";
 
-function formatRelativeTime(iso: string): string {
+function daysSince(iso: string | undefined): number | null {
+  if (!iso) return null;
   const d = new Date(iso);
-  const now = new Date();
-  const diffMs = now.getTime() - d.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-  if (diffMins < 1) return "Just now";
-  if (diffMins < 60) return `${diffMins} min ago`;
-  if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? "" : "s"} ago`;
-  if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
-  return d.toLocaleDateString();
+  if (Number.isNaN(d.getTime())) return null;
+  const diff = Date.now() - d.getTime();
+  return Math.max(0, Math.floor(diff / (24 * 60 * 60 * 1000)));
 }
 
-function getConversationsThisWeek(conversations: ConversationResponse[]): number {
-  const now = new Date();
-  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-  return conversations.filter((c) => new Date(c.last_message_at) >= weekAgo).length;
+function sessionsThisWeek(conversations: Conversation[]): number {
+  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  return conversations.filter((c) => new Date(c.last_message_at).getTime() >= weekAgo).length;
+}
+
+function sessionsSparkline(conversations: Conversation[]): Array<{ value: number }> {
+  const today = new Date();
+  const buckets: number[] = Array.from({ length: 7 }, () => 0);
+  for (const c of conversations) {
+    const d = new Date(c.last_message_at);
+    const diff = Math.floor((today.getTime() - d.getTime()) / (24 * 60 * 60 * 1000));
+    if (diff >= 0 && diff < 7) buckets[6 - diff]++;
+  }
+  return buckets.map((value) => ({ value }));
 }
 
 export default function DashboardPage() {
-  const t = useTranslations("dashboard");
-  const tChat = useTranslations("chat");
-  const tMood = useTranslations("mood");
-  const tCommon = useTranslations("common");
   const router = useRouter();
+  const tMood = useTranslations("mood");
   const [displayName, setDisplayName] = useState<string | null>(null);
-  const [conversations, setConversations] = useState<ConversationResponse[]>([]);
-  const [moodTrends, setMoodTrends] = useState<MoodTrend[]>([]);
-  const [moodStreak, setMoodStreak] = useState(0);
-  const [todayLoggedCount, setTodayLoggedCount] = useState(0);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [trends, setTrends] = useState<MoodTrend[]>([]);
+  const [stats, setStats] = useState<MoodStats | null>(null);
   const [loading, setLoading] = useState(true);
-
-  function handleMoodCreated(entry: MoodEntryResponse, newBadges: BadgeResponse[]) {
-    setTodayLoggedCount((n) => n + 1);
-    toast({
-      title: tMood("logged"),
-      description: newBadges.length > 0
-        ? `${tMood("badgeEarned")} ${newBadges.map((b) => b.icon + " " + b.name).join(", ")}`
-        : undefined,
-    });
-  }
-
-  const hour = typeof window !== "undefined" ? new Date().getHours() : 12;
-  const welcomeKey = hour < 12 ? "welcomeMorning" : hour < 17 ? "welcomeAfternoon" : "welcomeEvening";
-  const welcome = t(welcomeKey, { name: displayName ?? "" });
+  const [checkInOpen, setCheckInOpen] = useState(false);
+  const refreshMoodRef = useRef(0);
 
   useEffect(() => {
     const token = getStoredToken();
@@ -72,8 +65,10 @@ export default function DashboardPage() {
       router.replace("/login");
       return;
     }
-    Promise.all([getMe(), getChatConversations(), getMoodHistory(7)]).then(
+    let cancelled = false;
+    Promise.all([getMe(), getChatConversations(), getMoodHistory(30)]).then(
       ([meRes, convRes, moodRes]) => {
+        if (cancelled) return;
         setLoading(false);
         if (!meRes.ok) {
           if (meRes.status === 401) return;
@@ -81,39 +76,65 @@ export default function DashboardPage() {
           return;
         }
         setDisplayName(meRes.data.display_name);
-        if (convRes.ok) setConversations(convRes.data);
+        if (convRes.ok) setConversations(convRes.data as Conversation[]);
         if (moodRes.ok) {
-          setMoodTrends(moodRes.data.daily_trends);
-          setMoodStreak(moodRes.data.stats.current_streak);
-          // Check if logged today from last trend entry (today = last in daily_trends)
-          const last = moodRes.data.daily_trends.at(-1);
-          if (last) setTodayLoggedCount(last.entry_count);
+          setTrends(moodRes.data.daily_trends);
+          setStats(moodRes.data.stats);
         }
-      }
+      },
     );
-  }, [router]);
+    return () => {
+      cancelled = true;
+    };
+  }, [router, refreshMoodRef.current]);
+
+  const lastCheckIn = useMemo(() => {
+    const sorted = [...trends].filter((t) => t.entry_count > 0).sort((a, b) => b.date.localeCompare(a.date));
+    return sorted[0]?.date;
+  }, [trends]);
+
+  const moodDelta = useMemo(() => {
+    if (!stats?.average_mood) return null;
+    const last7 = trends.slice(-7).filter((t) => t.entry_count > 0);
+    const prev7 = trends.slice(-14, -7).filter((t) => t.entry_count > 0);
+    if (last7.length === 0 || prev7.length === 0) return null;
+    const avg = (arr: MoodTrend[]) => arr.reduce((s, t) => s + t.average_mood, 0) / arr.length;
+    return avg(last7) - avg(prev7);
+  }, [trends, stats]);
+
+  const handleMoodCreated = (_entry: MoodEntryResponse, newBadges: BadgeResponse[]) => {
+    refreshMoodRef.current++;
+    setCheckInOpen(false);
+    toast({
+      title: tMood("logged"),
+      description:
+        newBadges.length > 0
+          ? `${tMood("badgeEarned")} ${newBadges.map((b) => b.icon + " " + b.name).join(", ")}`
+          : undefined,
+    });
+    getMoodHistory(30).then((res) => {
+      if (res.ok) {
+        setTrends(res.data.daily_trends);
+        setStats(res.data.stats);
+      }
+    });
+  };
 
   if (loading) {
     return (
-      <div className="min-h-full bg-background">
-        <div className="max-w-2xl mx-auto px-4 py-8">
-          <Skeleton className="h-8 w-64 mb-8 rounded-lg" />
-          <div className="space-y-6">
-            <Skeleton className="h-24 w-full rounded-2xl" />
-            <Skeleton className="h-20 w-full rounded-2xl" />
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <Skeleton className="h-24 rounded-xl" />
-              <Skeleton className="h-24 rounded-xl" />
-              <Skeleton className="h-24 rounded-xl" />
-            </div>
-            <Skeleton className="h-24 w-full rounded-xl" />
-            <div className="space-y-3">
-              <Skeleton className="h-5 w-40 rounded" />
-              <Skeleton className="h-20 rounded-xl" />
-              <Skeleton className="h-20 rounded-xl" />
-              <Skeleton className="h-20 rounded-xl" />
-            </div>
+      <div className="mx-auto w-full max-w-6xl px-4 py-8 md:px-8 md:py-10">
+        <div className="space-y-6">
+          <Skeleton className="h-32 rounded-2xl" />
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Skeleton className="h-28 rounded-2xl" />
+            <Skeleton className="h-28 rounded-2xl" />
+            <Skeleton className="h-28 rounded-2xl" />
           </div>
+          <div className="grid gap-4 lg:grid-cols-12">
+            <Skeleton className="h-44 rounded-2xl lg:col-span-8" />
+            <Skeleton className="h-44 rounded-2xl lg:col-span-4" />
+          </div>
+          <Skeleton className="h-40 rounded-2xl" />
         </div>
       </div>
     );
@@ -121,123 +142,51 @@ export default function DashboardPage() {
 
   if (displayName === null) return null;
 
-  const recent = conversations.slice(0, 3);
-  const hasRecent = recent.length > 0;
-  const thisWeek = getConversationsThisWeek(conversations);
-
   return (
-    <div className="min-h-full bg-background">
-      <div className="max-w-2xl mx-auto px-4 py-8">
-        <p className="text-xl text-foreground mb-6" id="dashboard-heading">
-          {displayName ? welcome : tCommon("loading")}
-        </p>
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 md:px-8 md:py-10">
+      <div className="space-y-6">
+        <GreetingHero
+          displayName={displayName}
+          daysSinceCheckIn={daysSince(lastCheckIn)}
+          onQuickCheckIn={() => setCheckInOpen(true)}
+        />
 
-        {/* Mood check-in — inviting prompt if not logged today */}
-        <div className="mb-4">
-          {todayLoggedCount === 0 ? (
-            <MoodCheckIn compact onEntryCreated={handleMoodCreated} />
-          ) : (
-            <div className="rounded-2xl bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 p-4 shadow-sm flex items-center gap-3 animate-fade-in">
-              <span className="text-xl">✓</span>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-green-700 dark:text-green-300">
-                  {tMood("loggedToday")}
-                </p>
-              </div>
-              <Link
-                href="/mood"
-                className="text-xs text-green-600 dark:text-green-400 font-medium hover:underline shrink-0"
-              >
-                {tMood("viewFullTracker")} →
-              </Link>
-            </div>
-          )}
-        </div>
+        <StatCards
+          currentStreak={stats?.current_streak ?? 0}
+          longestStreak={stats?.longest_streak ?? 0}
+          averageMood={stats?.average_mood ?? null}
+          moodDelta={moodDelta}
+          sessionsThisWeek={sessionsThisWeek(conversations)}
+          sparkline={sessionsSparkline(conversations)}
+        />
 
-        {/* Mini mood widget — sparkline + streak */}
-        <div className="mb-8">
-          <DashboardMoodWidget trends={moodTrends} streak={moodStreak} />
-        </div>
-
-        {/* Quick stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-            <p className="text-sm text-muted-foreground">{t("totalConversations")}</p>
-            <p className="text-2xl font-semibold text-foreground mt-1">{conversations.length}</p>
+        <div className="grid gap-6 lg:grid-cols-12">
+          <div className="lg:col-span-8">
+            <DashboardMoodWidget
+              trends={trends}
+              streak={stats?.current_streak ?? 0}
+              onPillClick={() => setCheckInOpen(true)}
+            />
           </div>
-          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-            <p className="text-sm text-muted-foreground">{t("thisWeek")}</p>
-            <p className="text-2xl font-semibold text-foreground mt-1">{thisWeek}</p>
-          </div>
-          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-            <p className="text-sm text-muted-foreground">{t("moodStreak")}</p>
-            {moodStreak > 0 ? (
-              <p className="text-2xl font-semibold text-foreground mt-1">
-                {moodStreak} <span className="text-xl">🔥</span>
-              </p>
-            ) : (
-              <Link href="/mood" className="text-sm text-primary mt-1 block hover:underline">
-                {tMood("startStreak")}
-              </Link>
-            )}
+          <div className="space-y-6 lg:col-span-4">
+            <ReflectionCard />
+            <ResourceCard />
           </div>
         </div>
 
-        {/* Start New Chat */}
-        <Link
-          href="/chat"
-          className="block rounded-2xl bg-card border border-border p-6 shadow-sm hover:border-primary/30 hover:shadow-md transition-all duration-200 mb-8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-        >
-          <div className="flex items-start gap-4">
-            <div className="rounded-xl bg-primary/10 p-3 shrink-0">
-              <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-              </svg>
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold text-foreground mb-1">{t("startChat")}</h2>
-              <p className="text-muted-foreground text-sm">
-                {t("startChatDescLong")}
-              </p>
-            </div>
-          </div>
-        </Link>
+        <RecentConversations conversations={conversations} />
 
-        {/* Recent conversations */}
-        <section aria-labelledby="recent-heading">
-          <h2 id="recent-heading" className="text-base font-semibold text-foreground mb-4">{t("recentChats")}</h2>
-          {!hasRecent && (
-            <p className="text-muted-foreground text-sm mb-4">{t("noChats")}</p>
-          )}
-          {hasRecent && (
-            <ul className="space-y-3">
-              {recent.map((c) => (
-                <li key={c.conversation_id}>
-                  <Link
-                    href={"/chat/" + c.conversation_id}
-                    className="block rounded-xl bg-card p-4 shadow-sm border border-border hover:border-primary/30 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  >
-                    <h3 className="font-medium text-foreground truncate">{c.title || tChat("newChat")}</h3>
-                    <p className="text-sm text-muted-foreground mt-0.5">{formatRelativeTime(c.last_message_at)}</p>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-          <Link
-            href="/chat"
-            className="inline-block mt-4 text-primary font-medium text-sm hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
-          >
-            {hasRecent ? t("viewAllConversations") : t("goToChat")}
-          </Link>
-        </section>
-
-        {/* Daily tip placeholder */}
-        <section className="mt-10 rounded-xl border border-border bg-card/50 p-5 shadow-sm" aria-labelledby="daily-tip-heading">
-          <h2 id="daily-tip-heading" className="text-sm font-semibold text-foreground mb-2">{t("dailyTip")}</h2>
-          <p className="text-sm text-muted-foreground">{t("dailyTipComingSoon")}</p>
-        </section>
+        <FooterBand />
       </div>
+
+      <Dialog open={checkInOpen} onOpenChange={setCheckInOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-2xl tracking-tight">{tMood("checkIn")}</DialogTitle>
+          </DialogHeader>
+          <MoodCheckIn onEntryCreated={handleMoodCreated} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

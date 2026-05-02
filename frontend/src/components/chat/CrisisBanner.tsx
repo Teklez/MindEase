@@ -1,11 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { ExternalLink, LifeBuoy, Phone, X } from "lucide-react";
 import type { CrisisResources } from "@/lib/types";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Phone, ExternalLink } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 type CrisisBannerProps = {
   resources: CrisisResources;
@@ -18,76 +16,83 @@ export default function CrisisBanner({ resources, onDismiss }: CrisisBannerProps
   const international = resources.international ?? [];
 
   return (
-    <Card
-      className={cn(
-        "animate-slide-down mb-4 border-destructive/50 bg-gradient-to-br from-destructive to-destructive/90 text-destructive-foreground shadow-lg"
-      )}
+    <div
       role="alert"
+      className="mb-4 animate-slide-down overflow-hidden rounded-2xl border border-destructive/30 bg-card shadow-soft"
     >
-      <CardContent className="p-4">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex gap-3 min-w-0 flex-1">
-            <AlertTriangle className="h-6 w-6 shrink-0 opacity-90" aria-hidden />
-            <div className="min-w-0 flex-1">
-              <h3 className="font-semibold">{t("title")}</h3>
-              <div className="mt-3 grid gap-4 text-sm sm:grid-cols-2">
-                {ethiopia.length > 0 && (
-                  <div>
-                    <p className="font-medium opacity-95">{t("ethiopia")}</p>
-                    <ul className="mt-1.5 space-y-1">
-                      {ethiopia.map((r, i) => (
-                        <li key={i} className="flex items-center gap-2">
-                          <Phone className="h-3.5 w-3.5 shrink-0 opacity-80" />
-                          <a
-                            href={`tel:${r.phone.replace(/\D/g, "")}`}
-                            className="underline hover:no-underline"
-                          >
-                            {r.name}: {r.phone}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {international.length > 0 && (
-                  <div>
-                    <p className="font-medium opacity-95">{t("international")}</p>
-                    <ul className="mt-1.5 space-y-1">
-                      {international.map((r, i) => (
-                        <li key={i} className="flex items-center gap-2">
-                          {r.url ? (
-                            <>
-                              <ExternalLink className="h-3.5 w-3.5 shrink-0 opacity-80" />
-                              <a
-                                href={r.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="underline hover:no-underline"
-                              >
-                                {r.name}
-                              </a>
-                            </>
-                          ) : (
-                            <span>{r.name}{r.info ? `: ${r.info}` : ""}</span>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="shrink-0 border-white/50 bg-transparent text-white hover:bg-white/20 hover:text-white"
-            onClick={onDismiss}
-          >
-            {t("dismiss")}
-          </Button>
+      <div className="flex items-start gap-3 border-b border-destructive/20 bg-destructive/[0.06] px-4 py-3">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-destructive/15 text-destructive">
+          <LifeBuoy className="h-5 w-5" strokeWidth={1.75} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="font-serif text-base text-foreground">{t("title")}</p>
         </div>
-      </CardContent>
-    </Card>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onDismiss}
+          aria-label={t("dismiss")}
+          className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground"
+        >
+          <X className="h-4 w-4" strokeWidth={1.75} />
+        </Button>
+      </div>
+      <div className="grid gap-4 p-4 text-sm sm:grid-cols-2">
+        {ethiopia.length > 0 && (
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              {t("ethiopia")}
+            </p>
+            <ul className="mt-2 space-y-1.5">
+              {ethiopia.map((r, i) => (
+                <li key={i} className="flex items-center gap-2">
+                  <Phone className="h-3.5 w-3.5 shrink-0 text-destructive" strokeWidth={1.75} />
+                  <a
+                    href={`tel:${r.phone.replace(/\D/g, "")}`}
+                    className="text-foreground underline-offset-2 hover:underline"
+                  >
+                    {r.name}: {r.phone}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {international.length > 0 && (
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              {t("international")}
+            </p>
+            <ul className="mt-2 space-y-1.5">
+              {international.map((r, i) => (
+                <li key={i} className="flex items-center gap-2">
+                  {r.url ? (
+                    <>
+                      <ExternalLink
+                        className="h-3.5 w-3.5 shrink-0 text-destructive"
+                        strokeWidth={1.75}
+                      />
+                      <a
+                        href={r.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-foreground underline-offset-2 hover:underline"
+                      >
+                        {r.name}
+                      </a>
+                    </>
+                  ) : (
+                    <span className="text-foreground">
+                      {r.name}
+                      {r.info ? `: ${r.info}` : ""}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

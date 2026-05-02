@@ -1,92 +1,76 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { cn } from "@/lib/utils";
+import { Flame, TrendingUp } from "lucide-react";
 import type { MoodStats } from "@/lib/types";
+import { getMoodEmoji, getMoodLabel } from "@/lib/mood";
 
-const MOOD_EMOJIS: Record<number, string> = { 1: "😢", 2: "😕", 3: "😐", 4: "🙂", 5: "😄" };
-
-function getMoodEmoji(avg: number | null): string {
-  if (!avg) return "😐";
-  return MOOD_EMOJIS[Math.round(avg)] ?? "😐";
-}
-
-const MOOD_TINTS: Record<number, string> = {
-  1: "bg-red-50 dark:bg-red-950/30",
-  2: "bg-orange-50 dark:bg-orange-950/30",
-  3: "bg-yellow-50 dark:bg-yellow-950/30",
-  4: "bg-green-50 dark:bg-green-950/30",
-  5: "bg-emerald-50 dark:bg-emerald-950/30",
-};
-
-interface Props {
+type Props = {
   stats: MoodStats;
-}
+};
 
 export default function MoodStatsCards({ stats }: Props) {
   const t = useTranslations("mood");
 
-  const avgRounded = stats.average_mood ? Math.round(stats.average_mood) : null;
-  const avgTint = avgRounded ? MOOD_TINTS[avgRounded] : "bg-card";
-  const weekProgress = Math.min((stats.entries_this_week / 7) * 100, 100);
-
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-      {/* Current Streak */}
-      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-        <p className="text-xs font-medium text-muted-foreground mb-2">{t("currentStreak")}</p>
-        {stats.current_streak > 0 ? (
-          <>
-            <p className="text-3xl font-bold text-foreground leading-none mb-1">
-              {stats.current_streak}
-              <span className="ml-1 text-2xl">🔥</span>
-            </p>
-            <p className="text-xs text-muted-foreground">{t("consecutiveDays")}</p>
-          </>
-        ) : (
-          <p className="text-sm text-muted-foreground mt-1">{t("startStreak")}</p>
-        )}
-      </div>
+    <div className="grid gap-4 sm:grid-cols-3">
+      <Card>
+        <Eyebrow>{t("currentStreak")}</Eyebrow>
+        <Value>
+          <Flame className="h-5 w-5 text-primary" strokeWidth={1.75} />
+          <span className="font-serif text-3xl tracking-tight">{stats.current_streak}</span>
+        </Value>
+        <SubLabel>
+          {stats.current_streak > 0 ? t("consecutiveDays") : t("startStreak")}
+        </SubLabel>
+      </Card>
 
-      {/* Average Mood */}
-      <div className={cn("rounded-2xl border border-border p-4 shadow-sm", avgTint)}>
-        <p className="text-xs font-medium text-muted-foreground mb-2">{t("averageMood")}</p>
-        <p className="text-4xl leading-none mb-1">{getMoodEmoji(stats.average_mood)}</p>
-        {stats.average_mood !== null ? (
-          <p className="text-sm font-semibold text-foreground">
-            {stats.average_mood.toFixed(1)}{" "}
-            <span className="text-xs font-normal text-muted-foreground">/ 5</span>
-          </p>
-        ) : (
-          <p className="text-xs text-muted-foreground">—</p>
-        )}
-      </div>
+      <Card>
+        <Eyebrow>{t("longestStreak")}</Eyebrow>
+        <Value>
+          <TrendingUp className="h-5 w-5 text-accent" strokeWidth={1.75} />
+          <span className="font-serif text-3xl tracking-tight">{stats.longest_streak}</span>
+        </Value>
+        <SubLabel>{t("consecutiveDays")}</SubLabel>
+      </Card>
 
-      {/* Total Entries */}
-      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-        <p className="text-xs font-medium text-muted-foreground mb-2">{t("totalEntries")}</p>
-        <p className="text-3xl font-bold text-foreground leading-none mb-1">
-          {stats.total_entries}
-        </p>
-        <p className="text-xs text-muted-foreground">{t("moodLogs")}</p>
-      </div>
-
-      {/* This Week */}
-      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-        <p className="text-xs font-medium text-muted-foreground mb-2">{t("thisWeek")}</p>
-        <p className="text-3xl font-bold text-foreground leading-none mb-2">
-          {stats.entries_this_week}
-          <span className="text-base font-normal text-muted-foreground"> / 7</span>
-        </p>
-        {/* Progress bar */}
-        <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-          <div
-            className="h-full rounded-full bg-primary transition-all duration-500"
-            style={{ width: `${weekProgress}%` }}
-          />
-        </div>
-        <p className="text-xs text-muted-foreground mt-1.5">{t("daysLoggedThisWeek")}</p>
-      </div>
+      <Card>
+        <Eyebrow>{t("averageMood")}</Eyebrow>
+        <Value>
+          {stats.average_mood !== null ? (
+            <>
+              <span className="text-2xl">{getMoodEmoji(stats.average_mood)}</span>
+              <span className="font-serif text-3xl tracking-tight">
+                {stats.average_mood.toFixed(1)}
+              </span>
+            </>
+          ) : (
+            <span className="font-serif text-3xl tracking-tight text-muted-foreground">—</span>
+          )}
+        </Value>
+        <SubLabel>
+          {stats.average_mood !== null
+            ? getMoodLabel(stats.average_mood)
+            : t("totalEntries")}
+        </SubLabel>
+      </Card>
     </div>
   );
+}
+
+function Card({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-soft-sm">{children}</div>
+  );
+}
+function Eyebrow({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{children}</p>
+  );
+}
+function Value({ children }: { children: React.ReactNode }) {
+  return <div className="mt-3 flex items-end gap-2">{children}</div>;
+}
+function SubLabel({ children }: { children: React.ReactNode }) {
+  return <p className="mt-2 text-xs text-muted-foreground">{children}</p>;
 }

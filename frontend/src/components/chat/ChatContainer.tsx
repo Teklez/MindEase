@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
-import { useTranslations, useLocale } from "next-intl";
-const INITIAL_MESSAGE_KEY = "mindease-initial-message";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
-import type { Message } from "@/lib/types";
-import type { CrisisResources } from "@/lib/types";
+import { ChevronLeft } from "lucide-react";
+import type { CrisisResources, Message } from "@/lib/types";
 import { getConversation } from "@/lib/api";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { useConversationsRefresh } from "@/contexts/ConversationsContext";
@@ -15,6 +14,8 @@ import ChatInput from "./ChatInput";
 import StarterPrompts from "./StarterPrompts";
 import CrisisBanner from "./CrisisBanner";
 import { Skeleton } from "@/components/ui/skeleton";
+
+const INITIAL_MESSAGE_KEY = "mindease-initial-message";
 
 type ChatContainerProps = {
   conversationId: string;
@@ -33,64 +34,69 @@ export default function ChatContainer({ conversationId }: ChatContainerProps) {
   const [title, setTitle] = useState<string>("Chat");
   const refreshConversations = useConversationsRefresh();
 
-  const handleWebSocketEvent = useCallback((event: Parameters<Parameters<typeof useWebSocket>[1]>[0]) => {
-    if (event.type === "token") {
-      setIsWaitingForResponse(false);
-      setIsStreaming(true);
-      streamingContentRef.current = (streamingContentRef.current ?? "") + (event.content ?? "");
-      setStreamingContent(streamingContentRef.current);
-    } else if (event.type === "done") {
-      const text = streamingContentRef.current ?? "";
-      streamingContentRef.current = null;
-      setStreamingContent(null);
-      setIsStreaming(false);
-      if (text.length > 0) {
-        const aiMessage: Message = {
-          message_id: event.message_id ?? crypto.randomUUID(),
+  const handleWebSocketEvent = useCallback(
+    (event: Parameters<Parameters<typeof useWebSocket>[1]>[0]) => {
+      if (event.type === "token") {
+        setIsWaitingForResponse(false);
+        setIsStreaming(true);
+        streamingContentRef.current = (streamingContentRef.current ?? "") + (event.content ?? "");
+        setStreamingContent(streamingContentRef.current);
+      } else if (event.type === "done") {
+        const text = streamingContentRef.current ?? "";
+        streamingContentRef.current = null;
+        setStreamingContent(null);
+        setIsStreaming(false);
+        if (text.length > 0) {
+          const aiMessage: Message = {
+            message_id: event.message_id ?? crypto.randomUUID(),
+            conversation_id: "",
+            sender_type: "ai",
+            content: text,
+            detected_emotion: null,
+            timestamp: new Date().toISOString(),
+            is_crisis_flagged: false,
+          };
+          setMessages((m) => [...m, aiMessage]);
+        }
+        refreshConversations?.();
+        getConversation(conversationId).then((res) => {
+          if (res.ok && res.data.title) setTitle(res.data.title);
+        });
+      } else if (event.type === "crisis_alert") {
+        const r = event.resources;
+        if (!r) {
+          setCrisisResources(null);
+          return;
+        }
+        setCrisisResources({
+          ethiopia: (Array.isArray(r.ethiopia) ? r.ethiopia : []).map((x) => ({
+            name: x.name,
+            phone: x.phone ?? "",
+          })),
+          international: (Array.isArray(r.international) ? r.international : []).map((x) => ({
+            name: x.name,
+            ...(x.info != null && { info: x.info }),
+            ...(x.url != null && { url: x.url }),
+          })),
+        });
+      } else if (event.type === "error") {
+        toast({ title: tChat("messageFailed"), variant: "destructive" });
+        const errorMessage: Message = {
+          message_id: crypto.randomUUID(),
           conversation_id: "",
           sender_type: "ai",
-          content: text,
+          content: event.content ?? "Something went wrong.",
           detected_emotion: null,
           timestamp: new Date().toISOString(),
           is_crisis_flagged: false,
         };
-        setMessages((m) => [...m, aiMessage]);
+        setMessages((m) => [...m, errorMessage]);
+        setIsStreaming(false);
+        setIsWaitingForResponse(false);
       }
-      refreshConversations?.();
-      getConversation(conversationId).then((res) => {
-        if (res.ok && res.data.title) setTitle(res.data.title);
-      });
-    } else if (event.type === "crisis_alert") {
-      const r = event.resources;
-      if (!r) {
-        setCrisisResources(null);
-        return;
-      }
-      setCrisisResources({
-        ethiopia: (Array.isArray(r.ethiopia) ? r.ethiopia : []).map((x) => ({ name: x.name, phone: x.phone ?? "" })),
-        international: (Array.isArray(r.international) ? r.international : []).map((x) => ({
-          name: x.name,
-          ...(x.info != null && { info: x.info }),
-          ...(x.url != null && { url: x.url }),
-        })),
-      });
-    } else if (event.type === "error") {
-      toast({ title: tChat("messageFailed"), variant: "destructive" });
-      const errorContent = event.content ?? "Something went wrong.";
-      const errorMessage: Message = {
-        message_id: crypto.randomUUID(),
-        conversation_id: "",
-        sender_type: "ai",
-        content: errorContent,
-        detected_emotion: null,
-        timestamp: new Date().toISOString(),
-        is_crisis_flagged: false,
-      };
-      setMessages((m) => [...m, errorMessage]);
-      setIsStreaming(false);
-      setIsWaitingForResponse(false);
-    }
-  }, [refreshConversations, conversationId, tChat]);
+    },
+    [refreshConversations, conversationId, tChat],
+  );
 
   const { send, connectionStatus } = useWebSocket(conversationId, handleWebSocketEvent);
   const sentInitialRef = useRef(false);
@@ -126,7 +132,6 @@ export default function ChatContainer({ conversationId }: ChatContainerProps) {
     streamingContentRef.current = null;
   }, [conversationId]);
 
-  // Send initial message from chat home (e.g. starter prompt) once when ready
   useEffect(() => {
     if (loading || connectionStatus !== "connected" || sentInitialRef.current) return;
     try {
@@ -160,7 +165,6 @@ export default function ChatContainer({ conversationId }: ChatContainerProps) {
     (content: string) => {
       const trimmed = content.trim();
       if (!trimmed) return;
-
       const userMessage: Message = {
         message_id: crypto.randomUUID(),
         conversation_id: conversationId,
@@ -175,28 +179,35 @@ export default function ChatContainer({ conversationId }: ChatContainerProps) {
       setIsWaitingForResponse(true);
       send(trimmed, locale === "am" || locale === "en" ? locale : undefined);
     },
-    [conversationId, send, locale]
+    [conversationId, send, locale],
   );
 
   const header = (
     <>
-      <div className="flex shrink-0 items-center gap-3 border-b border-border bg-background/95 px-4 py-3">
+      <div className="flex shrink-0 items-center gap-3 border-b border-border bg-background/85 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/70 md:px-6">
         <Link
           href="/chat"
-          className="rounded-lg p-2 -m-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="-ml-1 inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           aria-label={tChat("backToChatList")}
         >
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
+          <ChevronLeft className="h-4 w-4" strokeWidth={1.75} />
         </Link>
-        <h1 className="min-w-0 flex-1 truncate text-base font-semibold text-foreground">{title}</h1>
+        <h1 className="min-w-0 flex-1 truncate font-serif text-lg tracking-tight text-foreground">
+          {title}
+        </h1>
+        {connectionStatus === "connected" && (
+          <span className="hidden items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground md:inline-flex">
+            <span className="h-1.5 w-1.5 rounded-full bg-success" /> live
+          </span>
+        )}
       </div>
       {connectionStatus === "connecting" && (
-        <p className="shrink-0 bg-muted/50 py-1.5 text-center text-xs text-muted-foreground">{tChat("connecting")}</p>
+        <p className="shrink-0 bg-muted py-1.5 text-center text-xs text-muted-foreground">
+          {tChat("connecting")}
+        </p>
       )}
       {connectionStatus === "error" && (
-        <div className="shrink-0 border-b border-border bg-muted py-2 px-4 text-center text-sm text-foreground">
+        <div className="shrink-0 border-b border-destructive/20 bg-destructive/10 py-2 px-4 text-center text-sm text-destructive">
           {tChat("connectionProblem")}
         </div>
       )}
@@ -208,16 +219,22 @@ export default function ChatContainer({ conversationId }: ChatContainerProps) {
       <div className="flex h-full flex-col">
         {header}
         <div className="flex-1 overflow-auto">
-          <div className="mx-auto w-full max-w-4xl space-y-4 px-4 py-4">
+          <div className="mx-auto w-full max-w-3xl space-y-4 px-4 py-6">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className={i % 2 === 0 ? "flex justify-end" : "flex gap-2 justify-start"}>
-                <Skeleton className={i % 2 === 0 ? "h-14 w-3/4 max-w-md rounded-2xl" : "h-16 w-2/3 max-w-md rounded-2xl"} />
+              <div key={i} className={i % 2 === 0 ? "flex justify-end" : "flex gap-3"}>
+                <Skeleton
+                  className={
+                    i % 2 === 0
+                      ? "h-14 w-3/4 max-w-md rounded-2xl"
+                      : "h-16 w-2/3 max-w-md rounded-2xl"
+                  }
+                />
               </div>
             ))}
           </div>
         </div>
         <div className="shrink-0 px-4 py-3">
-          <Skeleton className="mx-auto h-14 w-full max-w-4xl rounded-2xl" />
+          <Skeleton className="mx-auto h-14 w-full max-w-3xl rounded-2xl" />
         </div>
       </div>
     );
@@ -235,13 +252,12 @@ export default function ChatContainer({ conversationId }: ChatContainerProps) {
     );
   }
 
-  const crisisBannerNode =
-    crisisResources != null ? (
-      <CrisisBanner resources={crisisResources} onDismiss={() => setCrisisResources(null)} />
-    ) : null;
+  const crisisBannerNode = crisisResources ? (
+    <CrisisBanner resources={crisisResources} onDismiss={() => setCrisisResources(null)} />
+  ) : null;
 
   return (
-    <div className="flex h-full flex-col min-h-0">
+    <div className="flex h-full min-h-0 flex-col">
       {header}
       <MessageList
         messages={messages}

@@ -56,14 +56,100 @@
         "title": "አማርኛ እና እንግሊዝኛ",
         "description": "በሚመርጡት ቋንቋ ያወያዩ። ማይንድኢዝ አማርኛንም እንግሊዝኛንም ይደግፋል።"
       }
+    },
+    "v2": {
+      "nav": {
+        "howItWorks": "እንዴት እንደሚሰራ",
+        "privacy": "የግላዊነት",
+        "resources": "ግብዓቶች",
+        "signIn": "ግባ",
+        "cta": "ይጀምሩ — ነፃ"
+      },
+      "disclaimerStrip": "ማይንድኢዝ የ AI ጓደኛ ነው፣ የባለሙያ ሕክምና ምትክ አይደለም።",
+      "crisisLink": "የአስቸኳይ ጊዜ ግብዓቶች",
+      "hero": {
+        "eyebrow": "24/7 ይገኛል",
+        "headlineLead": "ሁካታ ለሚሰማቸው ቀናት",
+        "headlineEm": "ጸጥ ያለ ጓደኛ።",
+        "lede": "ማይንድኢዝ ሀሳቦችዎን ለመመለስ የተረጋጋ ቦታ ነው — በራስዎ ጊዜ፣ በቀስታ።",
+        "primaryCta": "የመጀመሪያ ክፍለ-ጊዜዎን ይጀምሩ",
+        "secondaryCta": "እንዴት እንደሚሰራ",
+        "trust": {
+          "encrypted": "ከጫፍ እስከ ጫፍ የተመሰጠረ",
+          "evidence": "በማስረጃ ላይ የተመሰረተ",
+          "noJudgment": "ያለ ፍርድ"
+        }
+      },
+      "preview": {
+        "moodPill": "ስሜት፡ ትንሽ ብሩህ",
+        "user": "የሥራ ቦታ ውይይቱን ደጋግሜ እያስታወስኩ ነው።",
+        "assistant": "የትኛው ክፍል እንደሚከሽፍ? አንዳንድ ጊዜ ሉፉ አንድ ጸጥ ያለ ድምፅ አለው።"
+      },
+      "steps": {
+        "title": "ሦስት ትናንሽ እርምጃዎች።",
+        "titleEm": "ጫና የለም።",
+        "items": [
+          { "kicker": "01 / ይመዝገቡ", "title": "ስሜትዎን ያስተውሉ", "body": "ፈጣን የስሜት ምዝገባ — በአንድ ምታ።" },
+          { "kicker": "02 / ይነጋገሩ", "title": "በራስዎ ቃላት ይነጋገሩ", "body": "የተረጋጋ፣ የግል ውይይት። የራስዎ ፍጥነት።" },
+          { "kicker": "03 / ንድፉን ይመልከቱ", "title": "መስመሩ ሲረጋጋ", "body": "ነገሮች እንዴት እንደሚቀየሩ ጥሩ ምስል።" }
+        ]
+      },
+      "features": {
+        "title": "በጥንቃቄ የተገነባ።",
+        "titleEm": "በዓላማ።",
+        "items": [
+          { "title": "ውይይቶች", "body": "የግል፣ ያልተጣደፉ። ከፈለጉ ይቀመጣሉ።" },
+          { "title": "የስሜት መከታተያ", "body": "በቀጥታ የሚያዳምጥ መስመር።" },
+          { "title": "ግብዓቶች", "body": "አጭር፣ ጠቃሚ ጽሑፎች — ለትናንሾቹ ሰዓቶች።" },
+          { "title": "የአስቸኳይ ድጋፍ", "body": "ከእኛ ከበድ ካለ፣ በፍጥነት ወደ ሌላ እንመራዎታለን።" }
+        ]
+      },
+      "testimonial": {
+        "quote": "ቴክኖሎጂ ሊጠግነኝ ያልሞከረበት የመጀመሪያው ጊዜ ነው። ማሰብ እስክችል ድረስ ከእኔ ጋር ቆየ።",
+        "attribution": "— ማያ፣ 28፣ ኒው ዮርክ"
+      },
+      "privacy": {
+        "title": "ውሂብዎ፣ ሕግዎ።",
+        "items": [
+          { "title": "ከጫፍ እስከ ጫፍ የተመሰጠረ", "body": "ውይይቶች በመጓጓዣ እና በማከማቻ ላይ ተመሰጥረዋል።" },
+          { "title": "የእርስዎ ነው", "body": "ሁሉንም ነገር በማንኛውም ጊዜ ይላኩ ወይም ይሰርዙ።" },
+          { "title": "የአስቸኳይ ጊዜ፣ በአንድ ምታ", "body": "በሚያስፈልግዎ ጊዜ የአካባቢ የእርዳታ መስመሮች።" }
+        ]
+      },
+      "finalCta": {
+        "headlineLead": "አንዳንድ ጊዜ ምርጡ ነገር",
+        "headlineEm": "ከአንድ ሰው ጋር ማውራት ነው።",
+        "lede": "ለመጀመር ነፃ ነው፣ ካርድ አይፈልግም።",
+        "cta": "የመጀመሪያ ክፍለ-ጊዜዎን ይጀምሩ",
+        "disclaimer": "ማይንድኢዝ የባለሙያ እንክብካቤ ምትክ አይደለም። በአስቸኳይ ጊዜ ውስጥ ከሆኑ፣ 988 ይደውሉ።"
+      },
+      "footer": {
+        "tagline": "ሀሳቦችዎን ለመመለስ ጸጥ ያለ ቦታ።",
+        "product": "ምርት",
+        "company": "ኩባንያ",
+        "legal": "ሕጋዊ",
+        "support": "ድጋፍ",
+        "links": {
+          "howItWorks": "እንዴት እንደሚሰራ",
+          "privacy": "የግላዊነት",
+          "terms": "ውሎች",
+          "about": "ስለ እኛ",
+          "contact": "ያግኙን",
+          "crisis": "የአስቸኳይ ጊዜ ግብዓቶች",
+          "dashboard": "ዳሽቦርድ"
+        },
+        "copyright": "© 2026 ማይንድኢዝ"
+      }
     }
   },
   "auth": {
     "login": {
       "title": "እንኳን ደህና መጡ",
       "subtitle": "ጉዞዎን ለመቀጠል ይግቡ",
+      "eyebrow": "ግባ",
       "email": "ኢሜይል",
       "password": "የይለፍ ቃል",
+      "rememberMe": "አስታውሰኝ",
       "signIn": "ግባ",
       "signInGoogle": "በ Google ግባ",
       "forgotPassword": "የይለፍ ቃል ረሱ?",
@@ -72,14 +158,22 @@
       "orContinueWith": "ወይም በኢሜይል ይቀጥሉ",
       "errors": {
         "invalid": "ልክ ያልሆነ ኢሜይል ወይም የይለፍ ቃል",
-        "required": "ይህ መስክ ያስፈልጋል"
+        "required": "ይህ መስክ ያስፈልጋል",
+        "invalidEmail": "ትክክለኛ ኢሜይል ያስገቡ"
       },
-      "signingIn": "በመግባት ላይ…"
+      "signingIn": "በመግባት ላይ…",
+      "brand": {
+        "headlineLead": "ወደ ጸጥ ያለ ቦታዎ",
+        "headlineEm": "እንኳን ተመለሱ።",
+        "subcopy": "ካቆሙበት ይቀጥሉ — ሀሳቦችዎን ለመመለስ የግል፣ የተረጋጋ ቦታ።",
+        "caption": "ምልክት · በዓላማ የተረጋጋ"
+      }
     },
     "register": {
       "title": "መለያዎን ይፍጠሩ",
       "subtitle": "የአእምሮ ጤንነት ጉዞዎን ይጀምሩ",
-      "displayName": "ስም",
+      "eyebrow": "መለያ ይፍጠሩ",
+      "displayName": "ሙሉ ስም",
       "email": "ኢሜይል",
       "password": "የይለፍ ቃል",
       "confirmPassword": "የይለፍ ቃል ያረጋግጡ",
@@ -89,7 +183,18 @@
       "hasAccount": "አስቀድመው መለያ አለዎት?",
       "signIn": "ይግቡ",
       "agreeTerms": "የአገልግሎት ውልን እና የግላዊነት ፖሊሲን እስማማለሁ",
+      "agreePrefix": "መለያ በመፍጠር",
+      "agreeTerm": "ውሎች",
+      "agreeAnd": "እና",
+      "agreePrivacy": "የግላዊነት ፖሊሲ",
+      "agreePeriod": "ን ይስማማሉ።",
       "passwordHint": "ቢያንስ 8 ቁምፊዎች፣ አቢይ ሆሄ፣ ትንሽ ሆሄ እና ቁጥር",
+      "passwordStrength": {
+        "weak": "ደካማ",
+        "okay": "መጠነኛ",
+        "good": "ጥሩ",
+        "strong": "ጠንካራ"
+      },
       "requirements": {
         "minChars": "ቢያንስ 8 ቁምፊዎች",
         "uppercase": "አቢይ ሆሄ",
@@ -100,29 +205,65 @@
         "emailExists": "ኢሜይል አስቀድሞ ተመዝግቧል",
         "passwordMismatch": "የይለፍ ቃሎች አይመሳሰሉም",
         "passwordWeak": "የይለፍ ቃል መስፈርቶችን አያሟላም",
-        "required": "ይህ መስክ ያስፈልጋል"
+        "required": "ይህ መስክ ያስፈልጋል",
+        "invalidEmail": "ትክክለኛ ኢሜይል ያስገቡ",
+        "nameTooShort": "እባክዎ ስምዎን ያስገቡ"
       },
       "creatingAccount": "መለያ በመፍጠር ላይ…",
-      "passwordsMatch": "የይለፍ ቃሎች ይጣጣማሉ"
+      "passwordsMatch": "የይለፍ ቃሎች ይጣጣማሉ",
+      "brand": {
+        "headlineLead": "በአንድ ውይይት",
+        "headlineEm": "ይጀምሩ።",
+        "subcopy": "ማይንድኢዝ ለቀስታ ሐሳብ — ለትናንሾቹ የመካከለኛ ሰዓቶች የተረጋጋ ቦታ።",
+        "caption": "ምልክት · በዓላማ የተረጋጋ"
+      }
     }
   },
   "dashboard": {
-    "welcomeMorning": "መልካም ጥዋት፣ {name}!",
-    "welcomeAfternoon": "መልካም ከሰዓት፣ {name}!",
-    "welcomeEvening": "መልካም ምሽት፣ {name}!",
+    "welcomeMorning": "መልካም ጥዋት፣ {name}",
+    "welcomeAfternoon": "መልካም ከሰዓት፣ {name}",
+    "welcomeEvening": "መልካም ምሽት፣ {name}",
+    "context": "ካለፈው ምዝገባዎ {days} ቀናት አልፈዋል — ጫና የለም።",
+    "contextToday": "ዛሬ ተመዝግበዋል። በቀስታ ይቀጥሉ።",
+    "contextYesterday": "ትናንት ተመዝግበዋል — እንኳን ተመለሱ።",
+    "startSession": "ክፍለ-ጊዜ ጀምር",
+    "quickCheckIn": "ፈጣን የስሜት ምዝገባ",
     "startChat": "አዲስ ውይይት ጀምር",
     "startChatDesc": "ከ AI ጓደኛዎ ጋር ያናግሩ",
     "recentChats": "የቅርብ ጊዜ ውይይቶች",
+    "recentSubtitle": "ካቆሙበት ይቀጥሉ።",
+    "viewAll": "ሁሉንም ይመልከቱ",
     "noChats": "ገና ምንም ውይይት የለም። የመጀመሪያ ውይይትዎን ይጀምሩ!",
     "totalConversations": "ጠቅላላ ውይይቶች",
-    "thisWeek": "በዚህ ሳምንት",
-    "streak": "ተከታታይ",
+    "thisWeek": "በዚህ ሳምንት ክፍለ-ጊዜዎች",
+    "streak": "የአሁኑ ተከታታይ",
+    "longest": "ረጅም፡ {days}",
+    "averageMood": "አማካይ ስሜት",
     "moodStreak": "የስሜት ተከታታይ",
     "startChatDescLong": "ለስሜታዊ ድጋፍ፣ የመቋቋም ስልቶች እና ደህን ለማንጸባረቅ ከማይንድኢዝ ጋር ያናግሩ።",
     "viewAllConversations": "ሁሉንም ውይይቶች ይመልከቱ",
     "goToChat": "ወደ ውይይት ይሂዱ",
     "dailyTip": "ዕለታዊ ምክር",
-    "dailyTipComingSoon": "የግል የጤና ምክሮች በቅርብ ቀን።"
+    "dailyTipComingSoon": "የግል የጤና ምክሮች በቅርብ ቀን።",
+    "weeklyMood": "የዚህ ሳምንት ስሜት",
+    "noMoodData": "ለዚህ ሳምንት ገና ምዝገባ የለም።",
+    "reflection": {
+      "eyebrow": "የዛሬ ማንጸባረቅ",
+      "prompt": "ዛሬ ሊተውት የሚችሉት አንድ ትንሽ ነገር ምንድነው?",
+      "cta": "አንጸባርቅ"
+    },
+    "resource": {
+      "eyebrow": "የተጠቆመ ግብዓት",
+      "title": "ሦስት ትንፋሾች፣ በቀስታ።",
+      "body": "ምንም የማይጠይቅ የ90 ሰከንድ ቆም።",
+      "cta": "አንብብ"
+    },
+    "footer": {
+      "reassurance": "ውሂብዎ የእርስዎ ነው። ሁልጊዜ።",
+      "crisis": "አሁን እርዳታ ያስፈልግዎታል? የአስቸኳይ ጊዜ ግብዓቶች"
+    },
+    "days": "ቀናት",
+    "daySingular": "ቀን"
   },
   "chat": {
     "newChat": "አዲስ ውይይት",
@@ -151,11 +292,18 @@
     "choosePrompt": "ለመጀመር ምክር ይምረጡ።",
     "sendMessage": "መልእክት ይላኩ",
     "stopGeneration": "መፍጠር አቁም",
+    "emptyHeadline": "ዛሬ ስለ ምን ማሰብ ይፈልጋሉ?",
+    "emptySubtitle": "ጸጥ ያለ፣ የግል ቦታ። መነሻ ይምረጡ — ወይም በቀላሉ ይጀምሩ።",
+    "searchConversations": "ውይይቶችን ይፈልጉ",
+    "newConversation": "አዲስ ውይይት",
+    "encryptedFooter": "ከጫፍ እስከ ጫፍ የተመሰጠረ",
+    "keyboardHint": "Enter ለመላክ · Shift+Enter ለአዲስ መስመር",
+    "charsLeft": "{count} ቀርቷል",
     "starters": {
-      "anxious": "በቅርቡ ጭንቀት ይሰማኛል",
-      "stress": "ጭንቀትን ለመቋቋም እርዳታ እፈልጋለሁ",
-      "talk": "ከአንድ ሰው ጋር ማውራት ብቻ እፈልጋለሁ",
-      "breathing": "የመተንፈስ ልምምድ አሳየኝ"
+      "anxious": "ጭንቀት ይነጥሉ",
+      "stress": "በቀንዎ ላይ ያንጸባርቁ",
+      "talk": "ከባድ ውይይት ይለማመዱ",
+      "breathing": "ከእኔ ጋር ይቀመጡ"
     },
     "today": "ዛሬ",
     "yesterday": "ትናንት",
