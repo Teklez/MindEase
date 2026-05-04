@@ -1,0 +1,1633 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1440" />
+<title>MindEase — Landing redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    /* Sage / healthcare palette */
+    --bg:           oklch(0.985 0.005 130);
+    --bg-tint:      oklch(0.965 0.012 150);
+    --bg-deep:      oklch(0.93 0.018 150);
+    --ink:          oklch(0.22 0.015 160);
+    --ink-2:        oklch(0.36 0.014 160);
+    --ink-mute:     oklch(0.50 0.012 160);
+    --ink-soft:     oklch(0.62 0.010 160);
+    --line:         oklch(0.90 0.010 150);
+    --line-strong:  oklch(0.83 0.014 150);
+    --sage:         oklch(0.52 0.045 155);
+    --sage-deep:    oklch(0.38 0.045 155);
+    --sage-soft:    oklch(0.92 0.022 150);
+    --warn:         oklch(0.55 0.12 35);
+
+    --serif: "Source Serif 4", "Iowan Old Style", Georgia, serif;
+    --sans:  "Inter", system-ui, -apple-system, sans-serif;
+    --mono:  "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+    --r-sm: 6px;
+    --r-md: 10px;
+    --r-lg: 16px;
+    --r-xl: 24px;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--sans);
+    color: var(--ink);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  ::selection { background: var(--sage-soft); color: var(--ink); }
+
+  a { color: inherit; text-decoration: none; }
+  img, svg { display: block; max-width: 100%; }
+
+  /* ===== Type system ===== */
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    font-weight: 500;
+  }
+  .display {
+    font-family: var(--serif);
+    font-weight: 360;
+    letter-spacing: -0.018em;
+    line-height: 1.04;
+    color: var(--ink);
+  }
+  .display em {
+    font-style: italic;
+    font-weight: 360;
+    color: var(--sage-deep);
+  }
+  h1.display { font-size: 64px; line-height: 1.06; }
+  h2.display { font-size: 48px; }
+  h3.display { font-size: 28px; }
+  .lede {
+    font-family: var(--sans);
+    font-size: 18px;
+    line-height: 1.55;
+    color: var(--ink-2);
+    max-width: 38em;
+  }
+
+  /* ===== Layout ===== */
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 40px; }
+
+  /* ===== Disclaimer strip ===== */
+  .disclaimer {
+    background: var(--ink);
+    color: oklch(0.92 0.008 150);
+    font-size: 12.5px;
+    padding: 9px 0;
+    text-align: center;
+    letter-spacing: 0.005em;
+  }
+  .disclaimer .dot {
+    display: inline-block;
+    width: 5px; height: 5px; border-radius: 999px;
+    background: var(--sage);
+    margin-right: 10px; vertical-align: 2px;
+  }
+
+  /* ===== Nav ===== */
+  nav.top {
+    position: sticky; top: 0; z-index: 30;
+    background: color-mix(in oklab, var(--bg) 92%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-row {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 68px;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .brand-mark {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: var(--sage);
+    display: grid; place-items: center;
+    color: #fff;
+  }
+  .nav-links {
+    display: flex; gap: 36px;
+    font-size: 14px; color: var(--ink-2);
+  }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-cta { display: flex; align-items: center; gap: 8px; }
+
+  /* ===== Buttons ===== */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    height: 44px; padding: 0 20px;
+    border-radius: var(--r-md);
+    font-family: var(--sans);
+    font-size: 14px; font-weight: 500;
+    letter-spacing: 0.005em;
+    cursor: pointer; user-select: none;
+    transition: background .15s ease, color .15s ease, border-color .15s ease, transform .15s ease;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+  .btn-primary {
+    background: var(--ink); color: var(--bg);
+  }
+  .btn-primary:hover { background: oklch(0.16 0.015 160); }
+  .btn-sage {
+    background: var(--sage); color: #fff;
+  }
+  .btn-sage:hover { background: var(--sage-deep); }
+  .btn-ghost {
+    background: transparent; color: var(--ink);
+    border-color: var(--line-strong);
+  }
+  .btn-ghost:hover { background: var(--bg-tint); }
+  .btn-text {
+    background: transparent; color: var(--ink); height: auto; padding: 0;
+  }
+  .btn-text:hover { color: var(--sage-deep); }
+  .btn-sm { height: 36px; padding: 0 14px; font-size: 13px; }
+
+  /* ===== Hero ===== */
+  .hero {
+    padding: 64px 0 96px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 72px;
+    align-items: center;
+  }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 6px 12px 6px 8px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--bg);
+    margin-bottom: 28px;
+  }
+  .hero-eyebrow .pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--sage-soft);
+    color: var(--sage-deep);
+    font-family: var(--mono);
+    font-size: 10.5px; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 999px;
+  }
+  .hero-eyebrow .pill .live {
+    width: 6px; height: 6px; border-radius: 999px; background: var(--sage);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--sage) 25%, transparent);
+  }
+  .hero-eyebrow .label {
+    font-size: 12.5px; color: var(--ink-2);
+  }
+  .hero h1 {
+    margin: 0;
+    padding-bottom: 6px;
+  }
+  .hero .lede { margin-top: 32px; }
+  .hero-cta {
+    margin-top: 36px;
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  }
+  .hero-meta {
+    margin-top: 36px;
+    display: flex; gap: 32px; flex-wrap: wrap;
+    padding-top: 28px;
+    border-top: 1px solid var(--line);
+  }
+  .hero-meta .stat .num {
+    font-family: var(--serif);
+    font-size: 28px; font-weight: 400;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .hero-meta .stat .lbl {
+    font-size: 12px; color: var(--ink-mute); margin-top: 2px;
+  }
+
+  /* Hero collage */
+  .hero-art {
+    position: relative;
+    aspect-ratio: 1 / 1.1;
+    min-height: 620px;
+  }
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(40px);
+    opacity: .55;
+    z-index: 0;
+  }
+  .blob-a {
+    width: 460px; height: 460px;
+    background: var(--sage-soft);
+    top: -60px; right: -80px;
+  }
+  .blob-b {
+    width: 320px; height: 320px;
+    background: oklch(0.92 0.024 80);
+    bottom: 20px; left: -60px;
+  }
+  .photo {
+    position: absolute;
+    border-radius: var(--r-lg);
+    background: var(--bg-tint);
+    border: 1px solid var(--line);
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(20,30,25,.04), 0 24px 48px -24px rgba(20,30,25,.18);
+  }
+  .photo .ph-inner {
+    position: absolute; inset: 0;
+    background-image: repeating-linear-gradient(
+      135deg,
+      var(--bg-deep) 0 1px,
+      transparent 1px 14px
+    ), linear-gradient(180deg, var(--sage-soft), var(--bg-tint));
+    display: grid; place-items: center;
+  }
+  .photo img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: filter .35s ease;
+  }
+  /* Photo treatments — toggled on body */
+  body.photo-duotone .photo img,
+  body.photo-duotone .moment img,
+  body.photo-duotone .testimonial-card img {
+    filter: grayscale(1) sepia(.35) hue-rotate(60deg) saturate(.65) brightness(.95) contrast(1.02);
+  }
+  body.photo-soft .photo img,
+  body.photo-soft .moment img,
+  body.photo-soft .testimonial-card img {
+    filter: saturate(.78) brightness(1.04) contrast(.95);
+  }
+  body.photo-bw .photo img,
+  body.photo-bw .moment img,
+  body.photo-bw .testimonial-card img {
+    filter: grayscale(1) contrast(1.02) brightness(1.01);
+  }
+  .photo .ph-tag {
+    font-family: var(--mono); font-size: 10.5px;
+    color: var(--ink-mute);
+    letter-spacing: 0.06em;
+    background: color-mix(in oklab, var(--bg) 75%, transparent);
+    border: 1px solid var(--line);
+    padding: 4px 8px; border-radius: 999px;
+    backdrop-filter: blur(4px);
+    position: absolute; bottom: 12px; left: 12px;
+    z-index: 2;
+  }
+  body.photos-off .photo img { display: none; }
+  body.photos-off .moment img,
+  body.photos-off .testimonial-card .avatar img { display: none; }
+  body.photos-off .photo .ph-inner-fallback,
+  body.photos-off .moment .ph-inner-fallback,
+  body.photos-off .testimonial-card .avatar .ph-inner-fallback { display: grid; }
+  .ph-inner-fallback { display: none; position: absolute; inset: 0;
+    background-image: repeating-linear-gradient(135deg,var(--bg-deep) 0 1px,transparent 1px 14px),
+      linear-gradient(180deg, var(--sage-soft), var(--bg-tint));
+    place-items: center;
+  }
+  body.blobs-off .blob { display: none; }
+  .photo-1 { width: 70%; aspect-ratio: 4/5; top: 0; right: 0; z-index: 2; }
+  .photo-2 { width: 56%; aspect-ratio: 1/1; bottom: 0; left: 0; z-index: 3; }
+  .photo-3 {
+    width: 36%; aspect-ratio: 1/1; bottom: 16%; right: 4%;
+    z-index: 4; border-radius: 50%;
+  }
+
+  /* Floating chip on art */
+  .chip-card {
+    position: absolute;
+    z-index: 5;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    padding: 12px 14px;
+    box-shadow: 0 12px 28px -16px rgba(20,30,25,.22);
+    display: flex; align-items: center; gap: 10px;
+    min-width: 220px;
+  }
+  .chip-card .av {
+    width: 32px; height: 32px; border-radius: 999px;
+    background: var(--sage); color: #fff;
+    display: grid; place-items: center;
+    font-size: 13px; font-weight: 600;
+  }
+  .chip-card .who { font-size: 12px; color: var(--ink-mute); }
+  .chip-card .msg { font-size: 13px; color: var(--ink); }
+  .chip-1 { top: 38%; left: -20px; }
+  .chip-2 { bottom: 4%; right: -20px; }
+
+  /* ===== Trust strip ===== */
+  .trust {
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-tint);
+  }
+  .trust-row {
+    display: grid; grid-template-columns: auto repeat(5, 1fr);
+    align-items: center;
+    gap: 32px;
+    padding: 22px 0;
+    color: var(--ink-mute);
+  }
+  .trust-row .lbl {
+    font-family: var(--mono);
+    font-size: 11px; letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .trust-row .item {
+    font-family: var(--serif);
+    font-size: 17px;
+    font-weight: 400;
+    color: var(--ink-2);
+    letter-spacing: -0.005em;
+    opacity: .85;
+  }
+
+  /* ===== Section frame ===== */
+  section.bay { padding: 120px 0; }
+  .section-head {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 64px; margin-bottom: 64px;
+    align-items: end;
+  }
+  .section-head .left .eyebrow { display: block; margin-bottom: 16px; }
+  .section-head .left h2 { margin: 0; max-width: 14ch; }
+  .section-head .right { color: var(--ink-2); font-size: 16px; line-height: 1.6; }
+
+  /* ===== How it works ===== */
+  .steps {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--line);
+    border-left: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    background: var(--bg);
+  }
+  .step {
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 36px 32px 40px;
+    background: var(--bg);
+    display: flex; flex-direction: column; gap: 18px;
+    min-height: 280px;
+  }
+  .step .num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.16em;
+  }
+  .step .ic {
+    width: 44px; height: 44px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-sm);
+    display: grid; place-items: center;
+    background: var(--bg);
+    color: var(--sage-deep);
+  }
+  .step h3 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 22px;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  .step p {
+    margin: 0; color: var(--ink-2); font-size: 14.5px; line-height: 1.6;
+    max-width: 32ch;
+  }
+
+  /* ===== Feature triad ===== */
+  .features {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+  }
+  .feature {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    padding: 28px;
+    display: flex; flex-direction: column; gap: 14px;
+    transition: border-color .2s ease, transform .2s ease;
+  }
+  .feature:hover { border-color: var(--line-strong); }
+  .feature .ic {
+    width: 36px; height: 36px;
+    color: var(--sage-deep);
+  }
+  .feature h3 {
+    font-family: var(--serif);
+    font-size: 22px; font-weight: 400;
+    margin: 0; letter-spacing: -0.01em;
+  }
+  .feature p { margin: 0; color: var(--ink-2); font-size: 14.5px; line-height: 1.6; }
+  .feature .meta {
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .badge-soon {
+    background: var(--bg-tint);
+    border: 1px solid var(--line);
+    color: var(--ink-2);
+    font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 999px;
+  }
+
+  /* ===== Product preview ===== */
+  .preview-wrap { background: var(--bg-tint); }
+  .preview-grid {
+    display: grid; grid-template-columns: 1.15fr 1fr; gap: 28px;
+    align-items: stretch;
+  }
+  .ui {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(20,30,25,.04), 0 30px 60px -32px rgba(20,30,25,.18);
+  }
+  .ui-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg);
+  }
+  .ui-bar .lbl {
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink-mute);
+  }
+  .ui-bar .dots { display: flex; gap: 6px; }
+  .ui-bar .dots i { width: 9px; height: 9px; border-radius: 999px; background: var(--bg-deep); display: block; }
+
+  /* Chat ui */
+  .chat-ui .chat-body { padding: 24px; display: flex; flex-direction: column; gap: 14px; min-height: 380px; }
+  .bubble {
+    max-width: 78%;
+    padding: 12px 16px;
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .bubble.user {
+    align-self: flex-end;
+    background: var(--ink);
+    color: var(--bg);
+    border-bottom-right-radius: 4px;
+  }
+  .bubble.bot {
+    align-self: flex-start;
+    background: var(--sage-soft);
+    color: var(--ink);
+    border-bottom-left-radius: 4px;
+  }
+  .bubble.bot .who {
+    font-family: var(--mono); font-size: 10.5px;
+    color: var(--sage-deep); letter-spacing: 0.1em; text-transform: uppercase;
+    margin-bottom: 6px; display: block;
+  }
+  .typing { display: inline-flex; gap: 4px; padding: 12px 16px; align-self: flex-start; background: var(--sage-soft); border-radius: 14px; border-bottom-left-radius: 4px; }
+  .typing i { width: 6px; height: 6px; border-radius: 999px; background: var(--sage-deep); opacity: .6; animation: bdot 1.2s ease-in-out infinite; }
+  .typing i:nth-child(2) { animation-delay: .15s; }
+  .typing i:nth-child(3) { animation-delay: .3s; }
+  @keyframes bdot { 0%,80%,100% { transform: translateY(0); opacity: .35;} 40% { transform: translateY(-4px); opacity: 1;} }
+
+  .chat-input {
+    border-top: 1px solid var(--line);
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+    background: var(--bg);
+  }
+  .chat-input .field {
+    flex: 1;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 10px 16px;
+    font-size: 13.5px;
+    color: var(--ink-mute);
+    background: var(--bg);
+  }
+
+  /* Mood ui */
+  .mood-ui .mood-body { padding: 24px; }
+  .mood-ui h4 {
+    font-family: var(--serif); font-size: 22px; font-weight: 400;
+    margin: 0 0 4px; letter-spacing: -0.01em;
+  }
+  .mood-ui .sub { color: var(--ink-mute); font-size: 13px; margin-bottom: 22px; }
+  .mood-faces {
+    display: grid; grid-template-columns: repeat(5,1fr); gap: 8px;
+    margin-bottom: 24px;
+  }
+  .face {
+    aspect-ratio: 1/1;
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    display: grid; place-items: center;
+    color: var(--ink-mute);
+    background: var(--bg);
+    transition: all .15s ease;
+  }
+  .face.active { border-color: var(--sage); background: var(--sage-soft); color: var(--sage-deep); }
+  .face .lbl { font-size: 10px; font-family: var(--mono); margin-top: 4px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .face-stack { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+
+  .mood-stats {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    margin-bottom: 22px;
+  }
+  .mood-stat {
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    padding: 12px;
+  }
+  .mood-stat .v {
+    font-family: var(--serif); font-size: 22px; font-weight: 400;
+    color: var(--ink); letter-spacing: -0.01em;
+  }
+  .mood-stat .l {
+    font-family: var(--mono); font-size: 10px; color: var(--ink-mute);
+    letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px;
+  }
+
+  .heatmap {
+    display: grid; grid-template-columns: repeat(14, 1fr); gap: 4px;
+    margin-top: 8px;
+  }
+  .heatmap i {
+    aspect-ratio: 1/1;
+    border-radius: 4px;
+    background: var(--bg-tint);
+    border: 1px solid var(--line);
+    display: block;
+  }
+  .heatmap i.l1 { background: color-mix(in oklab, var(--sage) 25%, var(--bg)); border-color: transparent; }
+  .heatmap i.l2 { background: color-mix(in oklab, var(--sage) 50%, var(--bg)); border-color: transparent; }
+  .heatmap i.l3 { background: color-mix(in oklab, var(--sage) 75%, var(--bg)); border-color: transparent; }
+  .heatmap i.l4 { background: var(--sage); border-color: transparent; }
+
+  /* ===== Bilingual ===== */
+  .bilingual {
+    background: var(--ink); color: var(--bg);
+    border-radius: var(--r-xl);
+    padding: 64px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 64px;
+    align-items: center;
+    overflow: hidden; position: relative;
+  }
+  .bilingual::before {
+    content: ""; position: absolute; inset: auto -120px -160px auto;
+    width: 460px; height: 460px; border-radius: 50%;
+    background: color-mix(in oklab, var(--sage) 60%, transparent);
+    filter: blur(60px); opacity: .35;
+  }
+  .bilingual .eyebrow { color: oklch(0.78 0.018 150); }
+  .bilingual h2 { color: var(--bg); margin: 16px 0 0; font-weight: 320; }
+  .bilingual h2 em { color: oklch(0.78 0.04 150); }
+  .bilingual p { color: oklch(0.85 0.012 150); margin-top: 20px; max-width: 36ch; }
+  .lang-card {
+    background: oklch(0.20 0.014 160);
+    border: 1px solid oklch(0.30 0.014 160);
+    border-radius: var(--r-lg);
+    padding: 28px;
+    position: relative; z-index: 1;
+  }
+  .lang-card .quote {
+    font-family: var(--serif); font-size: 22px; font-weight: 360;
+    color: var(--bg); line-height: 1.4; letter-spacing: -0.01em;
+  }
+  .lang-card .am .quote {
+    font-family: "Noto Sans Ethiopic", "Source Serif 4", serif;
+    font-size: 21px;
+  }
+  .lang-card .meta {
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 16px;
+    font-family: var(--mono); font-size: 11px;
+    color: oklch(0.72 0.018 150); letter-spacing: 0.1em; text-transform: uppercase;
+  }
+  .lang-card + .lang-card { margin-top: 14px; }
+  .lang-flag {
+    width: 22px; height: 22px; border-radius: 999px;
+    border: 1px solid oklch(0.34 0.014 160);
+    display: grid; place-items: center;
+    font-family: var(--mono); font-size: 9px; color: oklch(0.78 0.014 150);
+    background: oklch(0.16 0.014 160);
+  }
+
+  /* ===== Crisis / safety ===== */
+  .safety {
+    border-top: 1px solid var(--line);
+  }
+  .safety-grid {
+    display: grid; grid-template-columns: 1fr 1.4fr; gap: 64px;
+    align-items: start;
+  }
+  .safety h2 { margin: 0; }
+  .safety p.lede { margin-top: 18px; }
+  .resources {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+  }
+  .resource {
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    padding: 22px;
+    background: var(--bg);
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .resource .region {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--ink-mute); letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  .resource .name {
+    font-family: var(--serif); font-size: 18px; font-weight: 400;
+    color: var(--ink); letter-spacing: -0.005em;
+  }
+  .resource .num {
+    font-family: var(--serif); font-size: 28px; font-weight: 400;
+    color: var(--sage-deep); letter-spacing: -0.01em;
+  }
+  .resource .desc { font-size: 13px; color: var(--ink-mute); }
+
+  /* ===== CTA ===== */
+  .cta-wrap {
+    background: var(--bg-tint);
+    border-top: 1px solid var(--line);
+  }
+  .cta-row {
+    padding: 96px 0;
+    text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 20px;
+  }
+  .cta-row h2 { max-width: 18ch; }
+  .cta-row .lede { text-align: center; margin: 0 auto; }
+  .cta-row .actions { margin-top: 12px; display: flex; gap: 12px; }
+
+  /* ===== Footer ===== */
+  footer.foot {
+    border-top: 1px solid var(--line);
+    background: var(--bg);
+  }
+  .foot-grid {
+    display: grid; grid-template-columns: 1.4fr repeat(3, 1fr);
+    gap: 64px;
+    padding: 64px 0 40px;
+  }
+  .foot h4 {
+    font-family: var(--mono); font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.14em;
+    color: var(--ink-mute); margin: 0 0 16px;
+  }
+  .foot ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+  .foot a { color: var(--ink-2); font-size: 14px; }
+  .foot a:hover { color: var(--ink); }
+  .foot .desc { color: var(--ink-mute); font-size: 13.5px; max-width: 32ch; margin-top: 14px; line-height: 1.6; }
+  .foot-base {
+    border-top: 1px solid var(--line);
+    padding: 22px 0;
+    display: flex; align-items: center; justify-content: space-between;
+    color: var(--ink-mute); font-size: 12.5px;
+  }
+  .foot-base .legal { display: flex; gap: 24px; }
+
+  /* ===== Annotation note (designer marginalia) ===== */
+  .design-note {
+    position: relative;
+    border: 1px dashed var(--line-strong);
+    background: var(--bg);
+    border-radius: var(--r-md);
+    padding: 14px 18px 14px 44px;
+    margin: 0 0 24px;
+    color: var(--ink-2);
+    font-size: 13px;
+    line-height: 1.55;
+    max-width: 920px;
+  }
+  .design-note::before {
+    content: "i";
+    position: absolute; left: 14px; top: 14px;
+    width: 20px; height: 20px; border-radius: 999px;
+    background: var(--sage-soft); color: var(--sage-deep);
+    display: grid; place-items: center;
+    font-family: var(--serif); font-style: italic; font-size: 13px;
+  }
+  .design-note b { color: var(--ink); font-weight: 600; }
+
+  /* utility */
+  .row { display: flex; align-items: center; }
+  .gap-2 { gap: 8px; }
+  .gap-3 { gap: 12px; }
+  .gap-4 { gap: 16px; }
+
+  /* ===== Moments gallery ===== */
+  .moments-wrap { padding: 0 0 120px; }
+  .moments-head {
+    display: flex; align-items: end; justify-content: space-between;
+    gap: 32px; margin-bottom: 40px;
+  }
+  .moments-head .left { max-width: 56ch; }
+  .moments-head h2 { margin: 16px 0 0; }
+  .moments-head .right { color: var(--ink-2); font-size: 15px; max-width: 36ch; }
+  .moments {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    grid-template-rows: 220px 220px;
+    gap: 16px;
+  }
+  .moment {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--r-lg);
+    background: var(--bg-tint);
+    border: 1px solid var(--line);
+  }
+  .moment img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform .6s ease, filter .35s ease;
+  }
+  .moment:hover img { transform: scale(1.04); }
+  .moment .cap {
+    position: absolute; left: 14px; bottom: 14px;
+    font-family: var(--mono); font-size: 10.5px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: #fff;
+    background: rgba(20,30,25,.55);
+    backdrop-filter: blur(6px);
+    padding: 5px 9px; border-radius: 999px;
+  }
+  .m-1 { grid-column: 1 / 2; grid-row: 1 / 3; }
+  .m-2 { grid-column: 2 / 3; grid-row: 1 / 2; }
+  .m-3 { grid-column: 3 / 4; grid-row: 1 / 2; }
+  .m-4 { grid-column: 2 / 3; grid-row: 2 / 3; }
+  .m-5 { grid-column: 3 / 4; grid-row: 2 / 3; }
+
+  /* ===== Testimonials ===== */
+  .testimonials-wrap {
+    background: var(--bg-tint);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .testimonials {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 56px;
+  }
+  .testimonial-card {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    padding: 28px;
+    display: flex; flex-direction: column; gap: 20px;
+    min-height: 280px;
+  }
+  .testimonial-card .stars {
+    display: flex; gap: 2px; color: var(--sage);
+  }
+  .testimonial-card blockquote {
+    margin: 0;
+    font-family: var(--serif);
+    font-size: 19px;
+    line-height: 1.5;
+    font-weight: 360;
+    letter-spacing: -0.005em;
+    color: var(--ink);
+    flex: 1;
+  }
+  .testimonial-card blockquote em { font-style: italic; }
+  .testimonial-card .who-row {
+    display: flex; align-items: center; gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+  .testimonial-card .avatar {
+    position: relative;
+    width: 40px; height: 40px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: var(--sage-soft);
+    flex: none;
+  }
+  .testimonial-card .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .testimonial-card .who-row .meta { display: flex; flex-direction: column; gap: 2px; }
+  .testimonial-card .who-row .name { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+  .testimonial-card .who-row .role { font-size: 12px; color: var(--ink-mute); }
+
+  /* ===== Tweaks panel hooks ===== */
+  body.radius-sharp { --r-md: 4px; --r-lg: 6px; --r-xl: 10px; }
+  body.radius-soft  { --r-md: 14px; --r-lg: 22px; --r-xl: 32px; }
+  body.serif-light .display { font-weight: 320; }
+  body.serif-bold  .display { font-weight: 460; }
+
+  /* Palette variants */
+  body.palette-clay {
+    --sage: oklch(0.62 0.10 45);
+    --sage-deep: oklch(0.45 0.10 40);
+    --sage-soft: oklch(0.93 0.04 60);
+  }
+  body.palette-dawn {
+    --sage: oklch(0.66 0.09 280);
+    --sage-deep: oklch(0.48 0.10 280);
+    --sage-soft: oklch(0.94 0.03 290);
+  }
+  body.palette-ink {
+    --sage: oklch(0.32 0.02 260);
+    --sage-deep: oklch(0.22 0.02 260);
+    --sage-soft: oklch(0.92 0.005 260);
+  }
+
+  /* Hero composition variants */
+  body.hero-single .photo-2,
+  body.hero-single .photo-3,
+  body.hero-single .chip-2 { display: none; }
+  body.hero-single .photo-1 { width: 100%; aspect-ratio: 4/5; top: 0; right: 0; }
+  body.hero-split .hero-grid { grid-template-columns: 1fr 1fr; }
+
+  /* Stacked: two large photos vertically stacked, no detail circle */
+  body.hero-stacked .hero-art { aspect-ratio: 1 / 1.25; }
+  body.hero-stacked .photo-3 { display: none; }
+  body.hero-stacked .photo-1 {
+    width: 100%; aspect-ratio: 4/3; top: 0; right: 0; left: 0;
+  }
+  body.hero-stacked .photo-2 {
+    width: 70%; aspect-ratio: 4/3; bottom: 0; left: 0;
+    z-index: 4;
+  }
+  body.hero-stacked .chip-1 { top: auto; bottom: 38%; left: -24px; }
+  body.hero-stacked .chip-2 { bottom: -10px; right: -20px; }
+
+  /* Mosaic: tight 2x2 grid feel, all rectangles, larger surface */
+  body.hero-mosaic .hero-art { aspect-ratio: 1 / 0.95; }
+  body.hero-mosaic .photo-1 {
+    width: 60%; aspect-ratio: 1/1; top: 0; right: 0;
+    border-radius: var(--r-lg);
+  }
+  body.hero-mosaic .photo-2 {
+    width: 60%; aspect-ratio: 1/1; bottom: 0; left: 0;
+    border-radius: var(--r-lg);
+  }
+  body.hero-mosaic .photo-3 {
+    width: 38%; aspect-ratio: 1/1; bottom: 0; right: 0;
+    border-radius: var(--r-lg);
+    top: auto;
+  }
+  body.hero-mosaic .chip-1 { top: 8%; left: -28px; }
+  body.hero-mosaic .chip-2 { bottom: 50%; right: -28px; }
+
+  @media (max-width: 900px) {
+    .moments { grid-template-columns: 1fr 1fr; grid-template-rows: 180px 180px 180px; }
+    .m-1 { grid-column: 1 / 3; grid-row: 1 / 2; }
+    .m-2 { grid-column: 1 / 2; grid-row: 2 / 3; }
+    .m-3 { grid-column: 2 / 3; grid-row: 2 / 3; }
+    .m-4 { grid-column: 1 / 2; grid-row: 3 / 4; }
+    .m-5 { grid-column: 2 / 3; grid-row: 3 / 4; }
+    .testimonials { grid-template-columns: 1fr; }
+  }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<!-- ============ DISCLAIMER STRIP ============ -->
+<div class="disclaimer">
+  <span class="dot"></span>
+  MindEase is not a substitute for professional therapy. If you're in crisis, please contact emergency services.
+</div>
+
+<!-- ============ NAV ============ -->
+<nav class="top">
+  <div class="wrap nav-row">
+    <a href="#" class="brand">
+      <span class="brand-mark" aria-hidden>
+        <!-- Leaf / inhale mark -->
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c0-7 4-12 9-13-1 9-5 13-9 13Z"/><path d="M12 21c0-5-3-9-8-10 1 7 4 10 8 10Z"/></svg>
+      </span>
+      MindEase
+    </a>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#features">Features</a>
+      <a href="#preview">Product</a>
+      <a href="#safety">Safety</a>
+      <a href="#">Resources</a>
+    </div>
+    <div class="nav-cta">
+      <a class="btn btn-text btn-sm" href="#">Sign in</a>
+      <a class="btn btn-primary btn-sm" href="#">Get started <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="wrap">
+
+    <div class="design-note">
+      <b>Designer's note —</b> Step 1 of the redesign: <b>public landing page</b>. Sage-grounded healthcare palette, editorial serif headlines (Source Serif 4), Inter for UI, custom 1.5px line icons replacing emoji. Photography placeholders show where to drop real human-moment imagery. Once approved, we'll move to auth → dashboard → chat → mood → global nav.
+    </div>
+
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <div class="hero-eyebrow">
+          <span class="pill"><span class="live"></span> Available 24/7</span>
+          <span class="label">Trained in CBT, mindfulness &amp; active listening</span>
+        </div>
+        <h1 class="display">
+          A quiet companion for the days<br />that feel <em>too loud.</em>
+        </h1>
+        <p class="lede">
+          MindEase is a private, judgment-free AI companion built on therapeutic
+          techniques. It listens, helps you find calm, and gently tracks how
+          you're feeling over time — in English or አማርኛ.
+        </p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#">
+            Start your first chat
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+          </a>
+          <a class="btn btn-ghost" href="#">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+            Watch a 60-sec tour
+          </a>
+        </div>
+        <div class="hero-meta">
+          <div class="stat">
+            <div class="num">End-to-end</div>
+            <div class="lbl">Encrypted conversations</div>
+          </div>
+          <div class="stat">
+            <div class="num">2 languages</div>
+            <div class="lbl">English &amp; Amharic</div>
+          </div>
+          <div class="stat">
+            <div class="num">Always free</div>
+            <div class="lbl">To start, no card required</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-art" aria-hidden>
+        <div class="blob blob-a"></div>
+        <div class="blob blob-b"></div>
+
+        <div class="photo photo-1">
+          <img src="https://images.unsplash.com/photo-1499209974431-9dddcece7f88?auto=format&fit=crop&w=900&q=70" alt="Morning light through curtains" />
+          <div class="ph-inner-fallback"><span class="ph-tag">PHOTO · morning light</span></div>
+        </div>
+        <div class="photo photo-2">
+          <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=800&q=70" alt="Hands holding warm cup" />
+          <div class="ph-inner-fallback"><span class="ph-tag">PHOTO · warm cup</span></div>
+        </div>
+        <div class="photo photo-3">
+          <img src="https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?auto=format&fit=crop&w=400&q=70" alt="Soft botanical detail" />
+          <div class="ph-inner-fallback"><span class="ph-tag">DETAIL</span></div>
+        </div>
+
+        <div class="chip-card chip-1">
+          <div class="av">M</div>
+          <div>
+            <div class="who">MindEase</div>
+            <div class="msg">That sounds heavy. Let's slow down.</div>
+          </div>
+        </div>
+        <div class="chip-card chip-2">
+          <div class="av" style="background:var(--bg-tint);color:var(--ink);border:1px solid var(--line)">A</div>
+          <div>
+            <div class="who">Mood logged · Today</div>
+            <div class="msg" style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:999px;background:var(--sage)"></span> Calm — 4-day streak</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ TRUST STRIP ============ -->
+<section class="trust">
+  <div class="wrap trust-row">
+    <span class="lbl">Built on</span>
+    <span class="item">Cognitive Behavioral Therapy</span>
+    <span class="item">Mindfulness</span>
+    <span class="item">Active Listening</span>
+    <span class="item">Motivational Interviewing</span>
+    <span class="item">Trauma-informed care</span>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="bay" id="how">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="left">
+        <span class="eyebrow">— How it works</span>
+        <h2 class="display">Three small steps. <em>No pressure.</em></h2>
+      </div>
+      <div class="right">
+        Most people open MindEase for the first time at 11pm, on a phone, after
+        a hard day. The flow is built for that — short, kind, and asks only what
+        helps.
+      </div>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="num">01 / CHECK IN</div>
+        <div class="ic">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 14s1 1.5 3 1.5 3-1.5 3-1.5"/><path d="M9 9h.01M15 9h.01"/></svg>
+        </div>
+        <h3>Notice how you feel</h3>
+        <p>One tap. Five faces. A short note if you want. We track the line, not the moment.</p>
+      </div>
+      <div class="step">
+        <div class="num">02 / TALK IT OUT</div>
+        <div class="ic">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 21l1.8-5.5A8 8 0 1 1 21 12z"/></svg>
+        </div>
+        <h3>Talk, in your own words</h3>
+        <p>Type or speak. MindEase listens, reflects back, and offers grounded techniques — never platitudes.</p>
+      </div>
+      <div class="step">
+        <div class="num">03 / SEE THE PATTERN</div>
+        <div class="ic">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 8-8"/><path d="M14 8h6v6"/></svg>
+        </div>
+        <h3>Watch the line settle</h3>
+        <p>Streaks, gentle nudges, and trends help you see what's working — without turning wellness into a scoreboard.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURES ============ -->
+<section class="bay" id="features" style="padding-top:0">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="left">
+        <span class="eyebrow">— What you get</span>
+        <h2 class="display">Built carefully, on purpose.</h2>
+      </div>
+      <div class="right">
+        We made the boring decisions first — encryption, tone, refusal patterns,
+        crisis routing — so the experience can feel quiet and human.
+      </div>
+    </div>
+
+    <div class="features">
+      <div class="feature">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 12.5a8 8 0 1 1-3.5-6.6"/>
+          <path d="M9 12s1.5 2 3 2 3-2 3-2"/>
+          <path d="M16 4l2 2 4-4"/>
+        </svg>
+        <h3>Empathetic support</h3>
+        <p>Companions trained in CBT, mindfulness, and active listening. Tone is the product — careful, never clinical-cold.</p>
+        <div class="meta">
+          <span>Therapeutic techniques</span>
+          <span>5 modes</span>
+        </div>
+      </div>
+      <div class="feature">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="10" width="16" height="11" rx="2"/>
+          <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+          <circle cx="12" cy="15.5" r="1.2"/>
+        </svg>
+        <h3>Private &amp; secure</h3>
+        <p>Conversations are encrypted in transit and at rest. We don't sell, share, or train public models on your data. Ever.</p>
+        <div class="meta">
+          <span>End-to-end encrypted</span>
+          <span>Your data, yours</span>
+        </div>
+      </div>
+      <div class="feature">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M3.5 12h17"/>
+          <path d="M12 3.5c2.5 3 2.5 14 0 17"/>
+          <path d="M12 3.5c-2.5 3-2.5 14 0 17"/>
+        </svg>
+        <h3>English &amp; <span style="font-family:'Noto Sans Ethiopic',var(--serif)">አማርኛ</span></h3>
+        <p>Speak in the language you think in. Cultural nuance, idiom, and culturally-grounded resources, not a literal translation.</p>
+        <div class="meta">
+          <span>Bilingual by design</span>
+          <span class="badge-soon">Coming soon</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MOMENTS GALLERY ============ -->
+<section class="bay moments-wrap" id="moments" style="padding-top:0">
+  <div class="wrap">
+    <div class="moments-head">
+      <div class="left">
+        <span class="eyebrow">— Moments</span>
+        <h2 class="display">For the small <em>in-between</em> hours.</h2>
+      </div>
+      <div class="right">
+        Late-night spirals. Quiet mornings. The pause before a hard conversation.
+        MindEase meets you in the moments most apps don't notice.
+      </div>
+    </div>
+    <div class="moments">
+      <div class="moment m-1">
+        <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=900&q=70" alt="Mountain stillness at dusk" />
+        <div class="ph-inner-fallback"></div>
+        <span class="cap">Stillness</span>
+      </div>
+      <div class="moment m-2">
+        <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=70" alt="Soft window light" />
+        <div class="ph-inner-fallback"></div>
+        <span class="cap">Morning light</span>
+      </div>
+      <div class="moment m-3">
+        <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=600&q=70" alt="Open path through forest" />
+        <div class="ph-inner-fallback"></div>
+        <span class="cap">Open air</span>
+      </div>
+      <div class="moment m-4">
+        <img src="https://images.unsplash.com/photo-1493957988430-a5f2e15f39a3?auto=format&fit=crop&w=600&q=70" alt="Hands writing in journal" />
+        <div class="ph-inner-fallback"></div>
+        <span class="cap">Reflection</span>
+      </div>
+      <div class="moment m-5">
+        <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=70" alt="Calm shore" />
+        <div class="ph-inner-fallback"></div>
+        <span class="cap">Calm</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PRODUCT PREVIEW ============ -->
+<section class="bay preview-wrap" id="preview">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="left">
+        <span class="eyebrow">— Inside the app</span>
+        <h2 class="display">Two surfaces. <em>One steady rhythm.</em></h2>
+      </div>
+      <div class="right">
+        A conversation when you need to be heard, and a quiet log of how the
+        days are going — so you can look back without scrolling through old
+        messages.
+      </div>
+    </div>
+
+    <div class="preview-grid">
+      <!-- Chat UI mock -->
+      <div class="ui chat-ui">
+        <div class="ui-bar">
+          <span class="lbl">Chat · MindEase</span>
+          <div class="dots"><i></i><i></i><i></i></div>
+        </div>
+        <div class="chat-body">
+          <div class="bubble bot">
+            <span class="who">MindEase</span>
+            How are you feeling today? No pressure to put it neatly.
+          </div>
+          <div class="bubble user">
+            Honestly? Just stretched thin. Couldn't sleep again.
+          </div>
+          <div class="bubble bot">
+            <span class="who">MindEase</span>
+            That sounds exhausting — physically and mentally. Want to try a
+            two-minute breathing exercise, or would you rather just keep talking?
+          </div>
+          <div class="typing"><i></i><i></i><i></i></div>
+        </div>
+        <div class="chat-input">
+          <div class="field">Message MindEase…</div>
+          <button class="btn btn-sage btn-sm" style="height:36px;width:36px;padding:0;border-radius:999px" aria-label="Send">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mood UI mock -->
+      <div class="ui mood-ui">
+        <div class="ui-bar">
+          <span class="lbl">Mood · This week</span>
+          <span class="lbl" style="color:var(--sage-deep)">4-day streak</span>
+        </div>
+        <div class="mood-body">
+          <h4>How are you feeling?</h4>
+          <div class="sub">Wednesday, April 22</div>
+          <div class="mood-faces">
+            <div class="face"><div class="face-stack">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 16s1.5-2 4-2 4 2 4 2"/><path d="M9 9h.01M15 9h.01"/></svg>
+              <span class="lbl">Low</span>
+            </div></div>
+            <div class="face"><div class="face-stack">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 15s1.5-1 4-1 4 1 4 1"/><path d="M9 9h.01M15 9h.01"/></svg>
+              <span class="lbl">Off</span>
+            </div></div>
+            <div class="face active"><div class="face-stack">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 14h8"/><path d="M9 9h.01M15 9h.01"/></svg>
+              <span class="lbl">Okay</span>
+            </div></div>
+            <div class="face"><div class="face-stack">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 1.5 4 1.5 4-1.5 4-1.5"/><path d="M9 9h.01M15 9h.01"/></svg>
+              <span class="lbl">Good</span>
+            </div></div>
+            <div class="face"><div class="face-stack">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M7.5 13s1.5 3 4.5 3 4.5-3 4.5-3"/><path d="M9 9h.01M15 9h.01"/></svg>
+              <span class="lbl">Great</span>
+            </div></div>
+          </div>
+
+          <div class="mood-stats">
+            <div class="mood-stat"><div class="v">4</div><div class="l">Day streak</div></div>
+            <div class="mood-stat"><div class="v">3.4</div><div class="l">Avg this week</div></div>
+            <div class="mood-stat"><div class="v">+0.6</div><div class="l">vs last week</div></div>
+          </div>
+
+          <div class="lbl" style="font-family:var(--mono);font-size:11px;color:var(--ink-mute);letter-spacing:.1em;text-transform:uppercase">Last 14 days</div>
+          <div class="heatmap">
+            <i class="l1"></i><i class="l2"></i><i></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l2"></i>
+            <i class="l3"></i><i class="l2"></i><i class="l3"></i><i class="l3"></i><i class="l4"></i><i class="l3"></i><i class="l4"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BILINGUAL ============ -->
+<section class="bay" style="padding-top:0">
+  <div class="wrap">
+    <div class="bilingual">
+      <div>
+        <span class="eyebrow">— Bilingual by design</span>
+        <h2 class="display">Speak the language <em>you think in.</em></h2>
+        <p>
+          Mental health doesn't translate cleanly. MindEase is built natively in
+          English and Amharic — with culturally-grounded resources, idiom, and
+          warmth. Switch any time.
+        </p>
+        <div class="hero-cta" style="margin-top:24px">
+          <a class="btn btn-sage" href="#">
+            Try it in <span style="font-family:'Noto Sans Ethiopic',var(--sans);margin-left:4px">አማርኛ</span>
+          </a>
+        </div>
+      </div>
+      <div>
+        <div class="lang-card">
+          <div class="quote">"It's okay to not have words for it yet. Stay with the feeling — I'm here."</div>
+          <div class="meta"><span class="lang-flag">EN</span> English · companion reply</div>
+        </div>
+        <div class="lang-card am">
+          <div class="quote">"ለስሜትህ ቃላት ማግኘት ባይቻልም ችግር የለውም። ከእኔ ጋር ቆይ።"</div>
+          <div class="meta"><span class="lang-flag">አማ</span> Amharic · companion reply</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TESTIMONIALS ============ -->
+<section class="bay testimonials-wrap" id="testimonials">
+  <div class="wrap">
+    <div class="section-head" style="margin-bottom:0">
+      <div class="left">
+        <span class="eyebrow">— In their words</span>
+        <h2 class="display">A companion that <em>doesn't flinch.</em></h2>
+      </div>
+      <div class="right">
+        Early MindEase users from Addis Ababa, London, and Toronto on what's
+        changed in the weeks since they started chatting. Names changed; words theirs.
+      </div>
+    </div>
+    <div class="testimonials">
+      <div class="testimonial-card">
+        <div class="stars" aria-label="5 out of 5">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7 7 .6-5.3 4.7L18 22l-6-3.7L6 22l1.3-7.7L2 9.6 9 9z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7 7 .6-5.3 4.7L18 22l-6-3.7L6 22l1.3-7.7L2 9.6 9 9z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7 7 .6-5.3 4.7L18 22l-6-3.7L6 22l1.3-7.7L2 9.6 9 9z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7 7 .6-5.3 4.7L18 22l-6-3.7L6 22l1.3-7.7L2 9.6 9 9z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7 7 .6-5.3 4.7L18 22l-6-3.7L6 22l1.3-7.7L2 9.6 9 9z"/></svg>
+        </div>
+        <blockquote>
+          “I used it at 3am when I couldn't call anyone. It didn't try to fix me — it just <em>stayed.</em> That was enough.”
+        </blockquote>
+        <div class="who-row">
+          <div class="avatar">
+            <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=120&q=70" alt="" />
+            <div class="ph-inner-fallback"></div>
+          </div>
+          <div class="meta">
+            <span class="name">Sara M.</span>
+            <span class="role">Graduate student · Toronto</span>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="stars" aria-label="5 out of 5">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7 7 .6-5.3 4.7L18 22l-6-3.7L6 22l1.3-7.7L2 9.6 9 9z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7 7 .6-5.3 4.7L18 22l-6-3.7L6 22l1.3-7.7L2 9.6 9 9z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7 7 .6-5.3 4.7L18 22l-6-3.7L6 22l1.3-7.7L2 9.6 9 9z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7 7 .6-5.3 4.7L18 22l-6-3.7L6 22l1.3-7.7L2 9.6 9 9z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7 7 .6-5.3 4.7L18 22l-6-3.7L6 22l1.3-7.7L2 9.6 9 9z"/></svg>
+        </div>
+        <blockquote>
+          “Being able to type in <em>Amharic</em> changed everything. I didn't have to translate my own grief into someone else's words.”
+        </blockquote>
+        <div class="who-row">
+          <div class="avatar">
+            <img src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=120&q=70" alt="" />
+            <div class="ph-inner-fallback"></div>
+          </div>
+          <div class="meta">
+            <span class="name">Daniel T.</span>
+            <span class="role">Teacher · Addis Ababa</span>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="stars" aria-label="5 out of 5">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7 7 .6-5.3 4.7L18 22l-6-3.7L6 22l1.3-7.7L2 9.6 9 9z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7 7 .6-5.3 4.7L18 22l-6-3.7L6 22l1.3-7.7L2 9.6 9 9z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7 7 .6-5.3 4.7L18 22l-6-3.7L6 22l1.3-7.7L2 9.6 9 9z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7 7 .6-5.3 4.7L18 22l-6-3.7L6 22l1.3-7.7L2 9.6 9 9z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7 7 .6-5.3 4.7L18 22l-6-3.7L6 22l1.3-7.7L2 9.6 9 9z"/></svg>
+        </div>
+        <blockquote>
+          “The mood streaks made me notice patterns my therapist later confirmed. It's not a replacement — it's a <em>better waiting room.</em>”
+        </blockquote>
+        <div class="who-row">
+          <div class="avatar">
+            <img src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=120&q=70" alt="" />
+            <div class="ph-inner-fallback"></div>
+          </div>
+          <div class="meta">
+            <span class="name">Priya R.</span>
+            <span class="role">Designer · London</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SAFETY ============ -->
+<section class="bay safety" id="safety">
+  <div class="wrap">
+    <div class="safety-grid">
+      <div>
+        <span class="eyebrow">— Safety first</span>
+        <h2 class="display" style="margin-top:16px">If it's heavier than us, we route you out — <em>fast.</em></h2>
+        <p class="lede">
+          MindEase is an AI companion, not a substitute for professional therapy
+          or emergency services. We surface real human help the moment a
+          conversation needs it.
+        </p>
+        <a class="btn btn-text" href="#" style="margin-top:18px;color:var(--sage-deep)">
+          Read our safety model
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+        </a>
+      </div>
+      <div class="resources">
+        <div class="resource">
+          <span class="region">Ethiopia</span>
+          <div class="name">Mental Health Helpline</div>
+          <div class="num">9595</div>
+          <div class="desc">Confidential support, 24/7. Amharic and English.</div>
+        </div>
+        <div class="resource">
+          <span class="region">International</span>
+          <div class="name">Find a hotline near you</div>
+          <div class="num">findahelpline.com</div>
+          <div class="desc">Verified hotlines in 130+ countries, by region.</div>
+        </div>
+        <div class="resource">
+          <span class="region">Emergency</span>
+          <div class="name">If life is in danger</div>
+          <div class="num">Call local services</div>
+          <div class="desc">911 (US), 999 (UK), 911 (Ethiopia), or your local equivalent.</div>
+        </div>
+        <div class="resource">
+          <span class="region">In-app</span>
+          <div class="name">Crisis banner</div>
+          <div class="num">Always one tap</div>
+          <div class="desc">Visible at the top of every conversation. Never buried.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="cta-wrap">
+  <div class="wrap cta-row">
+    <span class="eyebrow">— A small step</span>
+    <h2 class="display">Some days the best thing you can do <em>is talk to someone.</em></h2>
+    <p class="lede">Free to start, no card required. Your conversations stay yours.</p>
+    <div class="actions">
+      <a class="btn btn-primary" href="#">
+        Create your account
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+      </a>
+      <a class="btn btn-ghost" href="#">Sign in</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <a href="#" class="brand">
+          <span class="brand-mark" aria-hidden>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c0-7 4-12 9-13-1 9-5 13-9 13Z"/><path d="M12 21c0-5-3-9-8-10 1 7 4 10 8 10Z"/></svg>
+          </span>
+          MindEase
+        </a>
+        <p class="desc">A private, judgment-free AI companion for mental wellness. Built carefully, on purpose. Not a substitute for professional therapy.</p>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#">Chat</a></li>
+          <li><a href="#">Mood tracker</a></li>
+          <li><a href="#">Resources</a></li>
+          <li><a href="#">Assessments</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Research</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Trust</h4>
+        <ul>
+          <li><a href="#">Privacy policy</a></li>
+          <li><a href="#">Terms of service</a></li>
+          <li><a href="#">Safety model</a></li>
+          <li><a href="#">Crisis resources</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="wrap foot-base" style="padding-left:0;padding-right:0">
+      <span>© 2026 MindEase. All rights reserved.</span>
+      <div class="legal">
+        <span>EN · <span style="font-family:'Noto Sans Ethiopic',var(--sans)">አማ</span></span>
+        <span>v0.4 — landing redesign</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ============ TWEAKS ============ -->
+<div id="tweaks-root"></div>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel">
+  const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+    "photoTreatment": "color",
+    "palette": "sage",
+    "heroComp": "collage",
+    "serifWeight": "regular",
+    "radius": "regular",
+    "showBlobs": true,
+    "showPhotos": true,
+    "showTestimonials": true,
+    "showMoments": true
+  }/*EDITMODE-END*/;
+
+  function App() {
+    const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+    React.useEffect(() => {
+      const b = document.body;
+      // Photo treatment
+      b.classList.remove('photo-duotone','photo-soft','photo-bw','photos-off');
+      if (!t.showPhotos) b.classList.add('photos-off');
+      else if (t.photoTreatment === 'duotone') b.classList.add('photo-duotone');
+      else if (t.photoTreatment === 'soft') b.classList.add('photo-soft');
+      else if (t.photoTreatment === 'bw') b.classList.add('photo-bw');
+      // Palette
+      b.classList.remove('palette-sage','palette-clay','palette-dawn','palette-ink');
+      b.classList.add('palette-' + t.palette);
+      // Hero composition
+      b.classList.remove('hero-collage','hero-single','hero-split','hero-stacked','hero-mosaic');
+      b.classList.add('hero-' + t.heroComp);
+      // Serif weight
+      b.classList.remove('serif-light','serif-regular','serif-bold');
+      b.classList.add('serif-' + t.serifWeight);
+      // Radius
+      b.classList.remove('radius-sharp','radius-regular','radius-soft');
+      b.classList.add('radius-' + t.radius);
+      // Blobs
+      b.classList.toggle('blobs-off', !t.showBlobs);
+      // Sections
+      const tSec = document.getElementById('testimonials');
+      if (tSec) tSec.style.display = t.showTestimonials ? '' : 'none';
+      const mSec = document.getElementById('moments');
+      if (mSec) mSec.style.display = t.showMoments ? '' : 'none';
+    }, [t]);
+
+    return (
+      <TweaksPanel title="Tweaks">
+        <TweakSection label="Imagery" />
+        <TweakRadio label="Photo treatment" value={t.photoTreatment}
+          options={[
+            {value:'color', label:'Color'},
+            {value:'soft', label:'Soft'},
+            {value:'duotone', label:'Sage'},
+            {value:'bw', label:'B&W'},
+          ]}
+          onChange={(v) => setTweak('photoTreatment', v)} />
+        <TweakToggle label="Show photos" value={t.showPhotos}
+          onChange={(v) => setTweak('showPhotos', v)} />
+        <TweakToggle label="Background blobs" value={t.showBlobs}
+          onChange={(v) => setTweak('showBlobs', v)} />
+
+        <TweakSection label="Hero" />
+        <TweakSelect label="Composition" value={t.heroComp}
+          options={[
+            {value:'collage', label:'Collage (default)'},
+            {value:'stacked', label:'Stacked'},
+            {value:'mosaic', label:'Mosaic grid'},
+            {value:'single', label:'Single hero'},
+            {value:'split', label:'50/50 split'},
+          ]}
+          onChange={(v) => setTweak('heroComp', v)} />
+
+        <TweakSection label="Style" />
+        <TweakSelect label="Palette" value={t.palette}
+          options={[
+            {value:'sage', label:'Sage (default)'},
+            {value:'clay', label:'Clay'},
+            {value:'dawn', label:'Dawn lavender'},
+            {value:'ink', label:'Ink mono'},
+          ]}
+          onChange={(v) => setTweak('palette', v)} />
+        <TweakRadio label="Serif weight" value={t.serifWeight}
+          options={[
+            {value:'light', label:'Light'},
+            {value:'regular', label:'Regular'},
+            {value:'bold', label:'Bold'},
+          ]}
+          onChange={(v) => setTweak('serifWeight', v)} />
+        <TweakRadio label="Corner radius" value={t.radius}
+          options={[
+            {value:'sharp', label:'Sharp'},
+            {value:'regular', label:'Regular'},
+            {value:'soft', label:'Soft'},
+          ]}
+          onChange={(v) => setTweak('radius', v)} />
+
+        <TweakSection label="Sections" />
+        <TweakToggle label="Moments gallery" value={t.showMoments}
+          onChange={(v) => setTweak('showMoments', v)} />
+        <TweakToggle label="Testimonials" value={t.showTestimonials}
+          onChange={(v) => setTweak('showTestimonials', v)} />
+      </TweaksPanel>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('tweaks-root')).render(<App />);
+</script>
+
+</body>
+</html>

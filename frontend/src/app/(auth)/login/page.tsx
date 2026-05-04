@@ -1,18 +1,19 @@
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import AuthShell from "@/components/auth/AuthShell";
 import LoginForm from "@/components/auth/LoginForm";
 
 export default async function LoginPage() {
-  const t = await getTranslations("auth.login");
+  const t = await getTranslations("auth.login.brand");
   return (
-    <div className="w-full flex flex-col items-center">
+    <AuthShell
+      brand={{
+        headlineLead: t("headlineLead"),
+        headlineEm: t("headlineEm"),
+        subcopy: t("subcopy"),
+        caption: t("caption"),
+      }}
+    >
       <LoginForm />
-      <p className="mt-6 text-center text-sm text-muted-foreground">
-        {t("noAccount")}{" "}
-        <Link href="/register" className="font-medium text-primary hover:underline">
-          {t("signUp")}
-        </Link>
-      </p>
-    </div>
+    </AuthShell>
   );
 }

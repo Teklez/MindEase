@@ -10,6 +10,7 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        serif: ["var(--font-fraunces)", "Georgia", "serif"],
       },
       colors: {
         background: "var(--background)",
@@ -21,14 +22,49 @@ const config: Config = {
         muted: { DEFAULT: "var(--muted)", foreground: "var(--muted-foreground)" },
         accent: { DEFAULT: "var(--accent)", foreground: "var(--accent-foreground)" },
         destructive: { DEFAULT: "var(--destructive)", foreground: "var(--destructive-foreground)" },
+        success: "var(--success)",
+        warning: "var(--warning)",
         border: "var(--border)",
         input: "var(--input)",
         ring: "var(--ring)",
+        sidebar: {
+          DEFAULT: "var(--sidebar)",
+          foreground: "var(--sidebar-foreground)",
+          primary: "var(--sidebar-primary)",
+          "primary-foreground": "var(--sidebar-primary-foreground)",
+          accent: "var(--sidebar-accent)",
+          "accent-foreground": "var(--sidebar-accent-foreground)",
+          border: "var(--sidebar-border)",
+          ring: "var(--sidebar-ring)",
+        },
+        mood: {
+          1: "var(--mood-1)",
+          2: "var(--mood-2)",
+          3: "var(--mood-3)",
+          4: "var(--mood-4)",
+          5: "var(--mood-5)",
+        },
+        chart: {
+          1: "var(--chart-1)",
+          2: "var(--chart-2)",
+          3: "var(--chart-3)",
+          4: "var(--chart-4)",
+          5: "var(--chart-5)",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      boxShadow: {
+        "soft-sm": "0 1px 2px 0 hsl(160 20% 12% / 0.04)",
+        soft: "0 4px 16px -4px hsl(160 20% 12% / 0.08)",
+        "soft-md": "0 8px 24px -8px hsl(160 20% 12% / 0.12)",
+        "soft-lg": "0 16px 40px -12px hsl(160 20% 12% / 0.16)",
+      },
+      letterSpacing: {
+        tightest: "-0.04em",
       },
     },
   },

@@ -1,16 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import Logo from "@/components/shared/Logo";
+import { Plus } from "lucide-react";
 import StarterPrompts from "@/components/chat/StarterPrompts";
 import ConversationList from "@/components/chat/ConversationList";
 import ChatInput from "@/components/chat/ChatInput";
 import { useConversationsContext } from "@/contexts/ConversationsContext";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -27,7 +26,8 @@ export default function ChatHomePage() {
   const tNav = useTranslations("nav");
   const tCommon = useTranslations("common");
   const router = useRouter();
-  const { conversations, isLoading, createConversation, deleteConversation } = useConversationsContext();
+  const { conversations, isLoading, createConversation, deleteConversation } =
+    useConversationsContext();
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
@@ -67,35 +67,20 @@ export default function ChatHomePage() {
 
   return (
     <>
-      {/* Desktop: centered welcome + starter prompts + input */}
-      <div className="hidden md:flex flex-1 flex-col items-center justify-center min-h-0">
-        <div className="flex flex-col items-center text-center px-4 py-8 w-full">
-          <Logo size="lg" asLink={false} className="mb-6" />
-          <StarterPrompts
-            showLogo={false}
-            heading={t("welcomeMessage")}
-            subtitle={t("welcomeSubtitle")}
-            onSelect={handleStarterSelect}
-          />
-          <p className="mt-4 text-xs text-muted-foreground">
-            {creating ? t("creatingConversation") : t("choosePrompt")}
-          </p>
-        </div>
-        <div className="w-full">
-          <ChatInput onSend={handleStarterSelect} disabled={creating} />
-        </div>
+      <div className="hidden flex-1 flex-col md:flex">
+        <StarterPrompts onSelect={handleStarterSelect} />
+        <ChatInput onSend={handleStarterSelect} disabled={creating} />
       </div>
 
-      {/* Mobile: conversation list + New Chat */}
-      <div className="md:hidden flex flex-1 flex-col min-h-0">
-        <div className="shrink-0 flex items-center justify-between gap-2 px-4 py-3 border-b border-border">
-          <h1 className="text-lg font-semibold text-foreground">{tNav("chat")}</h1>
-          <Button onClick={handleNewChat} disabled={creating} size="sm">
-            <Plus className="h-4 w-4 mr-1" />
+      <div className="flex flex-1 flex-col md:hidden">
+        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border px-4 py-3">
+          <h1 className="font-serif text-xl tracking-tight text-foreground">{tNav("chat")}</h1>
+          <Button onClick={handleNewChat} disabled={creating} size="sm" className="rounded-full">
+            <Plus className="mr-1 h-4 w-4" strokeWidth={1.75} />
             {t("newChat")}
           </Button>
         </div>
-        <div className="flex-1 min-h-0 overflow-auto p-2">
+        <div className="min-h-0 flex-1 overflow-auto p-2">
           <ConversationList
             conversations={conversations}
             activeId={null}
@@ -106,7 +91,10 @@ export default function ChatHomePage() {
         </div>
       </div>
 
-      <Dialog open={!!deleteConfirmId} onOpenChange={(open) => !open && setDeleteConfirmId(null)}>
+      <Dialog
+        open={!!deleteConfirmId}
+        onOpenChange={(open) => !open && setDeleteConfirmId(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t("deleteConfirm")}</DialogTitle>

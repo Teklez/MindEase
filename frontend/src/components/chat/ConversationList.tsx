@@ -1,14 +1,18 @@
 "use client";
 
 import type { Conversation } from "@/lib/types";
-import { groupConversationsByDate } from "@/lib/utils";
-import type { ConversationGroupKey } from "@/lib/utils";
+import { groupConversationsByDate, type ConversationGroupKey } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import ConversationItem from "./ConversationItem";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
 
-const GROUP_KEYS: ConversationGroupKey[] = ["today", "yesterday", "previous7", "thisMonth", "older"];
+const GROUP_KEYS: ConversationGroupKey[] = [
+  "today",
+  "yesterday",
+  "previous7",
+  "thisMonth",
+  "older",
+];
 
 type ConversationListProps = {
   conversations: Conversation[];
@@ -29,11 +33,11 @@ export default function ConversationList({
 
   if (isLoading) {
     return (
-      <ul className="space-y-1">
+      <ul className="space-y-1.5 p-2">
         {[1, 2, 3, 4, 5, 6].map((i) => (
           <li key={i} className="flex items-center gap-2 rounded-lg px-3 py-2">
-            <Skeleton className="h-4 w-4 shrink-0 rounded" />
-            {!collapsed && <Skeleton className="h-4 flex-1 max-w-[80%] rounded" />}
+            <Skeleton className="h-3 w-3 shrink-0 rounded-full" />
+            {!collapsed && <Skeleton className="h-3 flex-1 max-w-[80%] rounded" />}
           </li>
         ))}
       </ul>
@@ -42,37 +46,37 @@ export default function ConversationList({
 
   if (conversations.length === 0) {
     return (
-      <p className="py-6 text-center text-sm text-muted-foreground">{t("noConversations")}</p>
+      <p className="px-3 py-6 text-center text-xs text-muted-foreground">
+        {t("noConversations")}
+      </p>
     );
   }
 
   const grouped = groupConversationsByDate(conversations);
 
   return (
-    <ul className="space-y-1">
+    <ul className="flex flex-col gap-3 px-1 pt-1">
       {GROUP_KEYS.map((key) => {
-        const { conversations: list } = grouped[key];
+        const list = grouped[key].conversations;
         if (list.length === 0) return null;
         return (
           <li key={key}>
             {!collapsed && (
-              <p
-                className={cn(
-                  "mb-1 mt-2 px-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground first:mt-0"
-                )}
-              >
+              <p className="mb-1 px-3 text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
                 {t(key)}
               </p>
             )}
-            {list.map((conv) => (
-              <ConversationItem
-                key={conv.conversation_id}
-                conversation={conv}
-                isActive={conv.conversation_id === activeId}
-                onDelete={onDelete}
-                collapsed={collapsed}
-              />
-            ))}
+            <ul className="space-y-0.5">
+              {list.map((conv) => (
+                <ConversationItem
+                  key={conv.conversation_id}
+                  conversation={conv}
+                  isActive={conv.conversation_id === activeId}
+                  onDelete={onDelete}
+                  collapsed={collapsed}
+                />
+              ))}
+            </ul>
           </li>
         );
       })}
