@@ -360,5 +360,67 @@
     "viewFullTracker": "ሙሉ ተከታታይ",
     "noStatsYet": "ገና ስታቲስቲክስ የለም",
     "completeFirstCheckIn": "ስታቲስቲክስዎን ለማየት ከዚህ በታች የመጀመሪያ ምዝገባዎን ያጠናቅቁ"
+  },
+  "assessment": {
+    "title": "የአእምሮ ጤንነት ራስን መገምገም",
+    "subtitle": "የአእምሮ ጤንነትዎን በይበልጥ ለመረዳት የሚረዱ በማስረጃ የተደገፉ መሳሪያዎች",
+    "intro": "ለመጀመር ከታች የራስን መገምገም ይምረጡ። እነዚህ መሳሪያዎች የተለመዱ የአእምሮ ጤንነት ችግሮችን ለመለየት የተዘጋጁ ናቸው። የመረዳት መሳሪያዎች ናቸው፣ ነገር ግን ለመድከም ስለሚገቡ ጊዜ ለመረዳት ይረዱዎታል።",
+    "viewHistory": "ታሪክ ይመልከቱ",
+    "startAssessment": "ራስን መገምገም ጀምር",
+    "gad7": {
+      "title": "GAD-7 የስጋት ራስን መገምገም",
+      "description": "የተለመደ የስጋት በሽታን ለመለየት መሳሪያ",
+      "duration": "2-3 ደቂቃዎች"
+    },
+    "phq9": {
+      "title": "PHQ-9 የድካም ራስን መገምገም", 
+      "description": "የድካም ምልክቶችን ለመለየት መሳሪያ",
+      "duration": "2-3 ደቂቃዎች"
+    },
+    "disclaimer": {
+      "title": "አስፈላጊ ማስታወቂያ",
+      "text": "እነዚህ ራስን መገምገማት መሳሪያዎች ናቸው፣ የመረዳት እቃዎች አይደሉም። ከፍተኛ ምልክቶች እየተሰማዉ ወይም የራስን መጉዳት አስታላቅሶች እንዳሉዎ፣ እባክዎ ወዲያውያን የሙያ እርዳታ ይፈልጋሉ።"
+    },
+    "questionProgress": "ጥያቄ {current} ከ {total}",
+    "progressStarted": "ተጀምረ",
+    "overTheLastTwoWeeks": "ባለፉት 2 ሳምንታት ውስጥ፣ ከሚከተሉት ችግሮች በስንት ድርግት ተጎድተዋል?",
+    "cancel": "ይቅር",
+    "previous": "ቀደም",
+    "questionCount": "ጥያቄ {current} ከ {total}",
+    "results": "ውጤቶች",
+    "backToAssessments": "ወደ ራስን መገምገማት ተመለስ",
+    "retakeAssessment": "ራስን መገምገም እንደገና ይውሰዱ",
+    "severityLevel": "የክብረት ደረጃ",
+    "completedOn": "{date} ተጠናቅሟል",
+    "recommendations": "እንዲሰሩ የሚመከሩ ነገሮች",
+    "professionalHelp": {
+      "title": "የሙያ እርዳታን ይገምግቡ",
+      "description": "በመልስዎች የተመሰሉ፣ ለትክክለኛው ምርመራ እና ህክምና የሙያ አእምሮ ጤንነት ባለሙያ ጋር ማውራትን ይገምግቡ።",
+      "callProfessionals": "ባለሙያዎችን ይደውሉ",
+      "startChat": "ውይይት ጀምር"
+    },
+    "nextSteps": {
+      "retake": "ራስን መገምገም እንደገና ይውሰዱ",
+      "retakeDescription": "በጊዜ ሂደት ለመከታተል ራስን መገምገምን እንደገና ይውሰዱ",
+      "track": "የእርስዎን እድገት ይከታተሉ",
+      "trackDescription": "የራስን መገምገም ታሪክዎን ይመልከቱ እና እንዴት እንደተሻሻሉ ይመልከቱ"
+    },
+    "history": {
+      "title": "የራስን መገምገም ታሪክ",
+      "subtitle": "በጥንታዊ እይታዎች እና አዝመራዎች የአእምሮ ጤንነትዎን እድገት በጊዜ ሂደት ይከታተሉ",
+      "totalAssessments": "ጠቅላላ ራስን መገምገማት",
+      "averageGAD7": "አማኛዊ GAD-7 ነጥብ",
+      "averagePHQ9": "አማኛዊ PHQ-9 ነጥብ",
+      "lastAssessment": "የመጨረሻ ራስን መገምገም",
+      "noAssessments": "ራስን መገምገማች የለም",
+      "noAssessmentsFound": "ራስን መገምገማች አልተገኙም",
+      "trends": "የነጥብ አዝመራዎች",
+      "all": "ሁሉም",
+      "recentAssessments": "የቅርብ ጊዜዎች ራስን መገምገማት",
+      "assessment": "ራስን መገምገም",
+      "exportHistory": "ታሪክ ይላኩ",
+      "startGAD7": "GAD-7 ጀምር",
+      "startPHQ9": "PHQ-9 ጀምር"
+    }
   }
 }
