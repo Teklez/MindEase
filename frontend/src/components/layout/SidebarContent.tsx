@@ -223,7 +223,7 @@ export default function SidebarContent({
       </div>
 
       {/* Delete confirmation dialog */}
-      <Dialog open={!!deleteConfirmId} onOpenChange={(open: any) => !open && setDeleteConfirmId(null)}>
+      <Dialog open={!!deleteConfirmId} onOpenChange={(open) => !open && setDeleteConfirmId(null)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{tChat("deleteConfirm")}</DialogTitle>
