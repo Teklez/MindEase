@@ -32,14 +32,19 @@ export default function GoogleSignInButton({ variant = "signin" }: { variant?: V
 
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
   if (!clientId) {
+    // Temporary mock for testing - remove when Google OAuth is configured
+    const handleMockSignIn = () => {
+      setError("Google OAuth not configured. Please add NEXT_PUBLIC_GOOGLE_CLIENT_ID to your .env file");
+    };
+    
     return (
       <button
         type="button"
-        disabled
-        className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-border bg-card py-2.5 font-medium text-muted-foreground"
+        onClick={handleMockSignIn}
+        className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card py-2.5 font-medium text-foreground hover:bg-accent transition-colors"
       >
         <GoogleIcon />
-        {variant === "signup" ? tReg("signUpGoogle") : t("signInGoogle")} (not configured)
+        {variant === "signup" ? tReg("signUpGoogle") : t("signInGoogle")} (configure OAuth)
       </button>
     );
   }

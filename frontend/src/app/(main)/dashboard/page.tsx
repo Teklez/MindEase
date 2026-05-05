@@ -23,6 +23,7 @@ import RecentConversations from "@/components/dashboard/RecentConversations";
 import FooterBand from "@/components/dashboard/FooterBand";
 import DashboardMoodWidget from "@/components/mood/DashboardMoodWidget";
 import MoodCheckIn from "@/components/mood/MoodCheckIn";
+import AssessmentSummary from "@/components/assessment/AssessmentSummary";
 
 function daysSince(iso: string | undefined): number | null {
   if (!iso) return null;
@@ -169,6 +170,7 @@ export default function DashboardPage() {
             />
           </div>
           <div className="space-y-6 lg:col-span-4">
+            <AssessmentSummary />
             <ReflectionCard />
             <ResourceCard />
           </div>
