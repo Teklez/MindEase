@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Menu, LayoutDashboard, MessageCircle, HeartPulse, BookOpen, Brain, type LucideIcon } from "lucide-react";
+import { Menu, LayoutDashboard, MessageCircle, HeartPulse, BookOpen, type LucideIcon } from "lucide-react";
 import { getMe, clearStoredToken } from "@/lib/api";
 import Logo from "@/components/shared/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -17,14 +17,13 @@ import { cn } from "@/lib/utils";
 
 const NAV_LINKS: Array<{
   href: string;
-  labelKey: "dashboard" | "chat" | "moodTracker" | "assessments" | "resources";
+  labelKey: "dashboard" | "chat" | "moodTracker" | "resources";
   icon: LucideIcon;
   disabled?: boolean;
 }> = [
   { href: "/dashboard", labelKey: "dashboard", icon: LayoutDashboard },
   { href: "/chat", labelKey: "chat", icon: MessageCircle },
   { href: "/mood", labelKey: "moodTracker", icon: HeartPulse },
-  { href: "/assessment", labelKey: "assessments", icon: Brain },
   { href: "/resources", labelKey: "resources", icon: BookOpen, disabled: true },
 ];
 
