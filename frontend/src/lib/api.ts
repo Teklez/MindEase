@@ -191,3 +191,213 @@ export async function getMoodCalendar(year: number, month: number): Promise<ApiR
 export async function deleteMoodEntry(entryId: string): Promise<ApiResponse<null>> {
   return apiRequest(`/api/v1/mood/entries/${entryId}`, { method: "DELETE" });
 }
+
+// Resource Library
+export type ResourceFilters = {
+  category?: string;
+  type?: import("@/lib/types").ResourceType;
+  favorites_only?: boolean;
+};
+
+export async function listResources(
+  filters: ResourceFilters = {},
+): Promise<ApiResponse<import("@/lib/types").ResourceListResponse>> {
+  const params = new URLSearchParams();
+  if (filters.category) params.set("category", filters.category);
+  if (filters.type) params.set("type", filters.type);
+  if (filters.favorites_only) params.set("favorites_only", "true");
+  const qs = params.toString();
+  return apiRequest(`/api/v1/resources${qs ? `?${qs}` : ""}`);
+}
+
+export async function getResourceCategories(): Promise<
+  ApiResponse<import("@/lib/types").ResourceCategory[]>
+> {
+  return apiRequest("/api/v1/resources/categories");
+}
+
+export async function getResourceRecommendations(
+  limit: number = 3,
+): Promise<ApiResponse<import("@/lib/types").ResourceRecommendation[]>> {
+  return apiRequest(`/api/v1/resources/recommendations?limit=${limit}`);
+}
+
+export async function trackResourceView(
+  resourceId: string,
+): Promise<ApiResponse<{ ok: boolean; new_badges: BadgeResponse[] }>> {
+  return apiRequest(`/api/v1/resources/${resourceId}/view`, { method: "POST" });
+}
+
+export async function toggleResourceFavorite(
+  resourceId: string,
+): Promise<ApiResponse<{ is_favorite: boolean }>> {
+  return apiRequest(`/api/v1/resources/${resourceId}/favorite`, { method: "POST" });
+}
+
+// Assessments
+export async function listAssessments(): Promise<
+  ApiResponse<import("@/lib/types").AssessmentListItem[]>
+> {
+  return apiRequest("/api/v1/assessments");
+}
+
+export async function getAssessment(
+  assessmentId: string,
+): Promise<ApiResponse<import("@/lib/types").AssessmentFull>> {
+  return apiRequest(`/api/v1/assessments/${assessmentId}`);
+}
+
+export async function submitAssessment(
+  assessmentId: string,
+  responses: import("@/lib/types").AssessmentResponseEntry[],
+): Promise<ApiResponse<import("@/lib/types").AssessmentResult>> {
+  return apiRequest(`/api/v1/assessments/${assessmentId}/submit`, {
+    method: "POST",
+    body: JSON.stringify({ responses }),
+  });
+}
+
+export async function getAssessmentHistory(
+  assessmentType?: string,
+): Promise<ApiResponse<import("@/lib/types").AssessmentHistory>> {
+  const qs = assessmentType ? `?assessment_type=${assessmentType}` : "";
+  return apiRequest(`/api/v1/assessments/history${qs}`);
+}
+
+export async function getAssessmentResult(
+  userAssessmentId: string,
+): Promise<ApiResponse<import("@/lib/types").AssessmentResult>> {
+  return apiRequest(`/api/v1/assessments/results/${userAssessmentId}`);
+}
+
+// Groups
+export type GroupsListFilters = {
+  category?: string;
+  my_groups?: boolean;
+  search?: string;
+};
+
+export async function getGroupCategories(): Promise<
+  ApiResponse<import("@/lib/types").GroupCategory[]>
+> {
+  return apiRequest("/api/v1/groups/categories");
+}
+
+export async function listGroups(
+  filters: GroupsListFilters = {},
+): Promise<ApiResponse<import("@/lib/types").GroupListItem[]>> {
+  const params = new URLSearchParams();
+  if (filters.category) params.set("category", filters.category);
+  if (filters.my_groups) params.set("my_groups", "true");
+  if (filters.search) params.set("search", filters.search);
+  const qs = params.toString();
+  return apiRequest(`/api/v1/groups${qs ? `?${qs}` : ""}`);
+}
+
+export async function getGroup(
+  groupId: string,
+): Promise<ApiResponse<import("@/lib/types").GroupResponse>> {
+  return apiRequest(`/api/v1/groups/${groupId}`);
+}
+
+export async function createGroup(
+  payload: import("@/lib/types").GroupCreatePayload,
+): Promise<ApiResponse<import("@/lib/types").GroupResponse>> {
+  return apiRequest("/api/v1/groups", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateGroup(
+  groupId: string,
+  payload: import("@/lib/types").GroupUpdatePayload,
+): Promise<ApiResponse<import("@/lib/types").GroupResponse>> {
+  return apiRequest(`/api/v1/groups/${groupId}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteGroup(groupId: string): Promise<ApiResponse<null>> {
+  return apiRequest(`/api/v1/groups/${groupId}`, { method: "DELETE" });
+}
+
+export async function joinGroup(
+  groupId: string,
+): Promise<ApiResponse<import("@/lib/types").GroupMemberResponse>> {
+  return apiRequest(`/api/v1/groups/${groupId}/join`, { method: "POST" });
+}
+
+export async function leaveGroup(groupId: string): Promise<ApiResponse<null>> {
+  return apiRequest(`/api/v1/groups/${groupId}/leave`, { method: "POST" });
+}
+
+export async function getGroupMembers(
+  groupId: string,
+): Promise<ApiResponse<import("@/lib/types").GroupMemberResponse[]>> {
+  return apiRequest(`/api/v1/groups/${groupId}/members`);
+}
+
+export async function muteGroupMember(
+  groupId: string,
+  targetUserId: string,
+  mute: boolean,
+): Promise<ApiResponse<{ ok: boolean; is_muted: boolean }>> {
+  return apiRequest(`/api/v1/groups/${groupId}/members/${targetUserId}/mute`, {
+    method: "POST",
+    body: JSON.stringify({ mute }),
+  });
+}
+
+export async function removeGroupMember(
+  groupId: string,
+  targetUserId: string,
+): Promise<ApiResponse<null>> {
+  return apiRequest(
+    `/api/v1/groups/${groupId}/members/${targetUserId}/remove`,
+    { method: "POST" },
+  );
+}
+
+export async function promoteGroupMember(
+  groupId: string,
+  targetUserId: string,
+): Promise<ApiResponse<{ ok: boolean }>> {
+  return apiRequest(
+    `/api/v1/groups/${groupId}/members/${targetUserId}/promote`,
+    { method: "POST" },
+  );
+}
+
+export async function getGroupMessages(
+  groupId: string,
+  options: { limit?: number; before?: string } = {},
+): Promise<ApiResponse<import("@/lib/types").GroupMessageResponse[]>> {
+  const params = new URLSearchParams();
+  if (options.limit) params.set("limit", String(options.limit));
+  if (options.before) params.set("before", options.before);
+  const qs = params.toString();
+  return apiRequest(`/api/v1/groups/${groupId}/messages${qs ? `?${qs}` : ""}`);
+}
+
+export async function deleteGroupMessage(
+  groupId: string,
+  messageId: string,
+): Promise<ApiResponse<null>> {
+  return apiRequest(`/api/v1/groups/${groupId}/messages/${messageId}`, {
+    method: "DELETE",
+  });
+}
+
+export async function markGroupRead(
+  groupId: string,
+): Promise<ApiResponse<null>> {
+  return apiRequest(`/api/v1/groups/${groupId}/read`, { method: "POST" });
+}
+
+export async function getGroupUnreadSummary(): Promise<
+  ApiResponse<import("@/lib/types").GroupUnreadSummary>
+> {
+  return apiRequest("/api/v1/groups/unread-summary");
+}

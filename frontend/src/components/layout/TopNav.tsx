@@ -4,8 +4,9 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Menu, LayoutDashboard, MessageCircle, HeartPulse, BookOpen, type LucideIcon } from "lucide-react";
+import { Menu, LayoutDashboard, MessageCircle, HeartPulse, BookOpen, ClipboardList, Sparkles, Users, type LucideIcon } from "lucide-react";
 import { getMe, clearStoredToken } from "@/lib/api";
+import { useGroupsUnread } from "@/hooks/useGroupsUnread";
 import Logo from "@/components/shared/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -17,20 +18,24 @@ import { cn } from "@/lib/utils";
 
 const NAV_LINKS: Array<{
   href: string;
-  labelKey: "dashboard" | "chat" | "moodTracker" | "resources";
+  labelKey: "dashboard" | "chat" | "avatar" | "moodTracker" | "resources" | "assessments" | "groups";
   icon: LucideIcon;
   disabled?: boolean;
 }> = [
   { href: "/dashboard", labelKey: "dashboard", icon: LayoutDashboard },
   { href: "/chat", labelKey: "chat", icon: MessageCircle },
+  { href: "/avatar", labelKey: "avatar", icon: Sparkles },
   { href: "/mood", labelKey: "moodTracker", icon: HeartPulse },
-  { href: "/resources", labelKey: "resources", icon: BookOpen, disabled: true },
+  { href: "/resources", labelKey: "resources", icon: BookOpen },
+  { href: "/assessments", labelKey: "assessments", icon: ClipboardList },
+  { href: "/groups", labelKey: "groups", icon: Users },
 ];
 
 function isActive(href: string, pathname: string | null): boolean {
   if (!pathname) return false;
   if (href === "/dashboard") return pathname === "/dashboard";
   if (href === "/chat") return pathname === "/chat" || pathname.startsWith("/chat/");
+  if (href === "/avatar") return pathname === "/avatar";
   return pathname.startsWith(href);
 }
 
@@ -40,6 +45,7 @@ export default function TopNav() {
   const tCommon = useTranslations("common");
   const [user, setUser] = useState<{ display_name: string } | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { hasUnread: groupsHaveUnread } = useGroupsUnread();
 
   useEffect(() => {
     getMe().then((res) => {
@@ -83,6 +89,7 @@ export default function TopNav() {
                 </span>
               );
             }
+            const showUnreadDot = labelKey === "groups" && groupsHaveUnread;
             return (
               <Link
                 key={href}
@@ -90,7 +97,15 @@ export default function TopNav() {
                 className={baseClass}
                 aria-current={active ? "page" : undefined}
               >
-                <Icon className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+                <span className="relative inline-flex shrink-0">
+                  <Icon className="h-4 w-4" strokeWidth={1.75} />
+                  {showUnreadDot && (
+                    <span
+                      className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-primary ring-2 ring-background"
+                      aria-label="unread groups"
+                    />
+                  )}
+                </span>
                 {label}
                 {indicator}
               </Link>

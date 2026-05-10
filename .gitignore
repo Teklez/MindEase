@@ -32,3 +32,6 @@ Thumbs.db
 *.log
 .coverage
 htmlcov/
+
+# Claude Code workspace settings
+.claude/

@@ -20,6 +20,7 @@ import StatCards from "@/components/dashboard/StatCards";
 import ReflectionCard from "@/components/dashboard/ReflectionCard";
 import ResourceCard from "@/components/dashboard/ResourceCard";
 import RecentConversations from "@/components/dashboard/RecentConversations";
+import YourGroups from "@/components/dashboard/YourGroups";
 import FooterBand from "@/components/dashboard/FooterBand";
 import DashboardMoodWidget from "@/components/mood/DashboardMoodWidget";
 import MoodCheckIn from "@/components/mood/MoodCheckIn";
@@ -175,6 +176,8 @@ export default function DashboardPage() {
         </div>
 
         <RecentConversations conversations={conversations} />
+
+        <YourGroups />
 
         <FooterBand />
       </div>
