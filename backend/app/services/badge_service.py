@@ -4,9 +4,11 @@ from uuid import UUID
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.assessment import UserAssessment
 from app.models.badge import Badge, UserBadge
 from app.models.conversation import Conversation
 from app.models.mood_entry import MoodEntry
+from app.models.resource import UserResource
 from app.schemas.mood import BadgeResponse
 
 
@@ -40,9 +42,10 @@ class BadgeService:
                 criteria_met = await self._check_mood_streak(db, user_id, badge.criteria_value)
             elif badge.criteria_type == "chat_count":
                 criteria_met = await self._check_chat_count(db, user_id, badge.criteria_value)
+            elif badge.criteria_type == "resource_view":
+                criteria_met = await self._check_resource_view(db, user_id, badge.criteria_value)
             elif badge.criteria_type == "assessment":
-                # Placeholder — no assessment table yet; always False
-                criteria_met = False
+                criteria_met = await self._check_assessment(db, user_id, badge.criteria_value)
 
             if criteria_met:
                 user_badge = UserBadge(user_id=user_id, badge_id=badge.badge_id)
@@ -111,6 +114,18 @@ class BadgeService:
     async def _check_chat_count(self, db: AsyncSession, user_id: UUID, value: int) -> bool:
         result = await db.execute(
             select(func.count()).where(Conversation.user_id == user_id)
+        )
+        return (result.scalar() or 0) >= value
+
+    async def _check_resource_view(self, db: AsyncSession, user_id: UUID, value: int) -> bool:
+        result = await db.execute(
+            select(func.count()).where(UserResource.user_id == user_id)
+        )
+        return (result.scalar() or 0) >= value
+
+    async def _check_assessment(self, db: AsyncSession, user_id: UUID, value: int) -> bool:
+        result = await db.execute(
+            select(func.count()).where(UserAssessment.user_id == user_id)
         )
         return (result.scalar() or 0) >= value
 

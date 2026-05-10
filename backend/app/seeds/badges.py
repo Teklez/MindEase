@@ -67,6 +67,15 @@ DEFAULT_BADGES = [
         "criteria_type": "assessment",
         "criteria_value": 1,
     },
+    {
+        "name": "Resource Explorer",
+        "name_am": "የግብዓት አሳሽ",
+        "description": "View 5 resources from the library",
+        "description_am": "ከቤተ-መጻሕፍት 5 ግብዓቶችን ይመልከቱ",
+        "icon": "📚",
+        "criteria_type": "resource_view",
+        "criteria_value": 5,
+    },
 ]
 
 

@@ -103,3 +103,107 @@ export class ChatWebSocket {
     this.onStateCb = null;
   }
 }
+
+// ---------- Group chat ----------
+
+import type { GroupMessageResponse } from "@/lib/types";
+
+export type GroupOnlineMember = { user_id: string; display_name: string };
+
+export type GroupWsEvent =
+  | { type: "message"; data: GroupMessageResponse }
+  | { type: "crisis_alert"; resources: { ethiopia?: Resource[]; international?: Resource[] } }
+  | { type: "user_joined"; user_id: string; display_name: string }
+  | { type: "user_left"; user_id: string; display_name: string }
+  | { type: "online_members"; members: GroupOnlineMember[] }
+  | { type: "ai_thinking" }
+  | { type: "ai_done" }
+  | { type: "error"; content?: string };
+
+export type GroupConnectOptions = {
+  onEvent: (event: GroupWsEvent) => void;
+  onConnectionState?: (state: ConnectionState) => void;
+};
+
+export class GroupChatWebSocket {
+  private ws: WebSocket | null = null;
+  private url: string;
+  private reconnectAttempts = 0;
+  private maxReconnects = 5;
+  private onEventCb: ((event: GroupWsEvent) => void) | null = null;
+  private onStateCb: ((state: ConnectionState) => void) | null = null;
+  private intentionalClose = false;
+
+  constructor(groupId: string, token: string) {
+    const base = getWsBaseUrl();
+    const sep = base.includes("?") ? "&" : "?";
+    this.url = `${base}/ws/group/${groupId}${sep}token=${encodeURIComponent(token)}`;
+  }
+
+  connect(options: GroupConnectOptions): void {
+    this.onEventCb = options.onEvent;
+    this.onStateCb = options.onConnectionState ?? null;
+    this.intentionalClose = false;
+    this.onStateCb?.("connecting");
+    this.ws = new WebSocket(this.url);
+
+    this.ws.onopen = () => {
+      this.reconnectAttempts = 0;
+      this.onStateCb?.("connected");
+    };
+
+    this.ws.onmessage = (ev) => {
+      try {
+        const event = JSON.parse(ev.data as string) as GroupWsEvent;
+        this.onEventCb?.(event);
+      } catch {
+        this.onEventCb?.({ type: "error", content: "Invalid message" });
+      }
+    };
+
+    this.ws.onclose = () => {
+      if (this.intentionalClose) return;
+      if (this.reconnectAttempts < this.maxReconnects) {
+        this.onStateCb?.("reconnecting");
+        const delay = Math.min(1000 * 2 ** this.reconnectAttempts, 10000);
+        this.reconnectAttempts += 1;
+        setTimeout(
+          () =>
+            this.connect({
+              onEvent: this.onEventCb!,
+              onConnectionState: this.onStateCb ?? undefined,
+            }),
+          delay,
+        );
+      } else {
+        this.onStateCb?.("failed");
+      }
+    };
+
+    this.ws.onerror = () => {
+      // onclose handles reconnect
+    };
+  }
+
+  sendMessage(content: string): void {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({ type: "message", content }));
+    }
+  }
+
+  requestOnlineMembers(): void {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({ type: "get_online" }));
+    }
+  }
+
+  disconnect(): void {
+    this.intentionalClose = true;
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
+    this.onEventCb = null;
+    this.onStateCb = null;
+  }
+}

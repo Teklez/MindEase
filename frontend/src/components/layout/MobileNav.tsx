@@ -6,14 +6,18 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   BookOpen,
+  ClipboardList,
   HeartPulse,
   LayoutDashboard,
   LogOut,
   MessageCircle,
   Settings,
+  Sparkles,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 import Logo from "@/components/shared/Logo";
+import { useGroupsUnread } from "@/hooks/useGroupsUnread";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -27,14 +31,17 @@ type Props = {
 
 const LINKS: Array<{
   href: string;
-  labelKey: "dashboard" | "chat" | "moodTracker" | "resources" | "settings";
+  labelKey: "dashboard" | "chat" | "avatar" | "moodTracker" | "resources" | "assessments" | "groups" | "settings";
   icon: LucideIcon;
   disabled?: boolean;
 }> = [
   { href: "/dashboard", labelKey: "dashboard", icon: LayoutDashboard },
   { href: "/chat", labelKey: "chat", icon: MessageCircle },
+  { href: "/avatar", labelKey: "avatar", icon: Sparkles },
   { href: "/mood", labelKey: "moodTracker", icon: HeartPulse },
-  { href: "/resources", labelKey: "resources", icon: BookOpen, disabled: true },
+  { href: "/resources", labelKey: "resources", icon: BookOpen },
+  { href: "/assessments", labelKey: "assessments", icon: ClipboardList },
+  { href: "/groups", labelKey: "groups", icon: Users },
   { href: "/settings", labelKey: "settings", icon: Settings, disabled: true },
 ];
 
@@ -52,6 +59,8 @@ export default function MobileNav({ user, onNavigate, onLogout }: Props) {
   const pathname = usePathname();
   const tNav = useTranslations("nav");
   const tCommon = useTranslations("common");
+  const { hasUnread: groupsHaveUnread, count: groupsUnreadCount } =
+    useGroupsUnread();
 
   return (
     <div className="flex h-full flex-col bg-background">
@@ -72,10 +81,16 @@ export default function MobileNav({ user, onNavigate, onLogout }: Props) {
               !active && !disabled && "text-foreground hover:bg-muted",
               disabled && "cursor-not-allowed text-muted-foreground",
             );
+            const showUnread = labelKey === "groups" && groupsHaveUnread;
             const inner = (
               <>
                 <Icon className="h-4 w-4 shrink-0" strokeWidth={1.75} />
                 <span className="flex-1">{tNav(labelKey)}</span>
+                {showUnread && (
+                  <span className="rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-medium text-primary-foreground">
+                    {groupsUnreadCount}
+                  </span>
+                )}
                 {disabled && (
                   <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
                     {tCommon("comingSoon").toLowerCase()}

@@ -7,7 +7,15 @@ import { getStoredToken, getMe } from "@/lib/api";
 import TopNav from "@/components/layout/TopNav";
 
 function isMainPath(pathname: string): boolean {
-  return pathname === "/dashboard" || pathname.startsWith("/chat") || pathname.startsWith("/mood") || pathname.startsWith("/resources");
+  return (
+    pathname === "/dashboard" ||
+    pathname.startsWith("/chat") ||
+    pathname.startsWith("/mood") ||
+    pathname.startsWith("/avatar") ||
+    pathname.startsWith("/resources") ||
+    pathname.startsWith("/assessments") ||
+    pathname.startsWith("/groups")
+  );
 }
 
 export default function MainLayout({

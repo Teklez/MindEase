@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ArrowUp, Square } from "lucide-react";
+import { ArrowUp, Sparkles, Square } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -13,13 +13,31 @@ const LINE_HEIGHT_APPROX = 24;
 const RESIZE_DEBOUNCE_MS = 120;
 const CHAR_LIMIT = 2000;
 
+export type ChatInputMention = {
+  /** The single character that summons the suggestion (e.g. "@"). */
+  trigger: string;
+  /** The full text to insert in place of the trigger (e.g. "@MindEase "). */
+  insert: string;
+  /** Label to show on the chip (e.g. "@MindEase"). */
+  label: string;
+};
+
 type ChatInputProps = {
   onSend: (content: string) => void;
   disabled: boolean;
   placeholder?: string;
+  /** Optional autocomplete suggestion. When the user types `mention.trigger`
+   * and the `insert` token isn't already present in the value, a small chip
+   * appears above the input; clicking it replaces the trigger with `insert`. */
+  mention?: ChatInputMention;
 };
 
-export default function ChatInput({ onSend, disabled, placeholder }: ChatInputProps) {
+export default function ChatInput({
+  onSend,
+  disabled,
+  placeholder,
+  mention,
+}: ChatInputProps) {
   const t = useTranslations("chat");
   const tDisclaimer = useTranslations("disclaimer");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -81,9 +99,54 @@ export default function ChatInput({ onSend, disabled, placeholder }: ChatInputPr
   const showCharCounter = value.length > CHAR_LIMIT * 0.8;
   const charsLeft = CHAR_LIMIT - value.length;
 
+  const showMentionSuggestion = useMemo(() => {
+    if (!mention) return false;
+    if (!value.includes(mention.trigger)) return false;
+    // Hide once the user has fully typed the mention (case-insensitive).
+    return !value.toLowerCase().includes(mention.insert.trim().toLowerCase());
+  }, [mention, value]);
+
+  const insertMention = useCallback(() => {
+    if (!mention) return;
+    const el = textareaRef.current;
+    // Replace only the *last* trigger occurrence so we don't disturb earlier
+    // text the user has typed.
+    const idx = value.lastIndexOf(mention.trigger);
+    const next =
+      idx === -1
+        ? `${mention.insert}${value}`
+        : `${value.slice(0, idx)}${mention.insert}${value.slice(
+            idx + mention.trigger.length,
+          )}`;
+    setValue(next.slice(0, CHAR_LIMIT));
+    requestAnimationFrame(() => {
+      if (!el) return;
+      el.focus();
+      const cursor = Math.min(idx + mention.insert.length, next.length);
+      el.setSelectionRange(cursor, cursor);
+      adjustHeight(el);
+    });
+  }, [mention, value, adjustHeight]);
+
   return (
     <div className="shrink-0 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
       <div className="mx-auto w-full max-w-3xl">
+        {showMentionSuggestion && mention && (
+          <div className="mb-1.5 flex justify-start">
+            <button
+              type="button"
+              onClick={insertMention}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full border border-primary/30",
+                "bg-primary/10 px-2.5 py-1 text-[12px] font-medium text-primary",
+                "transition-colors hover:border-primary/50 hover:bg-primary/15",
+              )}
+            >
+              <Sparkles className="h-3 w-3" strokeWidth={2} />
+              {mention.label}
+            </button>
+          </div>
+        )}
         <div
           className={cn(
             "relative flex flex-col rounded-2xl border bg-card shadow-soft-sm transition-all",
