@@ -13,3 +13,4 @@ python-dotenv
 authlib
 google-auth
 requests
+pgvector>=0.3.0

@@ -15,7 +15,7 @@ from alembic import context
 
 from app.config import get_settings
 from app.database import Base
-from app.models import User, Conversation, Message  # noqa: F401 - needed so Base.metadata has all tables for autogenerate
+from app.models import User, Conversation, Message, MemoryChunk  # noqa: F401 - needed so Base.metadata has all tables for autogenerate
 
 config = context.config
 
