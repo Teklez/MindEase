@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import uuid
 
@@ -8,9 +9,48 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.database import async_session_maker
 from app.models import Conversation, Message
 from app.models.mood_entry import MoodEntry
 from app.services.ai_client import AIClient
+from app.services.memory_service import memory_service
+from app.services.profile_service import profile_service
+
+
+def _format_chunks(chunks: list) -> str:
+    """Render retrieved MemoryChunks as `[YYYY-MM-DD, kind] text` lines so the LLM
+    can cite them by time."""
+    lines: list[str] = []
+    for c in chunks:
+        d = c.created_at.date().isoformat()
+        text = (c.text or "").strip().replace("\n", " ")
+        if len(text) > 500:
+            text = text[:497] + "..."
+        lines.append(f"[{d}, {c.source_kind}] {text}")
+    return "\n".join(lines)
+
+
+async def _background_index_ai_message(
+    *, user_id: uuid.UUID, conversation_id: uuid.UUID,
+    message_id: uuid.UUID, text: str,
+) -> None:
+    """Embed and index an AI message in a fresh session, after the request has closed."""
+    if not text or not text.strip():
+        return
+    try:
+        async with async_session_maker() as db:
+            await memory_service.index(
+                db,
+                user_id=user_id,
+                source_kind="message",
+                source_id=message_id,
+                conversation_id=conversation_id,
+                text=text,
+                attrs={"sender": "ai"},
+            )
+            await db.commit()
+    except Exception as exc:
+        logger.warning("background ai-message index failed: %s", exc)
 
 
 def _simple_emotion_to_mood(text: str) -> int:
@@ -154,8 +194,20 @@ Core rules:
             await db.commit()
             await db.refresh(user_message)
 
-            # 3. Call ai_client.check_crisis(content)
-            crisis_result = await self.ai_client.check_crisis(content)
+            # 3. Parallel: crisis check + user-content embedding
+            crisis_task = asyncio.create_task(self.ai_client.check_crisis(content))
+            embed_task = asyncio.create_task(self.ai_client.embed([content]))
+            user_vec: list[float] | None
+            try:
+                crisis_result, vecs = await asyncio.gather(crisis_task, embed_task)
+                user_vec = vecs[0] if vecs else None
+            except Exception as exc:
+                logger.warning("embed/crisis parallel failed: %s", exc)
+                try:
+                    crisis_result = await self.ai_client.check_crisis(content)
+                except Exception:
+                    crisis_result = {"is_crisis": False}
+                user_vec = None
 
             # 4. If crisis detected: flag and yield crisis_alert
             if crisis_result.get("is_crisis"):
@@ -167,16 +219,58 @@ Core rules:
                     "resources": crisis_result.get("resources", {}),
                 }
 
-            # 5. Build conversation context (last 15 messages, oldest first)
+            # 4a. Index the user message chunk (reuse the embedding from step 3).
+            if user_vec is not None:
+                try:
+                    await memory_service.index(
+                        db,
+                        user_id=user_id,
+                        source_kind="message",
+                        source_id=user_message.message_id,
+                        conversation_id=conversation_id,
+                        text=content,
+                        embedding=user_vec,
+                        attrs={"sender": "user", "lang": user_lang},
+                    )
+                    await db.commit()
+                except Exception as exc:
+                    logger.warning("index user message failed: %s", exc)
+
+            # 5. Build layered conversation context.
+            profile_block = await profile_service.build_profile_block(db, user_id)
+            retrieved: list = []
+            if user_vec is not None:
+                try:
+                    retrieved = await memory_service.retrieve(
+                        db,
+                        user_id=user_id,
+                        query_vec=user_vec,
+                        k=6,
+                        kinds=["message", "mood_note", "assessment_result", "summary", "profile_fact"],
+                        exclude_conversation_id=conversation_id,
+                    )
+                except Exception as exc:
+                    logger.warning("retrieve failed: %s", exc)
+
+            # Last 10 messages of the current conversation, oldest first.
             msg_result = await db.execute(
                 select(Message)
                 .where(Message.conversation_id == conversation_id)
                 .order_by(Message.timestamp.desc())
-                .limit(15)
+                .limit(10)
             )
             last_messages = list(reversed(msg_result.scalars().all()))
+
+            system_blocks: list[str] = [self.SYSTEM_PROMPT]
+            if profile_block:
+                system_blocks.append("## About this user\n" + profile_block)
+            if retrieved:
+                system_blocks.append(
+                    "## Relevant past moments\n" + _format_chunks(retrieved)
+                )
+
             context = [
-                {"role": "system", "content": self.SYSTEM_PROMPT},
+                {"role": "system", "content": "\n\n".join(system_blocks)},
                 *[
                     {
                         "role": "user" if m.sender_type == "user" else "assistant",
@@ -203,6 +297,16 @@ Core rules:
             db.add(ai_message)
             await db.commit()
             await db.refresh(ai_message)
+
+            # Index the AI message in the background — must not delay the `done` event.
+            asyncio.create_task(
+                _background_index_ai_message(
+                    user_id=user_id,
+                    conversation_id=conversation_id,
+                    message_id=ai_message.message_id,
+                    text=full_text,
+                )
+            )
 
             conversation.last_message_at = ai_message.timestamp
             prev_total = conversation.total_messages or 0

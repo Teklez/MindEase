@@ -1,3 +1,5 @@
+import asyncio
+import logging
 from collections import defaultdict
 from datetime import datetime, timezone
 from uuid import UUID
@@ -5,6 +7,7 @@ from uuid import UUID
 from sqlalchemy import desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.database import async_session_maker
 from app.models.assessment import Assessment, UserAssessment
 from app.models.resource import Resource, UserResource
 from app.schemas.assessment import (
@@ -16,6 +19,9 @@ from app.schemas.assessment import (
 )
 from app.schemas.mood import BadgeResponse
 from app.services.badge_service import BadgeService
+from app.services.memory_service import memory_service
+
+logger = logging.getLogger(__name__)
 
 _badge_service = BadgeService()
 
@@ -154,6 +160,16 @@ class AssessmentService:
         await db.flush()
         await db.refresh(ua)
 
+        if ua.feedback_text and ua.feedback_text.strip():
+            asyncio.create_task(_background_index_assessment(
+                user_id=user_id,
+                user_assessment_id=ua.user_assessment_id,
+                assessment_type=assessment.assessment_type,
+                feedback_text=ua.feedback_text,
+                feedback_level=ua.feedback_level,
+                score=ua.score,
+            ))
+
         # Recommended resources from the library (un-viewed first, capped to 3)
         recommended_resources = await self._recommend_resources(
             db, user_id, assessment.assessment_type
@@ -284,6 +300,37 @@ class AssessmentService:
             new_badges=[],
         )
 
+    async def latest_per_type(
+        self, db: AsyncSession, user_id: UUID
+    ) -> list[tuple[str, "UserAssessment"]]:
+        """Returns the most recent UserAssessment per Assessment.assessment_type,
+        as a list of (type_name, UserAssessment) tuples.
+        """
+        result = await db.execute(
+            select(UserAssessment, Assessment.assessment_type)
+            .join(Assessment, UserAssessment.assessment_id == Assessment.assessment_id)
+            .where(UserAssessment.user_id == user_id)
+            .order_by(desc(UserAssessment.completed_at))
+        )
+        seen: dict[str, UserAssessment] = {}
+        for ua, atype in result.all():
+            if atype not in seen:
+                seen[atype] = ua
+        return list(seen.items())
+
+    async def format_latest_block(
+        self, db: AsyncSession, user_id: UUID
+    ) -> str:
+        """One-line per assessment. Empty string if the user has never completed any."""
+        rows = await self.latest_per_type(db, user_id)
+        if not rows:
+            return ""
+        lines: list[str] = []
+        for atype, ua in rows:
+            d = ua.completed_at.date().isoformat()
+            lines.append(f"{atype}: {ua.feedback_level} ({ua.score}) — completed {d}")
+        return "\n".join(lines)
+
     async def _recommend_resources(
         self, db: AsyncSession, user_id: UUID, assessment_type: str
     ) -> list[dict]:
@@ -326,6 +373,32 @@ class AssessmentService:
         return out
 
 
+async def _background_index_assessment(
+    *, user_id, user_assessment_id, assessment_type: str,
+    feedback_text: str, feedback_level: str, score: int,
+) -> None:
+    try:
+        async with async_session_maker() as db:
+            await memory_service.index(
+                db,
+                user_id=user_id,
+                source_kind="assessment_result",
+                source_id=user_assessment_id,
+                text=feedback_text,
+                attrs={
+                    "assessment_type": assessment_type,
+                    "feedback_level": feedback_level,
+                    "score": score,
+                },
+            )
+            await db.commit()
+    except Exception as exc:
+        logger.warning("index assessment_result failed: %s", exc)
+
+
 # Helper for serializing BadgeResponse safely
 def _badge_to_dict(badge: BadgeResponse) -> dict:
     return badge.model_dump()
+
+
+assessment_service = AssessmentService()
