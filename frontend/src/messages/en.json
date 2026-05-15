@@ -280,7 +280,7 @@
     "connectionLost": "Connection lost. Reconnecting...",
     "connectionFailed": "Unable to connect. Please refresh the page.",
     "deleteConfirm": "Delete this conversation?",
-    "deleteConfirmDescription": "This action cannot be undone.",
+    "deleteConfirmDescription": "This permanently removes the conversation and all its messages. This cannot be undone.",
     "conversationCreated": "Conversation created",
     "conversationDeleted": "Conversation deleted",
     "backToChatList": "Back to chat list",

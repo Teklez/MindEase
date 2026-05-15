@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     FRONTEND_URL: str = "http://localhost:3000"
     REDIS_URL: str = "redis://localhost:6379/0"
     AI_SERVICE_URL: str = "http://ai-service:8001"
+    GEMINI_API_KEY: str = ""
+    GEMINI_LIVE_MODEL: str = "models/gemini-2.5-flash-native-audio-latest"
 
     class Config:
         env_file = ".env"

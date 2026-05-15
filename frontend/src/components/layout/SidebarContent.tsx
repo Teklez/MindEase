@@ -89,11 +89,16 @@ export default function SidebarContent({
   };
 
   const handleDeleteConfirm = async () => {
-    if (deleteConfirmId) {
-      await deleteConversation(deleteConfirmId);
-      toast({ title: tChat("conversationDeleted") });
-      setDeleteConfirmId(null);
+    if (!deleteConfirmId) return;
+    const wasActive = deleteConfirmId === currentConversationId;
+    const res = await deleteConversation(deleteConfirmId);
+    setDeleteConfirmId(null);
+    if (!res.ok) {
+      toast({ title: tChat("messageFailed"), variant: "destructive" });
+      return;
     }
+    toast({ title: tChat("conversationDeleted") });
+    if (wasActive) router.push("/chat");
   };
 
   const handleLogout = () => {
@@ -158,7 +163,7 @@ export default function SidebarContent({
         </div>
 
         {/* Middle: Conversations */}
-        <ScrollArea className="flex-1 min-h-0">
+        <ScrollArea className="flex-1 min-h-0 [&>div>div]:!block">
           <div className={cn("p-2", collapsed && "px-0 flex flex-col items-center")}>
             {!collapsed && (
               <p className="mb-2 px-3 text-xs font-medium text-muted-foreground">{tChat("conversations")}</p>

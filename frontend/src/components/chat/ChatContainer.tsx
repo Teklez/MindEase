@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Phone } from "lucide-react";
 import type { CrisisResources, Message } from "@/lib/types";
 import { getConversation } from "@/lib/api";
 import { useWebSocket } from "@/hooks/useWebSocket";
@@ -32,6 +32,8 @@ export default function ChatContainer({ conversationId }: ChatContainerProps) {
   const [crisisResources, setCrisisResources] = useState<CrisisResources | null>(null);
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState<string>("Chat");
+  const [conversationType, setConversationType] = useState<"text" | "voice">("text");
+  const [personaName, setPersonaName] = useState<string | null>(null);
   const refreshConversations = useConversationsRefresh();
 
   const handleWebSocketEvent = useCallback(
@@ -120,6 +122,8 @@ export default function ChatContainer({ conversationId }: ChatContainerProps) {
       if (res.ok) {
         setMessages(res.data.messages as Message[]);
         setTitle(res.data.title || tChat("newChat"));
+        setConversationType(res.data.conversation_type ?? "text");
+        setPersonaName(res.data.attrs?.persona_name ?? null);
       }
     });
     return () => {
@@ -201,14 +205,28 @@ export default function ChatContainer({ conversationId }: ChatContainerProps) {
           </span>
         )}
       </div>
-      {connectionStatus === "connecting" && (
+      {connectionStatus === "connecting" && conversationType !== "voice" && (
         <p className="shrink-0 bg-muted py-1.5 text-center text-xs text-muted-foreground">
           {tChat("connecting")}
         </p>
       )}
-      {connectionStatus === "error" && (
+      {connectionStatus === "error" && conversationType !== "voice" && (
         <div className="shrink-0 border-b border-destructive/20 bg-destructive/10 py-2 px-4 text-center text-sm text-destructive">
           {tChat("connectionProblem")}
+        </div>
+      )}
+      {conversationType === "voice" && (
+        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border bg-muted/40 px-4 py-2">
+          <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+            Voice conversation · {personaName ?? "Avatar"}
+          </p>
+          <Link
+            href={`/avatar?conversation=${conversationId}`}
+            className="inline-flex items-center gap-1.5 rounded-md border border-primary/60 bg-primary/10 px-2.5 py-1 text-xs text-primary hover:bg-primary/15"
+          >
+            <Phone className="h-3.5 w-3.5" strokeWidth={1.75} />
+            Continue this call
+          </Link>
         </div>
       )}
     </>
@@ -246,8 +264,10 @@ export default function ChatContainer({ conversationId }: ChatContainerProps) {
     return (
       <div className="flex h-full flex-col">
         {header}
-        <StarterPrompts onSelect={handleSend} />
-        <ChatInput onSend={handleSend} disabled={isStreaming || isWaitingForResponse} />
+        {conversationType !== "voice" && <StarterPrompts onSelect={handleSend} />}
+        {conversationType !== "voice" && (
+          <ChatInput onSend={handleSend} disabled={isStreaming || isWaitingForResponse} />
+        )}
       </div>
     );
   }
@@ -266,7 +286,9 @@ export default function ChatContainer({ conversationId }: ChatContainerProps) {
         isWaitingForResponse={isWaitingForResponse}
         crisisBanner={crisisBannerNode}
       />
-      <ChatInput onSend={handleSend} disabled={isStreaming || isWaitingForResponse} />
+      {conversationType !== "voice" && (
+        <ChatInput onSend={handleSend} disabled={isStreaming || isWaitingForResponse} />
+      )}
     </div>
   );
 }

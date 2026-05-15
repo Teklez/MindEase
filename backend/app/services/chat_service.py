@@ -5,12 +5,12 @@ import uuid
 from fastapi import HTTPException, status
 
 logger = logging.getLogger(__name__)
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.database import async_session_maker
-from app.models import Conversation, Message
+from app.models import Conversation, MemoryChunk, Message
 from app.models.mood_entry import MoodEntry
 from app.services.ai_client import AIClient
 from app.services.memory_service import memory_service
@@ -121,11 +121,10 @@ Core rules:
     async def get_user_conversations(
         self, db: AsyncSession, user_id: uuid.UUID
     ) -> list[Conversation]:
-        """Get all non-archived conversations for a user, newest first."""
+        """Get all conversations for a user, newest first."""
         result = await db.execute(
             select(Conversation)
             .where(Conversation.user_id == user_id)
-            .where(Conversation.status != "archived")
             .order_by(Conversation.last_message_at.desc())
         )
         return list(result.scalars().all())
@@ -345,13 +344,14 @@ Core rules:
                 "content": "I'm having trouble right now. Please try again in a moment.",
             }
 
-    async def archive_conversation(
+    async def delete_conversation(
         self,
         db: AsyncSession,
         conversation_id: uuid.UUID,
         user_id: uuid.UUID,
     ) -> None:
-        """Set conversation status to 'archived'. Verify ownership."""
+        """Permanently delete a conversation, all its messages (cascade via FK),
+        and every memory_chunks row tied to it for this user. Atomic."""
         result = await db.execute(
             select(Conversation).where(
                 Conversation.conversation_id == conversation_id
@@ -368,7 +368,23 @@ Core rules:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Not allowed to access this conversation",
             )
-        conversation.status = "archived"
+        # memory_chunks has no FK to conversations, so cascade can't help — scrub
+        # explicitly. Scope by user_id too as defense in depth.
+        await db.execute(
+            delete(MemoryChunk).where(
+                MemoryChunk.user_id == user_id,
+                MemoryChunk.conversation_id == conversation_id,
+            )
+        )
+        # Bypass ORM relationship handling (which would try to null out
+        # messages.conversation_id before delete and violate NOT NULL).
+        # The DB-level ondelete=CASCADE on messages_conversation_id_fkey
+        # handles message cleanup.
+        await db.execute(
+            delete(Conversation).where(
+                Conversation.conversation_id == conversation_id
+            )
+        )
         await db.commit()
 
     async def update_conversation_title(

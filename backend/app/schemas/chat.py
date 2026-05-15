@@ -37,6 +37,8 @@ class ConversationResponse(BaseModel):
     status: str
     total_messages: int
     crisis_detected: bool
+    conversation_type: str = "text"
+    attrs: dict | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

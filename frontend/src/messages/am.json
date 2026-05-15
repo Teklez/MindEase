@@ -280,7 +280,7 @@
     "connectionLost": "ግንኙነት ጠፍቷል። እንደገና በመገናኘት ላይ...",
     "connectionFailed": "መገናኘት አልተቻለም። እባክዎ ገጹን ያድሱ።",
     "deleteConfirm": "ይህን ውይይት ይሰርዙ?",
-    "deleteConfirmDescription": "ይህ ድርጊት ሊቀለበስ አይችልም።",
+    "deleteConfirmDescription": "ይህ ውይይትን እና ሁሉንም መልዕክቶቹን በቋሚነት ያስወግዳል። ሊቀለበስ አይችልም።",
     "conversationCreated": "ውይይት ተፈጥሯል",
     "conversationDeleted": "ውይይት ተሰርዟል",
     "backToChatList": "ወደ ውይይት ዝርዝር ተመለስ",

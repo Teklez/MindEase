@@ -96,6 +96,13 @@ export type ConversationResponse = {
   status: string;
   total_messages: number;
   crisis_detected: boolean;
+  conversation_type: "text" | "voice";
+  attrs: {
+    persona_id?: string;
+    persona_name?: string;
+    persona_blurb?: string;
+    voice?: string;
+  } | null;
 };
 
 export type MessageResponse = {
@@ -137,7 +144,7 @@ export async function updateConversation(
   });
 }
 
-export async function archiveConversation(conversationId: string): Promise<ApiResponse<null>> {
+export async function deleteConversation(conversationId: string): Promise<ApiResponse<null>> {
   return apiRequest(`/api/v1/chat/conversations/${conversationId}`, { method: "DELETE" });
 }
 
@@ -400,4 +407,17 @@ export async function getGroupUnreadSummary(): Promise<
   ApiResponse<import("@/lib/types").GroupUnreadSummary>
 > {
   return apiRequest("/api/v1/groups/unread-summary");
+}
+
+export async function createVoiceConversation(body: {
+  persona_id: string;
+  persona_name: string;
+  persona_blurb: string;
+  voice: string;
+  conversation_id?: string | null;
+}): Promise<ApiResponse<ConversationResponse>> {
+  return apiRequest("/api/v1/voice/conversations", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
 }

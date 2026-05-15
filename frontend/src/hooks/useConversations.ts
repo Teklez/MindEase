@@ -4,7 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import {
   getChatConversations,
   createConversation as createConversationApi,
-  archiveConversation,
+  deleteConversation as deleteConversationApi,
+  type ApiResponse,
 } from "@/lib/api";
 import type { Conversation } from "@/lib/types";
 
@@ -12,7 +13,7 @@ export function useConversations(): {
   conversations: Conversation[];
   isLoading: boolean;
   createConversation: () => Promise<Conversation | null>;
-  deleteConversation: (id: string) => Promise<void>;
+  deleteConversation: (id: string) => Promise<ApiResponse<null>>;
   refresh: () => Promise<void>;
 } {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -39,8 +40,9 @@ export function useConversations(): {
   }, []);
 
   const deleteConversation = useCallback(async (id: string) => {
-    const res = await archiveConversation(id);
+    const res = await deleteConversationApi(id);
     if (res.ok) setConversations((prev) => prev.filter((c) => c.conversation_id !== id));
+    return res;
   }, []);
 
   return {

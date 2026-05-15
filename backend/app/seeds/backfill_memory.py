@@ -18,12 +18,11 @@ BATCH = 100
 
 
 async def _backfill_messages(db) -> int:
-    """Embed and index every existing non-empty Message from non-archived conversations."""
+    """Embed and index every existing non-empty Message."""
     total = 0
     result = await db.execute(
         select(Message, Conversation.user_id)
         .join(Conversation, Message.conversation_id == Conversation.conversation_id)
-        .where(Conversation.status != "archived")
         .order_by(Message.timestamp)
     )
     batch: list[IndexItem] = []
