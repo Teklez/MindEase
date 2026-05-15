@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1440" />
+<title>MindEase — Inside a circle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Noto+Sans+Ethiopic:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg: oklch(0.985 0.005 130);
+    --bg-tint: oklch(0.965 0.012 150);
+    --bg-deep: oklch(0.93 0.018 150);
+    --ink: oklch(0.22 0.015 160);
+    --ink-2: oklch(0.36 0.014 160);
+    --ink-mute: oklch(0.50 0.012 160);
+    --ink-soft: oklch(0.62 0.010 160);
+    --line: oklch(0.90 0.010 150);
+    --line-strong: oklch(0.83 0.014 150);
+    --sage: oklch(0.52 0.045 155);
+    --sage-deep: oklch(0.38 0.045 155);
+    --sage-soft: oklch(0.92 0.022 150);
+    --clay: oklch(0.62 0.10 30);
+    --clay-soft: oklch(0.94 0.035 30);
+    --honey: oklch(0.72 0.08 80);
+    --honey-soft: oklch(0.95 0.030 80);
+    --dawn: oklch(0.66 0.07 280);
+    --dawn-soft: oklch(0.94 0.025 290);
+    --online: oklch(0.62 0.13 145);
+    --idle: oklch(0.78 0.10 80);
+
+    --serif: "Source Serif 4", Georgia, serif;
+    --sans: "Inter", system-ui, sans-serif;
+    --mono: "Geist Mono", ui-monospace, Menlo, monospace;
+    --r-sm: 6px; --r-md: 10px; --r-lg: 16px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  svg{display:block}
+  button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:inherit}
+
+  .design-note{margin:24px 24px 0;position:relative;border:1px dashed var(--line-strong);background:var(--bg);border-radius:var(--r-md);padding:14px 18px 14px 44px;color:var(--ink-2);font-size:13px}
+  .design-note::before{content:"i";position:absolute;left:14px;top:14px;width:20px;height:20px;border-radius:999px;background:var(--sage-soft);color:var(--sage-deep);display:grid;place-items:center;font-family:var(--serif);font-style:italic;font-size:13px}
+  .design-note b{color:var(--ink);font-weight:600}
+
+  /* === Top global nav (short, matches other mockups) === */
+  .topnav{height:60px;border-bottom:1px solid var(--line);background:var(--bg);display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:24px;padding:0 28px}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-size:18px;font-weight:500;letter-spacing:-.005em}
+  .brand-mark{width:26px;height:26px;border-radius:7px;background:var(--sage);color:#fff;display:grid;place-items:center}
+  .nav-links{display:flex;justify-content:center;gap:2px;height:100%}
+  .nav-link{display:inline-flex;align-items:center;gap:8px;padding:0 13px;height:100%;font-size:14px;color:var(--ink-2);font-weight:500;position:relative}
+  .nav-link.active{color:var(--sage-deep)}
+  .nav-link.active::after{content:"";position:absolute;left:13px;right:13px;bottom:-1px;height:2px;background:var(--sage);border-radius:2px 2px 0 0}
+  .top-right{display:flex;align-items:center;gap:10px}
+  .top-ic{width:34px;height:34px;border-radius:999px;background:var(--bg-tint);border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-2)}
+  .user-pill{display:inline-flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;border-radius:999px;background:var(--bg-tint);border:1px solid var(--line)}
+  .av{width:28px;height:28px;border-radius:999px;background:var(--sage);color:#fff;display:grid;place-items:center;font-weight:600;font-size:12px;flex:none}
+
+  /* === ROOM SHELL — three columns === */
+  .shell{display:grid;grid-template-columns:268px 1fr 296px;height:calc(100vh - 60px)}
+
+  /* === LEFT RAIL (Discord-inspired channels but called "rooms") === */
+  .rail{background:var(--bg);border-right:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden}
+  .rail-head{padding:18px 20px 12px;border-bottom:1px solid var(--line)}
+  .rail-back{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--ink-mute);text-transform:uppercase;margin-bottom:14px}
+  .rail-back:hover{color:var(--ink)}
+  .circle-id{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .circle-icon{width:38px;height:38px;border-radius:10px;background:var(--sage-soft);color:var(--sage-deep);display:grid;place-items:center;flex:none}
+  .circle-meta{min-width:0}
+  .circle-meta .title{font-family:var(--serif);font-size:16px;font-weight:500;letter-spacing:-.005em;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .circle-meta .sub{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--ink-mute);text-transform:uppercase;margin-top:2px;display:flex;align-items:center;gap:6px}
+  .circle-meta .pulse{width:5px;height:5px;border-radius:999px;background:var(--online);box-shadow:0 0 0 2px color-mix(in oklab, var(--online) 35%, transparent)}
+  .rail-info{padding:12px 16px;display:flex;gap:6px;border-bottom:1px solid var(--line)}
+  .info-pill{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 6px;background:var(--bg-tint);border:1px solid var(--line);border-radius:var(--r-sm);min-width:0}
+  .info-pill .v{font-family:var(--serif);font-size:18px;font-weight:400;letter-spacing:-.01em;color:var(--ink);line-height:1.1}
+  .info-pill .l{font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--ink-mute);text-transform:uppercase;margin-top:3px}
+
+  .rail-section{padding:14px 8px 0;display:flex;flex-direction:column;gap:1px}
+  .rail-h{display:flex;align-items:center;justify-content:space-between;padding:6px 12px 4px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--ink-mute);text-transform:uppercase;font-weight:500}
+  .rail-h .add{width:18px;height:18px;border-radius:5px;background:transparent;color:var(--ink-mute);display:grid;place-items:center}
+  .rail-h .add:hover{background:var(--bg-tint);color:var(--ink)}
+  .room{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:7px;color:var(--ink-2);font-size:13.5px;cursor:pointer;position:relative}
+  .room:hover{background:var(--bg-tint);color:var(--ink)}
+  .room .hash{color:var(--ink-soft);font-family:var(--mono);font-size:13px;flex:none}
+  .room.active{background:var(--sage-soft);color:var(--sage-deep);font-weight:500}
+  .room.active .hash{color:var(--sage-deep)}
+  .room .count{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--ink-mute);background:var(--bg-tint);border:1px solid var(--line);padding:1px 6px;border-radius:999px}
+  .room.active .count{background:var(--bg);color:var(--sage-deep);border-color:transparent}
+  .room.unread::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:2px;background:var(--sage);border-radius:0 2px 2px 0}
+  .room.unread{color:var(--ink);font-weight:500}
+  .room .dot{width:6px;height:6px;border-radius:999px;background:var(--sage);margin-left:auto;flex:none}
+
+  .rail-event{margin:14px 12px 0;padding:14px;background:linear-gradient(180deg,var(--sage-soft) 0%,var(--bg-tint) 100%);border:1px solid var(--line);border-radius:var(--r-md);position:relative;overflow:hidden}
+  .rail-event::before{content:"";position:absolute;right:-30px;top:-30px;width:100px;height:100px;border-radius:50%;background:color-mix(in oklab,var(--sage) 25%,transparent);filter:blur(30px)}
+  .rail-event .e{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--sage-deep);text-transform:uppercase;margin-bottom:6px;position:relative}
+  .rail-event .t{font-family:var(--serif);font-size:14px;font-weight:500;line-height:1.3;margin-bottom:4px;position:relative}
+  .rail-event .s{font-size:11.5px;color:var(--ink-2);line-height:1.4;position:relative}
+  .rail-event .cta{margin-top:10px;display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--sage-deep);position:relative}
+
+  .rail-foot{margin-top:auto;padding:10px 14px;border-top:1px solid var(--line);display:flex;align-items:center;gap:9px;background:var(--bg)}
+  .rail-foot .name{font-size:13px;font-weight:500;line-height:1.2}
+  .rail-foot .status{font-family:var(--mono);font-size:10px;color:var(--ink-mute);letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;gap:5px}
+  .rail-foot .status .d{width:5px;height:5px;border-radius:999px;background:var(--online)}
+  .av-online{position:relative}
+  .av-online::after{content:"";position:absolute;right:-1px;bottom:-1px;width:9px;height:9px;border-radius:999px;background:var(--online);border:2px solid var(--bg)}
+
+  /* === CENTER COLUMN === */
+  .main{background:var(--bg-tint);display:flex;flex-direction:column;min-width:0;overflow:hidden}
+  .room-head{background:var(--bg);border-bottom:1px solid var(--line);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .room-head-l{display:flex;align-items:center;gap:14px;min-width:0}
+  .room-head .hash{font-family:var(--mono);font-size:18px;color:var(--ink-soft);font-weight:400}
+  .room-head h2{font-family:var(--serif);font-size:18px;font-weight:500;letter-spacing:-.005em;margin:0}
+  .room-head .topic{font-size:13px;color:var(--ink-mute);border-left:1px solid var(--line);padding-left:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:40ch}
+  .room-head-r{display:flex;align-items:center;gap:6px;flex:none}
+  .tab-row{display:flex;gap:0;border-bottom:1px solid var(--line);background:var(--bg);padding:0 28px}
+  .tab{padding:12px 18px;font-size:13px;color:var(--ink-mute);font-weight:500;border-bottom:2px solid transparent;margin-bottom:-1px;display:inline-flex;align-items:center;gap:8px}
+  .tab:hover{color:var(--ink)}
+  .tab.on{color:var(--ink);border-bottom-color:var(--sage)}
+  .tab .badge{font-family:var(--mono);font-size:10px;background:var(--bg-tint);color:var(--ink-mute);padding:1px 6px;border-radius:999px;border:1px solid var(--line)}
+  .tab.on .badge{background:var(--sage-soft);color:var(--sage-deep);border-color:transparent}
+  .sort-row{padding:14px 28px 6px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .sort{display:inline-flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);padding:5px 10px;font-size:12.5px;color:var(--ink-2);font-weight:500}
+  .sort.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .sort:hover:not(.on){border-color:var(--line-strong);color:var(--ink)}
+  .sort-tag{margin-left:auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--ink-mute);text-transform:uppercase}
+  .sort-tag b{color:var(--ink);font-weight:500;font-style:normal}
+
+  /* Feed area */
+  .feed{flex:1;overflow-y:auto;padding:18px 28px 40px;display:flex;flex-direction:column;gap:14px}
+
+  /* Pinned banner */
+  .pinned{background:var(--bg);border:1px solid var(--line);border-radius:var(--r-md);padding:14px 18px;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:start;position:relative}
+  .pinned::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;background:var(--honey);border-radius:0 3px 3px 0}
+  .pinned .ic{width:32px;height:32px;border-radius:999px;background:var(--honey-soft);color:oklch(0.45 0.08 80);display:grid;place-items:center;flex:none}
+  .pinned .e{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--ink-mute);text-transform:uppercase;margin-bottom:4px}
+  .pinned .t{font-family:var(--serif);font-size:15.5px;font-weight:500;line-height:1.35}
+  .pinned .s{font-size:12.5px;color:var(--ink-mute);margin-top:4px}
+  .pinned .open{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--sage-deep);text-transform:uppercase;display:flex;align-items:center;gap:5px;align-self:center}
+
+  /* === POST (Reddit-inspired structure, MindEase tone) === */
+  .post{background:var(--bg);border:1px solid var(--line);border-radius:var(--r-md);padding:16px 18px 14px;display:grid;grid-template-columns:42px 1fr;gap:14px;transition:border-color .15s ease}
+  .post:hover{border-color:var(--line-strong)}
+  .post.feat{background:var(--sage-soft);border-color:color-mix(in oklab,var(--sage) 25%, transparent)}
+  .author-col{display:flex;flex-direction:column;align-items:center;gap:5px}
+  .author-col .av{width:36px;height:36px;font-size:13px}
+  .author-col .av.anon{background:var(--bg-tint);border:1px dashed var(--line-strong);color:var(--ink-mute);font-family:var(--mono);font-size:14px}
+  .author-col .role{font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--sage-deep);text-transform:uppercase;background:var(--sage-soft);padding:1px 5px;border-radius:4px;margin-top:2px}
+  .author-col .role.mod{color:oklch(0.45 0.08 80);background:var(--honey-soft)}
+
+  .post-body{min-width:0}
+  .post-head{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ink-mute);margin-bottom:6px;flex-wrap:wrap}
+  .post-head b{color:var(--ink);font-weight:600;font-family:var(--sans);font-size:13px;letter-spacing:0}
+  .post-head .dot{width:3px;height:3px;border-radius:999px;background:var(--ink-soft)}
+  .post-head .pill{display:inline-flex;align-items:center;gap:5px;background:var(--bg-tint);border:1px solid var(--line);padding:1px 7px;border-radius:999px;color:var(--ink-2);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em}
+  .post-head .pill.cw{background:var(--clay-soft);border-color:transparent;color:oklch(0.42 0.10 30)}
+  .post-head .pill.win{background:var(--sage-soft);border-color:transparent;color:var(--sage-deep)}
+
+  .post h3{font-family:var(--serif);font-size:19px;font-weight:500;letter-spacing:-.012em;line-height:1.3;margin:0 0 6px;color:var(--ink)}
+  .post h3 em{font-style:italic;color:var(--sage-deep);font-weight:500}
+  .post .text{font-size:14.5px;color:var(--ink-2);line-height:1.6;margin:0}
+  .post .text p{margin:0 0 8px}
+  .post .text p:last-child{margin-bottom:0}
+  .post .text blockquote{margin:8px 0;padding:6px 0 6px 14px;border-left:2px solid var(--sage-soft);color:var(--ink-mute);font-style:italic;font-family:var(--serif);font-size:15px}
+  .post .body-img{margin-top:10px;border-radius:var(--r-sm);overflow:hidden;max-height:220px;border:1px solid var(--line)}
+  .post .body-img img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.85)}
+
+  /* Reactions row (Reddit/Discord blend, gentle wording) */
+  .react-row{margin-top:12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .react{display:inline-flex;align-items:center;gap:6px;background:var(--bg-tint);border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-size:12.5px;color:var(--ink-2);font-weight:500;transition:all .12s ease}
+  .react:hover{border-color:var(--line-strong);color:var(--ink);transform:translateY(-1px)}
+  .react .em{font-size:13px;line-height:1}
+  .react .n{font-family:var(--mono);font-size:11px;color:var(--ink-mute)}
+  .react.on{background:var(--sage-soft);border-color:color-mix(in oklab,var(--sage) 30%,transparent);color:var(--sage-deep)}
+  .react.on .n{color:var(--sage-deep)}
+  .react-more{width:28px;height:28px;border-radius:999px;background:transparent;border:1px solid var(--line);color:var(--ink-mute);display:grid;place-items:center}
+  .react-more:hover{background:var(--bg-tint);color:var(--ink)}
+  .react-actions{margin-left:auto;display:flex;align-items:center;gap:4px}
+  .react-actions button{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:7px;font-size:12.5px;color:var(--ink-mute);font-weight:500}
+  .react-actions button:hover{background:var(--bg-tint);color:var(--ink)}
+  .react-actions .reply{color:var(--ink-2)}
+
+  /* Replies preview */
+  .replies-prev{margin-top:10px;padding-top:10px;border-top:1px solid var(--bg-tint);display:flex;align-items:center;gap:10px}
+  .replies-prev .av-stack{display:flex}
+  .replies-prev .av-stack .av{width:22px;height:22px;font-size:9px;border:1.5px solid var(--bg);margin-left:-6px}
+  .replies-prev .av-stack .av:first-child{margin-left:0}
+  .replies-prev .copy{font-size:12.5px;color:var(--ink-mute);min-width:0;flex:1}
+  .replies-prev .copy b{color:var(--ink);font-weight:500}
+  .replies-prev .latest{font-family:var(--serif);font-style:italic;color:var(--ink-2)}
+  .replies-prev .expand{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--sage-deep);text-transform:uppercase;display:flex;align-items:center;gap:4px}
+
+  /* Inline reply (expanded thread) */
+  .thread{margin-top:10px;padding-top:14px;border-top:1px solid var(--bg-tint);display:flex;flex-direction:column;gap:12px}
+  .reply{display:grid;grid-template-columns:30px 1fr;gap:10px}
+  .reply .av{width:28px;height:28px;font-size:11px}
+  .reply .b{min-width:0}
+  .reply .h{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--ink-mute);margin-bottom:3px}
+  .reply .h b{color:var(--ink);font-weight:600;font-family:var(--sans);font-size:12.5px;letter-spacing:0}
+  .reply .t{font-size:13.5px;color:var(--ink-2);line-height:1.5}
+  .reply .acts{margin-top:4px;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--ink-mute);text-transform:uppercase}
+  .reply .acts button:hover{color:var(--ink)}
+  .reply .heart{display:inline-flex;align-items:center;gap:4px;color:var(--clay)}
+
+  .reply-composer{margin-top:6px;display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center}
+  .reply-composer input{width:100%;height:36px;border:1px solid var(--line);border-radius:999px;background:var(--bg-tint);padding:0 14px;font-family:var(--sans);font-size:13px;color:var(--ink)}
+  .reply-composer input::placeholder{color:var(--ink-soft)}
+  .reply-composer input:focus{outline:none;border-color:var(--sage);background:var(--bg)}
+  .reply-composer .send{width:36px;height:36px;border-radius:999px;background:var(--sage);color:#fff;display:grid;place-items:center}
+
+  /* Daily prompt card (special post type) */
+  .prompt-card{background:linear-gradient(180deg,var(--dawn-soft) 0%,var(--bg) 60%);border:1px solid color-mix(in oklab,var(--dawn) 28%,transparent);border-radius:var(--r-md);padding:18px 20px;position:relative;overflow:hidden}
+  .prompt-card::before{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;background:color-mix(in oklab,var(--dawn) 30%,transparent);filter:blur(40px)}
+  .prompt-card .e{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:oklch(0.42 0.07 280);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px;position:relative}
+  .prompt-card .e::before{content:"";width:16px;height:1px;background:oklch(0.42 0.07 280)}
+  .prompt-card h3{font-family:var(--serif);font-size:24px;font-weight:360;letter-spacing:-.015em;line-height:1.25;margin:0 0 6px;color:var(--ink);position:relative}
+  .prompt-card h3 em{font-style:italic;color:oklch(0.45 0.08 280);font-weight:360}
+  .prompt-card .s{font-size:13.5px;color:var(--ink-mute);position:relative;margin-bottom:14px}
+  .prompt-card .row{display:flex;gap:10px;flex-wrap:wrap;position:relative}
+  .prompt-card .row button{display:inline-flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--line);padding:7px 14px;border-radius:999px;font-size:13px;color:var(--ink);font-weight:500}
+  .prompt-card .row button.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .prompt-card .row .meta{margin-left:auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--ink-mute);display:flex;align-items:center;gap:6px;text-transform:uppercase}
+
+  /* Composer at bottom */
+  .composer-wrap{background:var(--bg);border-top:1px solid var(--line);padding:14px 28px 18px}
+  .composer{max-width:780px;margin:0 auto;background:var(--bg);border:1px solid var(--line-strong);border-radius:var(--r-md);padding:12px 14px;transition:all .15s ease}
+  .composer:focus-within{border-color:var(--sage);box-shadow:0 0 0 4px color-mix(in oklab,var(--sage) 12%,transparent)}
+  .composer-row1{display:flex;align-items:center;gap:8px;padding-bottom:8px;border-bottom:1px solid var(--bg-tint);flex-wrap:wrap}
+  .composer-title-input{flex:1;border:none;outline:none;font-family:var(--serif);font-size:16px;font-weight:500;letter-spacing:-.005em;color:var(--ink);background:transparent;min-width:120px}
+  .composer-title-input::placeholder{color:var(--ink-soft);font-style:italic}
+  .composer-tag-row{display:flex;gap:6px}
+  .composer-tag{display:inline-flex;align-items:center;gap:5px;background:var(--bg-tint);border:1px solid var(--line);padding:4px 9px;border-radius:999px;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--ink-mute);text-transform:uppercase}
+  .composer-tag.on{background:var(--sage-soft);border-color:transparent;color:var(--sage-deep)}
+  .composer-tag.on.cw{background:var(--clay-soft);color:oklch(0.42 0.10 30)}
+  .composer textarea{width:100%;border:none;outline:none;background:transparent;resize:none;font-family:var(--sans);font-size:14.5px;line-height:1.55;color:var(--ink);min-height:64px;padding:10px 0 6px}
+  .composer textarea::placeholder{color:var(--ink-soft)}
+  .composer-row2{display:flex;align-items:center;gap:6px;padding-top:6px;border-top:1px solid var(--bg-tint)}
+  .composer-tool{width:32px;height:32px;border-radius:7px;color:var(--ink-mute);display:grid;place-items:center}
+  .composer-tool:hover{background:var(--bg-tint);color:var(--ink)}
+  .composer-tool.anon{width:auto;padding:6px 11px;display:inline-flex;gap:6px;font-size:12.5px;color:var(--ink-2);border-radius:999px}
+  .composer-tool.anon .sw{width:24px;height:14px;background:var(--bg-deep);border-radius:999px;position:relative}
+  .composer-tool.anon .sw::after{content:"";position:absolute;top:1px;left:1px;width:12px;height:12px;background:var(--bg);border-radius:999px;transition:left .15s ease}
+  .composer-tool.anon.on .sw{background:var(--sage)}
+  .composer-tool.anon.on .sw::after{left:11px}
+  .composer-send{margin-left:auto;display:inline-flex;align-items:center;gap:6px;background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:var(--r-sm);font-size:13px;font-weight:500}
+  .composer-send:hover{background:var(--sage-deep)}
+  .composer-foot{max-width:780px;margin:8px auto 0;display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--ink-mute)}
+  .composer-foot .calm{display:inline-flex;align-items:center;gap:6px;color:var(--sage-deep)}
+
+  /* === RIGHT RAIL (member presence + group info) === */
+  .right{background:var(--bg);border-left:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden}
+  .right-head{padding:18px 20px 14px;border-bottom:1px solid var(--line)}
+  .right-head h3{font-family:var(--serif);font-size:16px;font-weight:500;letter-spacing:-.005em;margin:0}
+  .right-head .s{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--ink-mute);text-transform:uppercase;margin-top:4px;display:flex;align-items:center;gap:8px}
+  .right-head .s .d{width:5px;height:5px;border-radius:999px;background:var(--online)}
+  .right-search{padding:10px 16px 0}
+  .right-search input{width:100%;height:32px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--bg-tint);padding:0 12px;font-size:12.5px;color:var(--ink);font-family:var(--sans)}
+  .right-search input::placeholder{color:var(--ink-soft)}
+  .right-list{padding:12px 8px 0;overflow-y:auto;flex:1}
+  .mh{padding:6px 12px 6px;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--ink-mute);text-transform:uppercase;display:flex;align-items:center;justify-content:space-between}
+  .mh .ct{font-family:var(--mono);color:var(--ink-soft)}
+  .mb{display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:7px;cursor:pointer}
+  .mb:hover{background:var(--bg-tint)}
+  .mb .av{width:30px;height:30px;font-size:11px;position:relative}
+  .mb .av-online::after{width:9px;height:9px;border:2px solid var(--bg)}
+  .mb .av.idle::after{content:"";position:absolute;right:-1px;bottom:-1px;width:9px;height:9px;border-radius:999px;background:var(--idle);border:2px solid var(--bg)}
+  .mb .av.off::after{content:"";position:absolute;right:-1px;bottom:-1px;width:9px;height:9px;border-radius:999px;background:var(--ink-soft);border:2px solid var(--bg)}
+  .mb .name{font-size:13px;font-weight:500;color:var(--ink);line-height:1.2}
+  .mb .status{font-family:var(--mono);font-size:9.5px;color:var(--ink-mute);text-transform:uppercase;letter-spacing:.06em;margin-top:1px}
+  .mb.mod .name{display:flex;align-items:center;gap:6px}
+  .mb .badge{font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;color:oklch(0.45 0.08 80);background:var(--honey-soft);padding:0 5px;border-radius:3px;text-transform:uppercase;font-weight:600}
+  .mb.you .name{color:var(--sage-deep)}
+  .mb.you{background:var(--sage-soft)}
+  .mb .vibe{margin-left:auto;font-size:12px}
+
+  .right-info{margin:14px 12px;padding:14px;background:var(--bg-tint);border:1px solid var(--line);border-radius:var(--r-md);font-size:12.5px;color:var(--ink-2);line-height:1.5}
+  .right-info b{display:block;font-family:var(--serif);font-size:13px;color:var(--ink);margin-bottom:4px;font-weight:500;letter-spacing:-.005em}
+  .right-info a{color:var(--sage-deep);font-weight:500;border-bottom:1px solid var(--sage-soft)}
+
+</style>
+</head>
+<body>
+
+<div class="design-note">
+  <b>Inside a circle \u2014</b> Reddit's post-anatomy (title + body + reactions + threaded replies + tags) meets Discord's chrome (left channel rail, right presence column, top room header, persistent composer). Built for mental-health context: voting replaced with empathy reactions ("Felt this", "Holding space"), anonymous-post toggle, CW tags, daily-prompt cards, idle/online presence, moderator badges. 100% sage palette \u2014 only honey/dawn for pinned and prompt-card accents.
+</div>
+
+<!-- === Global top nav === -->
+<nav class="topnav">
+  <div class="brand"><span class="brand-mark"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c0-7 4-12 9-13-1 9-5 13-9 13Z"/><path d="M12 21c0-5-3-9-8-10 1 7 4 10 8 10Z"/></svg></span>MindEase</div>
+  <div class="nav-links">
+    <a class="nav-link" href="#"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Dashboard</a>
+    <a class="nav-link" href="#"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 21l1.8-5.5A8 8 0 1 1 21 12z"/></svg>Chat</a>
+    <a class="nav-link active" href="#"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><circle cx="17" cy="10" r="3"/><path d="M3 21a6 6 0 0 1 12 0"/><path d="M14 21a5 5 0 0 1 7-4.6"/></svg>Groups</a>
+    <a class="nav-link" href="#"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 1.5 4 1.5 4-1.5 4-1.5"/></svg>Mood</a>
+  </div>
+  <div class="top-right">
+    <button class="top-ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+    <button class="top-ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg></button>
+    <button class="user-pill"><span class="av">A</span><span style="font-size:13px;font-weight:500">Amelia</span></button>
+  </div>
+</nav>
+
+<!-- === ROOM SHELL === -->
+<div class="shell">
+
+  <!-- ============ LEFT RAIL ============ -->
+  <aside class="rail">
+    <div class="rail-head">
+      <a class="rail-back" href="#"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m11 18-6-6 6-6"/></svg>Back to circles</a>
+      <div class="circle-id">
+        <div class="circle-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 21l1.8-5.5A8 8 0 1 1 21 12z"/></svg></div>
+        <div class="circle-meta">
+          <div class="title">Tuesday Night Quiet Hour</div>
+          <div class="sub"><span class="pulse"></span>14 online \u00b7 312 members</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rail-info">
+      <div class="info-pill"><div class="v">312</div><div class="l">Members</div></div>
+      <div class="info-pill"><div class="v">14</div><div class="l">Online</div></div>
+      <div class="info-pill"><div class="v">9pm</div><div class="l">Tonight</div></div>
+    </div>
+
+    <div class="rail-section">
+      <div class="rail-h"><span>Rooms</span><button class="add"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg></button></div>
+      <div class="room active"><span class="hash">#</span>daily-check-in<span class="count">142</span></div>
+      <div class="room unread"><span class="hash">#</span>vent-room<span class="count">28</span></div>
+      <div class="room"><span class="hash">#</span>small-wins</div>
+      <div class="room unread"><span class="hash">#</span>resources<span class="dot"></span></div>
+      <div class="room"><span class="hash">#</span>introductions</div>
+      <div class="room"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ink-soft);flex:none"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>private-1-on-1s</div>
+    </div>
+
+    <div class="rail-section" style="margin-top:6px">
+      <div class="rail-h">Events</div>
+      <div class="room"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="color:var(--sage-deep);flex:none"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Quiet Hour \u00b7 9pm<span class="count" style="color:var(--sage-deep);background:var(--sage-soft);border-color:transparent">Tonight</span></div>
+      <div class="room"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ink-soft);flex:none"><path d="M12 2v4"/><path d="M12 18v4"/><circle cx="12" cy="12" r="6"/></svg>Breath workshop<span class="count">Fri</span></div>
+    </div>
+
+    <div class="rail-event">
+      <div class="e">— Starting in 4h</div>
+      <div class="t">Quiet Hour tonight</div>
+      <div class="s">Soft check-in \u2192 4-min breath \u2192 unstructured talk. No camera.</div>
+      <a class="cta" href="#">RSVP \u2192</a>
+    </div>
+
+    <div class="rail-foot">
+      <div class="av av-online" style="background:var(--clay)">A</div>
+      <div style="flex:1;min-width:0">
+        <div class="name">Amelia K.</div>
+        <div class="status"><span class="d"></span>Online \u00b7 feeling steady</div>
+      </div>
+      <button class="top-ic" style="width:30px;height:30px;background:transparent;border:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33"/></svg></button>
+    </div>
+  </aside>
+
+  <!-- ============ CENTER (FEED) ============ -->
+  <main class="main">
+
+    <div class="room-head">
+      <div class="room-head-l">
+        <span class="hash">#</span>
+        <h2>daily-check-in</h2>
+        <span class="topic">A soft place to land each day. One sentence. One face. No pressure.</span>
+      </div>
+      <div class="room-head-r">
+        <button class="top-ic" title="Pin"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M5 12V7a7 7 0 0 1 14 0v5"/><path d="M5 12h14l-2 5H7l-2-5z"/></svg></button>
+        <button class="top-ic" title="Members"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><circle cx="17" cy="10" r="3"/><path d="M3 21a6 6 0 0 1 12 0"/></svg></button>
+        <button class="top-ic" title="More"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="6" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="18" r="1.4"/></svg></button>
+      </div>
+    </div>
+
+    <div class="tab-row">
+      <button class="tab on"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12c0-5 4-9 9-9s9 4 9 9-4 9-9 9c-1.5 0-3-.4-4-1L3 21l1-5"/></svg>Posts<span class="badge">142</span></button>
+      <button class="tab"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M5 12V7a7 7 0 0 1 14 0v5"/><path d="M5 12h14l-2 5H7l-2-5z"/></svg>Pinned<span class="badge">3</span></button>
+      <button class="tab"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 13h6M9 17h4"/></svg>Resources</button>
+      <button class="tab"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Events</button>
+    </div>
+
+    <div class="sort-row">
+      <button class="sort on"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12c0-5 4-9 9-9s9 4 9 9-4 9-9 9c-1.5 0-3-.4-4-1L3 21l1-5"/></svg>Active</button>
+      <button class="sort"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>New</button>
+      <button class="sort"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4-7-11a7 7 0 0 1 14 0c0 7-7 11-7 11z"/></svg>Most cared for</button>
+      <button class="sort"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a4 4 0 0 1-4 4H8l-5 4V6a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>Most replies</button>
+      <span class="sort-tag">Filtering \u00b7 <b>Last 7 days</b></span>
+    </div>
+
+    <div class="feed">
+
+      <!-- Pinned banner -->
+      <div class="pinned">
+        <div class="ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M5 12V7a7 7 0 0 1 14 0v5"/><path d="M5 12h14l-2 5H7l-2-5z"/></svg></div>
+        <div>
+          <div class="e">\u2014 Pinned by Mira (moderator)</div>
+          <div class="t">A few gentle rules for this room.</div>
+          <div class="s">No advice unless asked. No diagnosing. We name what we feel before we name what to do. Read the full charter \u2192</div>
+        </div>
+        <a class="open" href="#">Open <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+      </div>
+
+      <!-- Daily prompt card -->
+      <div class="prompt-card">
+        <div class="e">Today's prompt \u00b7 Tuesday</div>
+        <h3>What's <em>one true thing</em> about how you woke up?</h3>
+        <p class="s">Not a story. Not a fix. One sentence is enough.</p>
+        <div class="row">
+          <button class="primary">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+            Answer the prompt
+          </button>
+          <button>Skip today</button>
+          <span class="meta"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><circle cx="17" cy="10" r="3"/><path d="M3 21a6 6 0 0 1 12 0"/></svg>27 answered today</span>
+        </div>
+      </div>
+
+      <!-- POST 1: Anonymous + CW tag -->
+      <article class="post">
+        <div class="author-col">
+          <div class="av anon">?</div>
+          <span class="role">Member</span>
+        </div>
+        <div class="post-body">
+          <div class="post-head">
+            <b>Anonymous member</b>
+            <span class="dot"></span>
+            <span>2h ago</span>
+            <span class="dot"></span>
+            <span>#daily-check-in</span>
+            <span class="pill cw"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.86a2 2 0 0 1 3.4 0l8.4 14a2 2 0 0 1-1.7 3H3.6a2 2 0 0 1-1.7-3Z"/></svg>CW: panic</span>
+          </div>
+          <h3>I made it out of bed. <em>That's the post.</em></h3>
+          <div class="text">
+            <p>Set the alarm 9 times. Body still felt like wet cement. I want to say something hopeful here but I don't have it today. I'm logging in. That counts. Tomorrow tomorrow.</p>
+          </div>
+          <div class="react-row">
+            <button class="react on"><span class="em">\ud83c\udf3f</span><span>Felt this</span><span class="n">23</span></button>
+            <button class="react"><span class="em">\ud83e\udd1d</span><span>Holding space</span><span class="n">11</span></button>
+            <button class="react"><span class="em">\ud83d\udd6f\ufe0f</span><span>Lighting a candle</span><span class="n">6</span></button>
+            <button class="react-more"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg></button>
+            <div class="react-actions">
+              <button class="reply"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a4 4 0 0 1-4 4H8l-5 4V6a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>Reply</button>
+              <button><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.5 0 2.5 1 2.5 2.5S20.5 19 19 19a2 2 0 0 1-2-2v-3"/><path d="M5 14c-1.5 0-2.5 1-2.5 2.5S3.5 19 5 19a2 2 0 0 0 2-2v-3"/></svg>Save</button>
+              <button><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="18" cy="12" r="1.4"/></svg></button>
+            </div>
+          </div>
+          <div class="thread">
+            <div class="reply">
+              <div class="av av-online" style="background:var(--honey);color:var(--ink)">M</div>
+              <div class="b">
+                <div class="h"><b>Mira</b><span class="badge" style="font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;color:oklch(0.45 0.08 80);background:var(--honey-soft);padding:0 5px;border-radius:3px;text-transform:uppercase;font-weight:600">Mod</span><span>2h ago</span></div>
+                <div class="t">Counts. That counts a hundred times. Glad you're here.</div>
+                <div class="acts">
+                  <span class="heart"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-8-4.5-8-12a5 5 0 0 1 8-4 5 5 0 0 1 8 4c0 7.5-8 12-8 12z"/></svg>8</span>
+                  <button>Reply</button>
+                </div>
+              </div>
+            </div>
+            <div class="reply">
+              <div class="av av-online" style="background:var(--dawn)">S</div>
+              <div class="b">
+                <div class="h"><b>Saba</b><span>1h ago</span></div>
+                <div class="t">Wet cement \u2014 yes. Going to borrow that phrase later. Thank you for posting.</div>
+                <div class="acts">
+                  <span class="heart"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-8-4.5-8-12a5 5 0 0 1 8-4 5 5 0 0 1 8 4c0 7.5-8 12-8 12z"/></svg>4</span>
+                  <button>Reply</button>
+                </div>
+              </div>
+            </div>
+            <div class="reply-composer">
+              <div class="av" style="background:var(--clay)">A</div>
+              <input type="text" placeholder="Write a kind reply\u2026" />
+              <button class="send"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- POST 2: Featured / Win -->
+      <article class="post feat">
+        <div class="author-col">
+          <div class="av av-online" style="background:var(--sage)">D</div>
+        </div>
+        <div class="post-body">
+          <div class="post-head">
+            <b>Daniel T.</b>
+            <span class="dot"></span>
+            <span>4h ago</span>
+            <span class="dot"></span>
+            <span>#small-wins (cross-post)</span>
+            <span class="pill win"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7 7 .6-5.3 4.7L18 22l-6-3.7L6 22l1.3-7.7L2 9.6 9 9z"/></svg>Small win</span>
+          </div>
+          <h3>Walked outside for ten minutes before <em>opening Slack.</em></h3>
+          <div class="text">
+            <p>Spring is finally a little warmer in Addis. Took the long way around the block. Watched a kid race their grandmother on a scooter. Sat down. Felt like a person for ten whole minutes before the rest of the day started swinging.</p>
+            <blockquote>"You don't have to feel ready. You just have to begin." \u2014 today's MindEase reflection.</blockquote>
+          </div>
+          <div class="react-row">
+            <button class="react on"><span class="em">\u2728</span><span>So glad for you</span><span class="n">42</span></button>
+            <button class="react"><span class="em">\ud83c\udf3f</span><span>Felt this</span><span class="n">17</span></button>
+            <button class="react"><span class="em">\ud83d\udc4f</span><span>Quiet applause</span><span class="n">9</span></button>
+            <button class="react-more"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg></button>
+            <div class="react-actions">
+              <button class="reply"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a4 4 0 0 1-4 4H8l-5 4V6a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>Reply</button>
+              <button><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.5 0 2.5 1 2.5 2.5S20.5 19 19 19a2 2 0 0 1-2-2v-3"/><path d="M5 14c-1.5 0-2.5 1-2.5 2.5S3.5 19 5 19a2 2 0 0 0 2-2v-3"/></svg>Save</button>
+            </div>
+          </div>
+          <div class="replies-prev">
+            <div class="av-stack">
+              <div class="av" style="background:var(--clay)">A</div>
+              <div class="av" style="background:var(--honey);color:var(--ink)">M</div>
+              <div class="av" style="background:var(--dawn)">S</div>
+            </div>
+            <div class="copy"><b>14 replies</b> \u00b7 latest from Saba <span class="latest">\u201cThe scooter detail. I'm wheezing in a good way.\u201d</span></div>
+            <button class="expand">Open thread <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></button>
+          </div>
+        </div>
+      </article>
+
+      <!-- POST 3: Mod question post with image -->
+      <article class="post">
+        <div class="author-col">
+          <div class="av av-online" style="background:var(--honey);color:var(--ink)">M</div>
+          <span class="role mod">Mod</span>
+        </div>
+        <div class="post-body">
+          <div class="post-head">
+            <b>Mira</b>
+            <span class="dot"></span>
+            <span>Yesterday</span>
+            <span class="dot"></span>
+            <span>#daily-check-in</span>
+            <span class="pill">Question</span>
+          </div>
+          <h3>Tonight's quiet hour: breath, prompt, or open floor?</h3>
+          <div class="text">
+            <p>Three options. Reply with the emoji, no need to explain. We'll do whichever wins by 8:45.</p>
+            <p style="margin-top:6px;color:var(--ink-mute);font-size:13px">\ud83c\udf3f breath \u00b7 \u270d\ufe0f prompt \u00b7 \ud83d\udc41\ufe0f open floor</p>
+          </div>
+          <div class="body-img"><img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=900&q=70" alt="" /></div>
+          <div class="react-row">
+            <button class="react"><span class="em">\ud83c\udf3f</span><span class="n">18</span></button>
+            <button class="react"><span class="em">\u270d\ufe0f</span><span class="n">11</span></button>
+            <button class="react"><span class="em">\ud83d\udc41\ufe0f</span><span class="n">7</span></button>
+            <button class="react-more"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg></button>
+            <div class="react-actions">
+              <button class="reply"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a4 4 0 0 1-4 4H8l-5 4V6a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>Reply</button>
+              <button><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.5 0 2.5 1 2.5 2.5S20.5 19 19 19a2 2 0 0 1-2-2v-3"/><path d="M5 14c-1.5 0-2.5 1-2.5 2.5S3.5 19 5 19a2 2 0 0 0 2-2v-3"/></svg>Save</button>
+            </div>
+          </div>
+          <div class="replies-prev">
+            <div class="av-stack">
+              <div class="av" style="background:var(--clay)">A</div>
+              <div class="av" style="background:var(--sage)">D</div>
+              <div class="av" style="background:var(--dawn)">P</div>
+            </div>
+            <div class="copy"><b>36 replies</b> \u00b7 leaning breath right now</div>
+            <button class="expand">Open thread <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></button>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <!-- Composer (pinned at bottom) -->
+    <div class="composer-wrap">
+      <div class="composer">
+        <div class="composer-row1">
+          <input class="composer-title-input" type="text" placeholder="Give your check-in a soft title\u2026" value="What's one true thing about today?" />
+          <div class="composer-tag-row">
+            <button class="composer-tag on">#daily-check-in</button>
+            <button class="composer-tag">+ tag</button>
+          </div>
+        </div>
+        <textarea placeholder="Take your time. Say only what feels true. You can edit or delete this anytime."></textarea>
+        <div class="composer-row2">
+          <button class="composer-tool"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 1.5 4 1.5 4-1.5 4-1.5"/></svg></button>
+          <button class="composer-tool"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></button>
+          <button class="composer-tool"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
+          <button class="composer-tool"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.86a2 2 0 0 1 3.4 0l8.4 14a2 2 0 0 1-1.7 3H3.6a2 2 0 0 1-1.7-3Z"/></svg></button>
+          <button class="composer-tool anon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 8a3 3 0 1 1 6 0"/><path d="M5 20a7 7 0 0 1 14 0"/><path d="M9 12h6"/></svg>Anonymous<span class="sw"></span></button>
+          <button class="composer-send">Share<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></button>
+        </div>
+      </div>
+      <div class="composer-foot">
+        <span class="calm"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M12 18v4"/><circle cx="12" cy="12" r="6"/></svg>Moderated by Mira \u00b7 calm rules apply</span>
+        <span>\u2318\u23ce to post \u00b7 \u21e7\u23ce new line</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- ============ RIGHT RAIL ============ -->
+  <aside class="right">
+    <div class="right-head">
+      <h3>Members</h3>
+      <div class="s"><span class="d"></span>14 online \u00b7 312 total</div>
+    </div>
+    <div class="right-search">
+      <input type="search" placeholder="Find a member\u2026" />
+    </div>
+    <div class="right-list">
+
+      <div class="mh"><span>Moderators</span><span class="ct">2</span></div>
+      <div class="mb mod">
+        <div class="av av-online" style="background:var(--honey);color:var(--ink)">M</div>
+        <div style="flex:1;min-width:0">
+          <div class="name">Mira <span class="badge">Mod</span></div>
+          <div class="status">In the room</div>
+        </div>
+        <span class="vibe">\ud83c\udf3f</span>
+      </div>
+      <div class="mb mod">
+        <div class="av av-online" style="background:var(--sage)">T</div>
+        <div style="flex:1;min-width:0">
+          <div class="name">Tewodros <span class="badge">Mod</span></div>
+          <div class="status">Typing\u2026</div>
+        </div>
+      </div>
+
+      <div class="mh"><span>Online \u2014 14</span></div>
+      <div class="mb you">
+        <div class="av av-online" style="background:var(--clay)">A</div>
+        <div style="flex:1;min-width:0">
+          <div class="name">Amelia <span style="color:var(--ink-mute);font-weight:400">(you)</span></div>
+          <div class="status">Feeling steady</div>
+        </div>
+        <span class="vibe">\ud83d\ude4c</span>
+      </div>
+      <div class="mb">
+        <div class="av av-online" style="background:var(--dawn)">S</div>
+        <div style="flex:1;min-width:0"><div class="name">Saba</div><div class="status">Reading</div></div>
+        <span class="vibe">\ud83c\udf31</span>
+      </div>
+      <div class="mb">
+        <div class="av av-online" style="background:var(--sage)">D</div>
+        <div style="flex:1;min-width:0"><div class="name">Daniel</div><div class="status">Quiet hour</div></div>
+        <span class="vibe">\u2728</span>
+      </div>
+      <div class="mb">
+        <div class="av av-online" style="background:var(--honey);color:var(--ink)">P</div>
+        <div style="flex:1;min-width:0"><div class="name">Priya</div><div class="status">Tea break</div></div>
+        <span class="vibe">\u2615</span>
+      </div>
+      <div class="mb">
+        <div class="av av-online" style="background:var(--clay)">K</div>
+        <div style="flex:1;min-width:0"><div class="name">Kalkidan</div><div class="status">\u2014</div></div>
+      </div>
+      <div class="mb">
+        <div class="av av-online" style="background:var(--dawn)">N</div>
+        <div style="flex:1;min-width:0"><div class="name">Naomi</div><div class="status">Walking</div></div>
+      </div>
+
+      <div class="mh"><span>Idle \u2014 5</span></div>
+      <div class="mb">
+        <div class="av idle" style="background:var(--sage)">J</div>
+        <div style="flex:1;min-width:0"><div class="name">Jonas</div><div class="status">Idle 12m</div></div>
+      </div>
+      <div class="mb">
+        <div class="av idle" style="background:var(--honey);color:var(--ink)">R</div>
+        <div style="flex:1;min-width:0"><div class="name">Rahel</div><div class="status">Idle 28m</div></div>
+      </div>
+
+      <div class="mh"><span>Offline \u2014 293</span></div>
+      <div class="mb">
+        <div class="av off" style="background:var(--clay)">H</div>
+        <div style="flex:1;min-width:0"><div class="name">Hana</div><div class="status">Last seen 4h</div></div>
+      </div>
+      <div class="mb">
+        <div class="av off" style="background:var(--dawn)">B</div>
+        <div style="flex:1;min-width:0"><div class="name">Bereket</div><div class="status">Last seen yesterday</div></div>
+      </div>
+
+    </div>
+
+    <div class="right-info">
+      <b>About this circle</b>
+      An anchor circle for navigating anxiety \u2014 weekly Quiet Hour Tuesdays at 9pm Africa/Addis_Ababa. <a href="#">Read the charter</a>
+    </div>
+  </aside>
+
+</div>
+
+</body>
+</html>
