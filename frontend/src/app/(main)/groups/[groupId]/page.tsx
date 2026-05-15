@@ -5,21 +5,11 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import {
+  CircleDot,
   ChevronLeft,
-  Info,
   Loader2,
-  LogOut,
-  MoreVertical,
-  Trash2,
   Users,
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import ChatInput from "@/components/chat/ChatInput";
 import CrisisBanner from "@/components/chat/CrisisBanner";
@@ -29,6 +19,9 @@ import { GroupDisclaimerBanner } from "@/components/groups/GroupDisclaimerBanner
 import { EmptyGroupState } from "@/components/groups/EmptyGroupState";
 import { AiThinkingIndicator } from "@/components/groups/AiThinkingIndicator";
 import { MembersList } from "@/components/groups/MembersList";
+import { MembersRail } from "@/components/groups/room/MembersRail";
+import { RoomHeader } from "@/components/groups/room/RoomHeader";
+import { useGroupsLayout } from "../layout";
 import { useGroupChat } from "@/hooks/useGroupChat";
 import {
   deleteGroup,
@@ -39,7 +32,6 @@ import {
   leaveGroup,
 } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
 import type { GroupMessageResponse, GroupResponse } from "@/lib/types";
 
 function dayKey(iso: string): string {
@@ -69,9 +61,11 @@ export default function GroupChatPage() {
   const params = useParams();
   const groupId = params?.groupId as string;
   const t = useTranslations("groups");
+  const tRoom = useTranslations("groups.room");
   const locale = useLocale();
 
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [currentUserName, setCurrentUserName] = useState<string | null>(null);
   const [group, setGroup] = useState<GroupResponse | null>(null);
   const [groupLoading, setGroupLoading] = useState(true);
   const [groupError, setGroupError] = useState<string | null>(null);
@@ -79,6 +73,7 @@ export default function GroupChatPage() {
   const [infoOpen, setInfoOpen] = useState(false);
   const [membersOpen, setMembersOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const { openSidebar } = useGroupsLayout();
 
   // Auth guard
   useEffect(() => {
@@ -87,7 +82,10 @@ export default function GroupChatPage() {
       return;
     }
     getMe().then((res) => {
-      if (res.ok) setCurrentUserId(res.data.user_id);
+      if (res.ok) {
+        setCurrentUserId(res.data.user_id);
+        setCurrentUserName(res.data.display_name ?? null);
+      }
     });
   }, [router]);
 
@@ -145,8 +143,6 @@ export default function GroupChatPage() {
   const prevFirstIdRef = useRef<string | null>(null);
   const wasAtBottomRef = useRef(true);
 
-  // Track scroll position to know if we should autoscroll on new messages
-  // and to trigger load-more when the user reaches the top.
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -160,8 +156,6 @@ export default function GroupChatPage() {
     }
   }, [hasMoreMessages, isLoadingMore, loadMoreMessages, messages]);
 
-  // After a load-more prepend, restore scroll so the previous oldest message
-  // stays under the user's eye.
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -263,7 +257,7 @@ export default function GroupChatPage() {
   const isAdminOrCreator = isCreator || group.my_role === "admin";
   const isMutedForMe = myMember?.is_muted ?? false;
 
-  // ---- join overlay (not yet a member) ----
+  // ---- join overlay (not yet a member) — unchanged visual ----
   if (!group.is_member) {
     return (
       <div className="mx-auto flex h-full w-full max-w-2xl flex-col items-center justify-center gap-6 px-6 py-12 text-center">
@@ -320,7 +314,7 @@ export default function GroupChatPage() {
     );
   }
 
-  // ---- member view ----
+  // ---- member view (new 3-column room layout) ----
   const grouped: { dayLabel: string; items: GroupMessageResponse[] }[] = [];
   let lastDay: string | null = null;
   for (const m of messages) {
@@ -331,117 +325,25 @@ export default function GroupChatPage() {
     }
     grouped[grouped.length - 1].items.push(m);
   }
-  // System messages (joins/leaves) don't make a group feel "alive" — keep
-  // showing the empty-state nudge until a real conversation starts.
   const hasNonSystemMessages = messages.some(
     (m) => m.sender_type !== "system",
   );
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-background">
-      {/* Header */}
-      <div className="flex shrink-0 items-center gap-3 border-b border-border bg-background/85 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/70 md:px-6">
-        <Link
-          href="/groups"
-          aria-label="Back to groups"
-          className="-ml-1 inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:h-9 md:w-9"
-        >
-          <ChevronLeft className="h-4 w-4" strokeWidth={1.75} />
-        </Link>
-        <div
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xl"
-          style={{ backgroundColor: `${coverColor}1A` }}
-          aria-hidden
-        >
-          {group.icon}
-        </div>
-        <div className="min-w-0 flex-1">
-          <h1 className="truncate font-serif text-[16px] leading-tight text-foreground">
-            {groupName}
-          </h1>
-          <p className="mt-0.5 inline-flex items-center gap-2 text-[11px] text-muted-foreground">
-            <button
-              type="button"
-              onClick={() => setMembersOpen(true)}
-              className="inline-flex items-center gap-1 hover:text-foreground"
-            >
-              <Users className="h-3 w-3" strokeWidth={1.75} />
-              {t("members", { count: group.member_count })}
-            </button>
-            <span aria-hidden>·</span>
-            <span className="inline-flex items-center gap-1">
-              <span
-                className={cn(
-                  "h-1.5 w-1.5 rounded-full",
-                  connectionStatus === "connected"
-                    ? "bg-success"
-                    : "bg-muted-foreground",
-                )}
-              />
-              {onlineMembers.length} online
-            </span>
-          </p>
-        </div>
-
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={() => setInfoOpen(true)}
-          aria-label="Group info"
-          className="hidden md:inline-flex"
-        >
-          <Info className="h-4 w-4" strokeWidth={1.75} />
-        </Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className="inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:h-9 md:w-9"
-              aria-label="More actions"
-            >
-              <MoreVertical className="h-4 w-4" strokeWidth={1.75} />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem onClick={() => setInfoOpen(true)}>
-              <Info className="mr-2 h-4 w-4" strokeWidth={1.75} />
-              Group Info
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setMembersOpen(true)}>
-              <Users className="mr-2 h-4 w-4" strokeWidth={1.75} />
-              Members
-            </DropdownMenuItem>
-            {!isCreator && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={handleLeave}
-                  className="text-destructive focus:bg-destructive/10 focus:text-destructive"
-                >
-                  <LogOut className="mr-2 h-4 w-4" strokeWidth={1.75} />
-                  {t("leave")}
-                </DropdownMenuItem>
-              </>
-            )}
-            {isAdminOrCreator && (
-              <DropdownMenuItem disabled>Group Settings</DropdownMenuItem>
-            )}
-            {isCreator && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => setConfirmDelete(true)}
-                  className="text-destructive focus:bg-destructive/10 focus:text-destructive"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" strokeWidth={1.75} />
-                  Delete Group
-                </DropdownMenuItem>
-              </>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+    <div className="flex h-full min-h-0">
+      <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
+      <RoomHeader
+        roomName="chat"
+        topic={groupDescription}
+        isCreator={isCreator}
+        isAdminOrCreator={isAdminOrCreator}
+        onOpenInfo={() => setInfoOpen(true)}
+        onOpenMembers={() => setMembersOpen(true)}
+        onOpenChannels={openSidebar}
+        onLeave={!isCreator ? handleLeave : undefined}
+        onDelete={isCreator ? () => setConfirmDelete(true) : undefined}
+        leaveLabel={t("leave")}
+      />
 
       {/* Connection state strip */}
       {connectionStatus === "connecting" && (
@@ -455,16 +357,15 @@ export default function GroupChatPage() {
         </div>
       )}
 
-      {/* Pinned peer-support disclaimer (dismissible per session) */}
       <GroupDisclaimerBanner />
 
-      {/* Messages */}
+      {/* Feed */}
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto"
+        className="min-h-0 flex-1 overflow-y-auto bg-secondary/30"
       >
-        <div className="mx-auto w-full max-w-3xl px-4 py-6 md:px-6">
+        <div className="mx-auto w-full max-w-3xl px-4 py-6 md:px-7">
           {hasMoreMessages && (
             <div className="mb-4 flex justify-center">
               {isLoadingMore ? (
@@ -502,7 +403,7 @@ export default function GroupChatPage() {
               {grouped.map((g, gi) => (
                 <div key={`${gi}-${g.dayLabel}`} className="space-y-3">
                   <div className="flex items-center justify-center">
-                    <span className="rounded-full bg-muted px-3 py-0.5 text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground">
+                    <span className="rounded-full border border-border bg-background px-3 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                       {g.dayLabel}
                     </span>
                   </div>
@@ -524,23 +425,46 @@ export default function GroupChatPage() {
         </div>
       </div>
 
-      {/* Input */}
-      <ChatInput
-        onSend={handleSend}
-        disabled={isMutedForMe || connectionStatus !== "connected"}
-        placeholder={
-          isMutedForMe
-            ? "You have been muted by an admin"
-            : `Message ${groupName}...`
-        }
-        mention={{
-          trigger: "@",
-          insert: "@MindEase ",
-          label: "@MindEase",
-        }}
-      />
+      {/* Composer */}
+      <div className="shrink-0 border-t border-border bg-background px-4 pt-3 pb-3.5 md:px-7">
+        <div className="mx-auto max-w-3xl">
+          <ChatInput
+            onSend={handleSend}
+            disabled={isMutedForMe || connectionStatus !== "connected"}
+            placeholder={
+              isMutedForMe
+                ? "You have been muted by an admin"
+                : `Message ${groupName}…`
+            }
+            mention={{
+              trigger: "@",
+              insert: "@MindEase ",
+              label: "@MindEase",
+            }}
+          />
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-2 font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+            <span className="flex items-center gap-1.5 text-primary-deep">
+              <CircleDot className="h-3 w-3" strokeWidth={1.75} />
+              {tRoom("moderatedBy", { name: t("aiModerator") })}
+            </span>
+            <span className="hidden sm:inline">{tRoom("composerHint")}</span>
+          </div>
+        </div>
+      </div>
 
-      {/* Sheets */}
+      </div>
+
+      {/* Members rail (right, xl+ only) */}
+      <aside className="hidden h-full w-[296px] min-h-0 shrink-0 border-l border-border bg-background xl:flex xl:flex-col">
+        <MembersRail
+          groupId={groupId}
+          groupAbout={groupDescription ?? null}
+          currentUserId={currentUserId}
+          onlineUserIds={onlineUserIds}
+        />
+      </aside>
+
+      {/* Sheets — Info, Members on smaller screens */}
       <GroupInfoSheet
         open={infoOpen}
         onOpenChange={setInfoOpen}

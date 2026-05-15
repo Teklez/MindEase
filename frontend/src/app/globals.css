@@ -161,6 +161,29 @@
     --mood-4: hsl(150 22% 48%);
     --mood-5: hsl(170 30% 42%);
 
+    /* Groups room palette — honey / clay / dawn accents + sage tints
+       and presence colors. Sourced from design_handoff/GroupRoom.html. */
+    --primary-soft: oklch(0.92 0.022 150);
+    --primary-deep: oklch(0.38 0.045 155);
+    --border-strong: oklch(0.83 0.014 150);
+    --honey: oklch(0.72 0.08 80);
+    --honey-soft: oklch(0.95 0.030 80);
+    --honey-deep: oklch(0.42 0.07 80);
+    --clay-soft: oklch(0.94 0.035 30);
+    --clay-deep: oklch(0.42 0.10 30);
+    --dawn: oklch(0.66 0.07 280);
+    --dawn-soft: oklch(0.94 0.025 290);
+    --dawn-deep: oklch(0.42 0.08 280);
+    --online: oklch(0.62 0.13 145);
+    --idle: oklch(0.78 0.10 80);
+
+    /* Assessments — severity scale (moss → sage-honey → sand → warm clay → clay). */
+    --lvl-1: oklch(0.62 0.10 145);
+    --lvl-2: oklch(0.68 0.10 95);
+    --lvl-3: oklch(0.70 0.10 60);
+    --lvl-4: oklch(0.65 0.10 35);
+    --lvl-5: oklch(0.55 0.13 25);
+
     /* Sidebar (chat conversation rail) */
     --sidebar: hsl(40 22% 95%);
     --sidebar-foreground: hsl(160 20% 12%);
@@ -208,6 +231,28 @@
     --mood-3: hsl(40 30% 65%);
     --mood-4: hsl(150 28% 58%);
     --mood-5: hsl(170 32% 52%);
+
+    /* Groups room palette — dark variants */
+    --primary-soft: oklch(0.28 0.04 155);
+    --primary-deep: oklch(0.78 0.05 155);
+    --border-strong: oklch(0.30 0.012 150);
+    --honey: oklch(0.74 0.08 80);
+    --honey-soft: oklch(0.26 0.05 80);
+    --honey-deep: oklch(0.82 0.07 80);
+    --clay-soft: oklch(0.26 0.05 30);
+    --clay-deep: oklch(0.78 0.10 30);
+    --dawn: oklch(0.70 0.07 280);
+    --dawn-soft: oklch(0.24 0.05 280);
+    --dawn-deep: oklch(0.80 0.08 280);
+    --online: oklch(0.68 0.13 145);
+    --idle: oklch(0.78 0.10 80);
+
+    /* Assessments — severity scale, dark variants (slightly brighter for legibility). */
+    --lvl-1: oklch(0.68 0.10 145);
+    --lvl-2: oklch(0.74 0.10 95);
+    --lvl-3: oklch(0.76 0.10 60);
+    --lvl-4: oklch(0.70 0.10 35);
+    --lvl-5: oklch(0.62 0.13 25);
 
     --sidebar: hsl(160 12% 10%);
     --sidebar-foreground: hsl(40 18% 92%);

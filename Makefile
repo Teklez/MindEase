@@ -1,4 +1,4 @@
-.PHONY: dev up down logs migrate makemigrations shell-backend
+.PHONY: dev up down logs migrate makemigrations shell-backend seed seed-reset
 
 dev:
 	docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
@@ -21,3 +21,9 @@ makemigrations:
 
 shell-backend:
 	docker compose exec backend bash
+
+seed:
+	docker compose exec backend python -m app.seeds.seed_all
+
+seed-reset:
+	docker compose exec backend python -m app.seeds.seed_all --reset

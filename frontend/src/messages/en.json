@@ -340,7 +340,126 @@
     "crisisNotice": "If you're having thoughts of self-harm, please know that help is available.",
     "notDiagnosis": "This is a screening tool, not a clinical diagnosis.",
     "improvement": "Your score has improved since last time!",
-    "scoreHistory": "Score History"
+    "scoreHistory": "Score History",
+    "eyebrow": "Validated check-ins",
+    "headline": "Where are you, this week?",
+    "headlineEmphasis": "this week?",
+    "subtitleLong": "Brief, validated questionnaires used in clinics worldwide. Not a diagnosis — a snapshot. We track the line, so you can talk to your future self with kindness.",
+    "scheduleReminder": "Schedule a reminder",
+    "stats": {
+      "tools": "Tools",
+      "taken": "Check-ins taken",
+      "thisMonth": "This month"
+    },
+    "safety": {
+      "lead": "These are screening tools, not a diagnosis.",
+      "body": "Use them to notice patterns and bring something concrete to a clinician — never as a verdict on a hard day. If something feels heavy, crisis resources are always one tap away.",
+      "crisisLink": "crisis resources",
+      "howScored": "How we score"
+    },
+    "available": {
+      "title": "Available tools",
+      "titleEmphasis": "tools",
+      "meta": "{count} instruments · all evidence-based"
+    },
+    "historyPanel": {
+      "title": "Your history",
+      "titleEmphasis": "history",
+      "meta": "{count} check-ins · last {days} days",
+      "recent": "Recent check-ins",
+      "noHistory": "Your line starts after the first check-in.",
+      "trendingDown": "↘ Trending down",
+      "steady": "→ Steady",
+      "trendingUp": "↗ Climbing",
+      "noData": "— No data",
+      "noDataHint": "Take your first to start the line.",
+      "lastN": "Last {days} days · {n} entries"
+    },
+    "card": {
+      "lastTakenAt": "Last taken · {when}",
+      "scoreOf": "Score {value} / {max}",
+      "takenNTimes": "Taken {n} times",
+      "begin": "Begin",
+      "retakeBtn": "Retake",
+      "notTaken": "Not taken yet · pace yourself",
+      "isNew": "New",
+      "validatedBadge": "Validated",
+      "selfPaced": "Self-paced",
+      "duration": "{n} min",
+      "items": "{n} items",
+      "type": "Self-report",
+      "dueAt": "Due {date}",
+      "dueToday": "Due today"
+    },
+    "take": {
+      "back": "Back",
+      "next": "Next",
+      "seeResultsLabel": "See results",
+      "saved": "Saved",
+      "questionOf": "Question {current} of {total}",
+      "preambleDefault": "Over the last two weeks, how often have you been bothered by…",
+      "preamblePss": "In the last month, how often have you felt…",
+      "subhint": "Choose the answer closest to how it's been. There's no right answer — just what's true.",
+      "kbdSelect": "{keys} select",
+      "kbdNext": "⏎ next",
+      "kbdExit": "⎋ save & exit"
+    },
+    "result": {
+      "crumb": "Result · {name} · {code}",
+      "headline": "Here's where you are this week.",
+      "headlineEmphasis": "are this week.",
+      "completed": "Completed",
+      "tookTime": "Took {time}",
+      "scoreLabel": "{code} Total",
+      "yourScore": "Your score",
+      "rangeHeadlinePrefix": "That's in the",
+      "rangeHeadlineSuffix": "range.",
+      "severityScale": "Severity scale",
+      "thresholds": "{code} thresholds",
+      "breakdown": "What's contributing",
+      "yourLine": "Your line",
+      "yourLineEmphasis": "line",
+      "nextSteps": "Suggested next steps",
+      "nextStepsEmphasis": "next steps",
+      "talkItThrough": "Talk it through with MindEase",
+      "talkItThroughSub": "Open a chat",
+      "findClinician": "Find a clinician near you",
+      "findClinicianSub": "Resources directory",
+      "exploreResources": "Explore related resources",
+      "exploreResourcesSub": "Articles + audio",
+      "joinGroup": "Find a circle that gets it",
+      "joinGroupSub": "Peer support groups",
+      "ifHeavy": "If today is heavy",
+      "ifHeavyBody": "You don't have to wait for a number to ask for help. These are free, confidential, and run by trained humans.",
+      "notDiagnosis": "This isn't a diagnosis. It's a brief screen that helps you notice what's heavy and bring it somewhere useful. Save the result and share it with a clinician if that feels right.",
+      "downloadPdf": "Download PDF",
+      "shareClinician": "Share with clinician",
+      "retakeIn": "Retake in 2 weeks",
+      "rangeToggle": {
+        "d90": "90D",
+        "m6": "6M",
+        "y1": "1Y",
+        "all": "All"
+      }
+    },
+    "levels": {
+      "minimal": "Minimal",
+      "mild": "Mild",
+      "moderate": "Moderate",
+      "moderately_severe": "Mod-severe",
+      "severe": "Severe",
+      "low": "Low",
+      "high": "High",
+      "very_high": "Very high"
+    },
+    "crisis": {
+      "eyebrow": "A pause",
+      "headline": "Thank you for being honest with us.",
+      "headlineEmphasis": "honest",
+      "body": "It takes courage to mark that answer. You're not alone in this — and you don't have to wait until you finish the check-in to talk to a real person. These resources are free, confidential, and run by trained humans.",
+      "comeBack": "I'll come back later",
+      "continueCheckIn": "Continue check-in"
+    }
   },
   "resources": {
     "title": "Resource Library",
@@ -452,7 +571,31 @@
     "lastActive": "Last active {time}",
     "aiThinking": "MindEase is thinking...",
     "aiTip": "Tip: Type @MindEase to ask for help anytime!",
-    "aiModerator": "MindEase"
+    "aiModerator": "MindEase",
+    "room": {
+      "back": "Back to circles",
+      "online": "{n} online",
+      "members": "{n} members",
+      "rooms": "Rooms",
+      "events": "Events",
+      "rsvp": "RSVP →",
+      "moderatedBy": "Moderated by {name} · calm rules apply",
+      "composerHint": "⌘⏎ to send · ⇧⏎ new line",
+      "membersPanel": {
+        "title": "Members",
+        "search": "Find a member…",
+        "moderators": "Moderators",
+        "onlineGroup": "Online — {n}",
+        "idleGroup": "Idle — {n}",
+        "offlineGroup": "Offline — {n}",
+        "you": "(you)",
+        "mod": "Mod"
+      },
+      "about": {
+        "title": "About this circle",
+        "readCharter": "Read the charter"
+      }
+    }
   },
   "settings": {
     "memory": {
