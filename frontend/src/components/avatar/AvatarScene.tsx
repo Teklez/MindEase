@@ -86,15 +86,60 @@ const AVATARS: AvatarOption[] = [
   },
 ];
 
-// LipsyncEn produces no visemes for tokens that aren't real words (e.g. "…",
-// punctuation, or an empty string). When transcripts are missing or sparse we
-// stuff in lipsync-friendly placeholders proportional to the audio duration so
-// the mouth still moves to the speech.
+// LipsyncEn only knows Latin letters. To drive visemes for non-English
+// languages (Amharic in our case) we transliterate to Latin syllables that
+// approximate the phonemes well enough for the mouth shapes — the exact
+// sound doesn't matter, only the vowel/consonant pattern that the lipsync
+// engine maps to visemes.
+//
+// Ethiopic Fidel (U+1200–U+137F) is a syllabary: glyphs are laid out in
+// blocks of 8 where each row is one consonant and each column is one of
+// 7 vowels (the 8th is a labialized variant). So we can compute the
+// romanization algorithmically from the code point.
+const ETHIOPIC_VOWELS = ["e", "u", "i", "a", "e", "", "o", "wa"];
+const ETHIOPIC_CONSONANTS: Record<number, string> = {
+  0x1200: "h", 0x1208: "l", 0x1210: "h", 0x1218: "m",
+  0x1220: "s", 0x1228: "r", 0x1230: "s", 0x1238: "sh",
+  0x1240: "q", 0x1248: "q", 0x1250: "q", 0x1258: "q",
+  0x1260: "b", 0x1268: "v", 0x1270: "t", 0x1278: "ch",
+  0x1280: "h", 0x1288: "h", 0x1290: "n", 0x1298: "ny",
+  0x12a0: "a", 0x12a8: "k", 0x12b0: "k", 0x12b8: "k",
+  0x12c0: "k", 0x12c8: "w", 0x12d0: "a", 0x12d8: "z",
+  0x12e0: "zh", 0x12e8: "y", 0x12f0: "d", 0x12f8: "j",
+  0x1300: "g", 0x1308: "g", 0x1310: "g", 0x1318: "g",
+  0x1320: "t", 0x1328: "ch", 0x1330: "p", 0x1338: "s",
+  0x1340: "s", 0x1348: "f", 0x1350: "p",
+};
+
+function romanizeForLipsync(text: string): string {
+  let out = "";
+  for (const ch of text) {
+    const code = ch.codePointAt(0)!;
+    if (code >= 0x1200 && code <= 0x137f) {
+      const block = code - ((code - 0x1200) % 8);
+      const consonant = ETHIOPIC_CONSONANTS[block];
+      if (consonant === undefined) {
+        // Punctuation block (U+1360+) and gaps: emit a space so words split correctly.
+        out += " ";
+        continue;
+      }
+      const vowel = ETHIOPIC_VOWELS[(code - 0x1200) % 8];
+      out += consonant + vowel;
+    } else {
+      out += ch;
+    }
+  }
+  return out;
+}
+
+// When the transcript has zero Latin-letter tokens (even after romanization)
+// we fall back to placeholder syllables proportional to the audio duration
+// so the mouth still moves to the speech.
 const FALLBACK_WORDS = ["la", "le", "ma", "mo", "na", "no", "ba", "be"];
 const LIPSYNC_WORD_RE = /[A-Za-z]/;
 
 function buildLipsyncWords(text: string, durationMs: number) {
-  const tokens = text.trim().split(/\s+/).filter(Boolean);
+  const tokens = romanizeForLipsync(text).trim().split(/\s+/).filter(Boolean);
   const realWords = tokens.filter((w) => LIPSYNC_WORD_RE.test(w));
   if (realWords.length) return realWords;
   // ~400ms per word matches estimateDuration below.
@@ -340,8 +385,6 @@ function AvatarViewer({
     });
     head.lipsync.en = new LipsyncEn();
     headRef.current = head;
-    // TEMP: lipsync diagnostics
-    console.log("[avatar] lipsync.en attached:", head.lipsync.en, "keys:", Object.keys(head.lipsync.en ?? {}));
     setStatus("loading");
     setProgress(0);
     setError(null);
@@ -356,28 +399,18 @@ function AvatarViewer({
       )
       .then(() => {
         setStatus("ready");
-        // TEMP: confirm armature + viseme morph targets after model load
         const h = headRef.current as unknown as {
-          armature?: { name?: string };
-          lipsync?: Record<string, { wordsToVisemes?: (s: string) => unknown }>;
           morphs?: Array<{
             material?: { needsUpdate: boolean } | Array<{ needsUpdate: boolean }>;
-            updateMorphTargets?: () => void;
           }>;
         } | null;
-        const sample = h?.lipsync?.en?.wordsToVisemes?.("HELLO");
-        console.log("[avatar] post-load:", {
-          armature: h?.armature?.name ?? null,
-          hasEnEngine: !!h?.lipsync?.en,
-          sampleVisemes: sample,
-        });
-        // Force shader recompile + re-bind morph attributes on every mesh
-        // that has morph targets. Without this, Next.js's bundling order
-        // can leave the SkinnedMesh shader compiled before the morph
-        // attributes are visible to Three.js's morph-texture packing,
-        // so the influences are silently ignored at render time.
+        // Nudge the material to recompile so the shader picks up morph
+        // attributes. Do NOT call mesh.updateMorphTargets() here: that
+        // *reassigns* mesh.morphTargetInfluences to a fresh array, which
+        // orphans the references TalkingHead already cached in
+        // mtAvatar[mt].ms[i] — meaning all viseme writes from
+        // speakAudio's animQueue would silently target a dead buffer.
         h?.morphs?.forEach((m) => {
-          m.updateMorphTargets?.();
           const mats = Array.isArray(m.material) ? m.material : m.material ? [m.material] : [];
           mats.forEach((mat) => {
             if (mat) mat.needsUpdate = true;
@@ -400,24 +433,39 @@ function AvatarViewer({
 
     return () => {
       resizeObserver?.disconnect();
-      head.stop();
+      // Full teardown: stop the rAF, drop the WebGL context, AND remove the
+      // canvas from the DOM. With only `head.stop()` (the old code), React
+      // strict-mode's mount → unmount → mount cycle leaves the first head's
+      // canvas in the container; the second head's canvas is added on top,
+      // and morph-target writes on the second instance get visually hidden
+      // behind the first's frozen frame.
+      try {
+        (head as unknown as { dispose?: () => void }).dispose?.();
+      } catch {
+        // dispose() crashes if showAvatar hasn't finished yet (poseBase
+        // isn't populated). Fall back to stop() + manual canvas removal —
+        // the goal is just to prevent two canvases from stacking.
+        try {
+          (head as unknown as { stop?: () => void }).stop?.();
+        } catch {
+          /* ignore */
+        }
+      }
+      if (containerRef.current) {
+        containerRef.current
+          .querySelectorAll("canvas")
+          .forEach((c) => c.remove());
+      }
       if (typeof window !== "undefined") window.speechSynthesis?.cancel();
       sessionRef.current?.close();
       sessionRef.current = null;
+      if (headRef.current === head) headRef.current = null;
     };
   }, [avatar]);
 
   const speakResponse = useCallback(
     async (text: string, pcm: ArrayBuffer | null, durationMs: number) => {
       setStatus("speaking");
-
-      try {
-        const t = new AudioContext();
-        await t.resume();
-        await t.close();
-      } catch {
-        /* ignore */
-      }
 
       // Guard against zero-length audio (Gemini Live can return text with no audio frames).
       const hasRealAudio = !!pcm && pcm.byteLength > 0;
@@ -436,16 +484,6 @@ function AvatarViewer({
       const timing = estimateWordTimings(text, safeDurationMs);
 
       try {
-        // TEMP: diagnostics on what we're handing TalkingHead
-        console.log("[avatar] speakAudio call:", {
-          textPreview: text.slice(0, 60),
-          pcmBytes: actualPcm.byteLength,
-          words: timing.words.length,
-          firstWord: timing.words[0],
-          firstWtime: timing.wtimes[0],
-          firstWdur: timing.wdurations[0],
-          hasRealAudio,
-        });
         headRef.current?.speakAudio({
           audio: [actualPcm],
           words: timing.words,
@@ -469,11 +507,25 @@ function AvatarViewer({
     [],
   );
 
+  // Resume TalkingHead's audioCtx from within a user gesture. Chrome's
+  // autoplay policy leaves the context suspended otherwise, which makes
+  // playAudio() bail before pushing viseme animations into animQueue —
+  // i.e. audio plays but lips don't move.
+  const resumeAudioCtx = useCallback(() => {
+    const h = headRef.current as unknown as {
+      audioCtx?: { state: string; resume: () => Promise<void> };
+    } | null;
+    if (h?.audioCtx?.state === "suspended") {
+      h.audioCtx.resume().catch(() => {});
+    }
+  }, []);
+
   const beginListening = useCallback(() => {
     if (callStatus !== "ready" || isRecording) return;
+    resumeAudioCtx();
     sessionRef.current?.startRecording();
     setIsRecording(true);
-  }, [callStatus, isRecording]);
+  }, [callStatus, isRecording, resumeAudioCtx]);
 
   const endListening = useCallback(() => {
     if (!isRecording) return;
@@ -514,6 +566,7 @@ function AvatarViewer({
 
   async function startCall() {
     if (status !== "ready") return;
+    resumeAudioCtx();
     setCallStatus("connecting");
     setCallError(null);
 
@@ -535,7 +588,6 @@ function AvatarViewer({
     sessionRef.current = session;
 
     session.onEvent = (e) => {
-      console.log("[voice] event:", e.type, "role" in e ? e.role : "");
       if (e.type === "ready") {
         setCallStatus("ready");
         return;
@@ -664,213 +716,15 @@ function AvatarViewer({
           )}
 
           {callStatus === "idle" && (
-            <div className="pointer-events-auto flex items-center gap-2">
-              <Button
-                type="button"
-                size="lg"
-                onClick={startCall}
-              >
-                <Phone className="mr-2 h-4 w-4" strokeWidth={1.75} />
-                Start conversation
-              </Button>
-              {/* TEMP: drives speakResponse with hardcoded text + browser TTS
-                  so lipsync can be verified without spinning up a voice call. */}
-              <Button
-                type="button"
-                size="lg"
-                variant="outline"
-                disabled={status !== "ready"}
-                onClick={() =>
-                  speakResponse(
-                    "Hello there. This is a quick test of the lipsync animation, my mouth should move in time with the words.",
-                    null,
-                    5000,
-                  )
-                }
-              >
-                Test lipsync
-              </Button>
-              {/* TEMP: dump morph-target wiring to console. The crucial
-                  fields are mtAvatar.viseme_aa.ms.length (must be >0 for
-                  the morph to reach a mesh) and isRunning (the rAF loop
-                  must be active for updates to apply). */}
-              <Button
-                type="button"
-                size="lg"
-                variant="outline"
-                onClick={() => {
-                  const h = headRef.current as unknown as {
-                    mtAvatar?: Record<string, {
-                      value: number;
-                      applied: number;
-                      baseline: number;
-                      ms: Float32Array[];
-                      is: number[];
-                    }>;
-                    morphs?: Array<{
-                      name?: string;
-                      morphTargetDictionary?: Record<string, number>;
-                      morphTargetInfluences?: number[];
-                    }>;
-                    isRunning?: boolean;
-                    armature?: { name?: string; visible?: boolean };
-                  } | null;
-                  if (!h) {
-                    console.warn("[diag] head not mounted");
-                    return;
-                  }
-                  const aa = h.mtAvatar?.viseme_aa;
-                  console.log("[diag] viseme_aa wiring:", {
-                    exists: !!aa,
-                    value: aa?.value,
-                    applied: aa?.applied,
-                    baseline: aa?.baseline,
-                    msLength: aa?.ms?.length,
-                    isIndices: aa?.is,
-                    isRunning: h.isRunning,
-                    armatureVisible: h.armature?.visible,
-                  });
-                  console.log("[diag] meshes with viseme_aa:", h.morphs?.map((m) => ({
-                    name: m.name,
-                    hasViseme_aa: m.morphTargetDictionary?.viseme_aa !== undefined,
-                    ndx: m.morphTargetDictionary?.viseme_aa,
-                    currentInfluence:
-                      m.morphTargetDictionary?.viseme_aa !== undefined
-                        ? m.morphTargetInfluences?.[m.morphTargetDictionary.viseme_aa]
-                        : null,
-                  })));
-                }}
-              >
-                Dump morphs
-              </Button>
-              {/* TEMP: use the `fixed` channel (priority over baseline) so
-                  the morph stays at 1.0. If the mouth still doesn't move,
-                  either the rAF loop isn't running or mtAvatar isn't wired
-                  to a visible mesh. */}
-              <Button
-                type="button"
-                size="lg"
-                variant="outline"
-                onClick={() => {
-                  const h = headRef.current as unknown as {
-                    mtAvatar?: Record<string, {
-                      fixed: number | null;
-                      needsUpdate: boolean;
-                      ms: Float32Array[];
-                      is: number[];
-                    }>;
-                    morphs?: Array<{
-                      morphTargetDictionary?: Record<string, number>;
-                      morphTargetInfluences?: number[];
-                    }>;
-                  } | null;
-                  const mt = h?.mtAvatar?.viseme_aa;
-                  if (!mt) {
-                    console.warn("[diag] viseme_aa morph target not found");
-                    return;
-                  }
-                  // Path A: through the talkinghead update pipeline
-                  mt.fixed = 1;
-                  mt.needsUpdate = true;
-                  // Path B: bypass talkinghead entirely — write straight to
-                  // the mesh's morphTargetInfluences. If THIS doesn't move
-                  // the mouth either, the morph itself doesn't deform the
-                  // mesh (wrong target, wrong mesh, or mesh hidden).
-                  h?.morphs?.forEach((m) => {
-                    const ndx = m.morphTargetDictionary?.viseme_aa;
-                    if (ndx !== undefined && m.morphTargetInfluences) {
-                      m.morphTargetInfluences[ndx] = 1;
-                    }
-                  });
-                  console.log("[diag] viseme_aa: set fixed=1 + raw influences=1");
-                  setTimeout(() => {
-                    mt.fixed = null;
-                    mt.needsUpdate = true;
-                    h?.morphs?.forEach((m) => {
-                      const ndx = m.morphTargetDictionary?.viseme_aa;
-                      if (ndx !== undefined && m.morphTargetInfluences) {
-                        m.morphTargetInfluences[ndx] = 0;
-                      }
-                    });
-                    console.log("[diag] viseme_aa released");
-                  }, 2000);
-                }}
-              >
-                Force aa
-              </Button>
-              {/* TEMP: deeper inspection — show the geometry-level morph
-                  data and try multiple morph indices to isolate the issue. */}
-              <Button
-                type="button"
-                size="lg"
-                variant="outline"
-                onClick={() => {
-                  const h = headRef.current as unknown as {
-                    morphs?: Array<{
-                      name?: string;
-                      visible?: boolean;
-                      type?: string;
-                      morphTargetDictionary?: Record<string, number>;
-                      morphTargetInfluences?: Float32Array | number[];
-                      geometry?: {
-                        morphAttributes?: { position?: unknown[]; normal?: unknown[] };
-                        morphTargetsRelative?: boolean;
-                      };
-                      material?: { morphTargets?: boolean; type?: string };
-                    }>;
-                  } | null;
-                  console.log("[diag] geometry-level morph info:",
-                    h?.morphs?.map((m) => ({
-                      name: m.name,
-                      visible: m.visible,
-                      type: m.type,
-                      influencesLen: m.morphTargetInfluences?.length,
-                      morphPositionsLen: m.geometry?.morphAttributes?.position?.length,
-                      morphNormalsLen: m.geometry?.morphAttributes?.normal?.length,
-                      morphTargetsRelative: m.geometry?.morphTargetsRelative,
-                      materialType: m.material?.type,
-                      materialMorphTargets: m.material?.morphTargets,
-                    })),
-                  );
-                }}
-              >
-                Inspect geom
-              </Button>
-              {/* TEMP: cycle through ALL morph targets on Wolf3D_Head one
-                  at a time so we can visually see which (if any) actually
-                  deform. */}
-              <Button
-                type="button"
-                size="lg"
-                variant="outline"
-                onClick={async () => {
-                  const h = headRef.current as unknown as {
-                    morphs?: Array<{
-                      name?: string;
-                      morphTargetDictionary?: Record<string, number>;
-                      morphTargetInfluences?: Float32Array | number[];
-                    }>;
-                  } | null;
-                  const head = h?.morphs?.find((m) => m.name === "Wolf3D_Head");
-                  if (!head?.morphTargetDictionary || !head.morphTargetInfluences) {
-                    console.warn("[diag] Wolf3D_Head not found");
-                    return;
-                  }
-                  const names = Object.keys(head.morphTargetDictionary);
-                  console.log("[diag] cycling", names.length, "morphs on Wolf3D_Head — watch the face");
-                  for (const name of names) {
-                    const ndx = head.morphTargetDictionary[name];
-                    head.morphTargetInfluences[ndx] = 1;
-                    console.log("[diag]", name, "@", ndx, "= 1");
-                    await new Promise((r) => setTimeout(r, 400));
-                    head.morphTargetInfluences[ndx] = 0;
-                  }
-                  console.log("[diag] cycle done");
-                }}
-              >
-                Cycle morphs
-              </Button>
-            </div>
+            <Button
+              type="button"
+              size="lg"
+              onClick={startCall}
+              className="pointer-events-auto"
+            >
+              <Phone className="mr-2 h-4 w-4" strokeWidth={1.75} />
+              Start conversation
+            </Button>
           )}
 
           {callStatus === "connecting" && (
