@@ -89,13 +89,14 @@ async def update_conversation(
     "/conversations/{conversation_id}",
     status_code=status.HTTP_204_NO_CONTENT,
 )
-async def archive_conversation(
+async def delete_conversation(
     conversation_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Archive the conversation (soft delete)."""
-    await chat_service.archive_conversation(
+    """Permanently delete the conversation, all messages, and all memory chunks
+    tied to it. Cannot be undone."""
+    await chat_service.delete_conversation(
         db, conversation_id, current_user.user_id
     )
 

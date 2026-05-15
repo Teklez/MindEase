@@ -73,11 +73,16 @@ export default function ChatSidebar({ onNavigate, className }: ChatSidebarProps)
 
   const handleDeleteRequest = (id: string) => setDeleteConfirmId(id);
   const handleDeleteConfirm = async () => {
-    if (deleteConfirmId) {
-      await deleteConversation(deleteConfirmId);
-      toast({ title: t("conversationDeleted") });
-      setDeleteConfirmId(null);
+    if (!deleteConfirmId) return;
+    const wasActive = deleteConfirmId === currentConversationId;
+    const res = await deleteConversation(deleteConfirmId);
+    setDeleteConfirmId(null);
+    if (!res.ok) {
+      toast({ title: t("messageFailed"), variant: "destructive" });
+      return;
     }
+    toast({ title: t("conversationDeleted") });
+    if (wasActive) router.push("/chat");
   };
 
   return (
@@ -122,7 +127,7 @@ export default function ChatSidebar({ onNavigate, className }: ChatSidebarProps)
           </div>
         )}
 
-        <ScrollArea className="mt-2 min-h-0 flex-1">
+        <ScrollArea className="mt-2 min-h-0 flex-1 [&>div>div]:!block">
           <div className="px-2 pb-2">
             <ConversationList
               conversations={filtered}

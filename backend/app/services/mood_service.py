@@ -1,3 +1,5 @@
+import asyncio
+import logging
 from collections import Counter
 from datetime import date, datetime, timedelta, timezone
 from uuid import UUID
@@ -5,6 +7,7 @@ from uuid import UUID
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.database import async_session_maker
 from app.models.mood_entry import MoodEntry
 from app.schemas.mood import (
     MoodDayAggregate,
@@ -15,6 +18,9 @@ from app.schemas.mood import (
     MoodTrend,
 )
 from app.services.badge_service import BadgeService, _calc_current_streak
+from app.services.memory_service import memory_service
+
+logger = logging.getLogger(__name__)
 
 _badge_service = BadgeService()
 
@@ -37,6 +43,14 @@ class MoodService:
         await db.flush()
         await db.refresh(entry)
         response = MoodEntryResponse.model_validate(entry)
+        if data.note and data.note.strip():
+            asyncio.create_task(_background_index_mood_note(
+                user_id=user_id,
+                entry_id=entry.entry_id,
+                text=data.note,
+                mood_level=data.mood_level,
+                entry_source=getattr(entry, "entry_source", "manual"),
+            ))
         new_badges = await _badge_service.check_and_award(db, user_id)
         return response, new_badges
 
@@ -81,6 +95,31 @@ class MoodService:
             .order_by(MoodEntry.created_at.desc())
         )
         return list(result.scalars().all())
+
+    async def recent_summary(
+        self, db: AsyncSession, user_id: UUID, *, days: int = 7
+    ) -> str:
+        """Returns a compact human-readable block describing the user's last `days` days
+        of mood entries. Empty string if the user has nothing in the window.
+        """
+        since = datetime.now(timezone.utc) - timedelta(days=days)
+        result = await db.execute(
+            select(MoodEntry)
+            .where(MoodEntry.user_id == user_id)
+            .where(MoodEntry.created_at >= since)
+            .order_by(MoodEntry.created_at.desc())
+            .limit(5)
+        )
+        entries = list(result.scalars().all())
+        if not entries:
+            return ""
+        avg = sum(e.mood_level for e in entries) / len(entries)
+        lines = [f"Avg mood (last {days} days): {avg:.1f} / 5 across {len(entries)} entries."]
+        for e in entries[:3]:
+            d = e.created_at.date().isoformat()
+            note = f' — "{e.note.strip()}"' if e.note else ""
+            lines.append(f"- {d}: {e.mood_level}/5{note}")
+        return "\n".join(lines)
 
     async def get_stats(self, db: AsyncSession, user_id: UUID) -> MoodStats:
         """Calculate comprehensive mood statistics."""
@@ -256,6 +295,26 @@ class MoodService:
         return current_streak, max(longest, current_streak)
 
 
+async def _background_index_mood_note(
+    *, user_id, entry_id, text: str, mood_level: int, entry_source: str,
+) -> None:
+    if not text or not text.strip():
+        return
+    try:
+        async with async_session_maker() as db:
+            await memory_service.index(
+                db,
+                user_id=user_id,
+                source_kind="mood_note",
+                source_id=entry_id,
+                text=text,
+                attrs={"mood_level": mood_level, "entry_source": entry_source},
+            )
+            await db.commit()
+    except Exception as exc:
+        logger.warning("index mood_note failed: %s", exc)
+
+
 def _calc_weekly_averages(entries: list[MoodEntry], weeks: int = 12) -> list[dict]:
     """Compute average mood per ISO week for the last N weeks."""
     today = date.today()
@@ -286,3 +345,6 @@ def _calc_weekly_averages(entries: list[MoodEntry], weeks: int = 12) -> list[dic
         current -= timedelta(days=7)
 
     return list(reversed(result))
+
+
+mood_service = MoodService()

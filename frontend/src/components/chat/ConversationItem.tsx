@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { useTranslations } from "next-intl";
-import { MessageCircle, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { MessageCircle, MoreHorizontal, Pencil, Phone, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,7 +52,11 @@ export default function ConversationItem({
               : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground",
           )}
         >
-          <MessageCircle className="h-4 w-4" strokeWidth={1.75} />
+          {conversation.conversation_type === "voice" ? (
+            <Phone className="h-4 w-4" strokeWidth={1.75} />
+          ) : (
+            <MessageCircle className="h-4 w-4" strokeWidth={1.75} />
+          )}
           <span className="sr-only">{displayTitle}</span>
         </Link>
       </li>
@@ -81,10 +85,17 @@ export default function ConversationItem({
           href={chatHref}
           className="block min-w-0 flex-1 outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring rounded"
         >
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 items-center gap-2">
+            {conversation.conversation_type === "voice" && (
+              <Phone
+                className="h-3 w-3 shrink-0 text-muted-foreground"
+                strokeWidth={1.75}
+                aria-hidden
+              />
+            )}
             <span
               className={cn(
-                "block truncate text-[13.5px] font-medium",
+                "min-w-0 flex-1 truncate text-[13.5px] font-medium",
                 isActive ? "text-foreground" : "text-foreground",
                 isUntitled && "italic text-muted-foreground font-normal",
               )}
@@ -109,10 +120,11 @@ export default function ConversationItem({
             <button
               type="button"
               className={cn(
-                "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-opacity",
+                "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-colors",
+                "text-foreground/70 hover:text-foreground",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring",
-                menuOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100",
-                "hover:bg-background hover:text-foreground",
+                "hover:bg-background",
+                menuOpen && "bg-background text-foreground",
               )}
               aria-label="More options"
               aria-haspopup="menu"

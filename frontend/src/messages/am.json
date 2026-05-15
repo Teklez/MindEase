@@ -280,7 +280,7 @@
     "connectionLost": "ግንኙነት ጠፍቷል። እንደገና በመገናኘት ላይ...",
     "connectionFailed": "መገናኘት አልተቻለም። እባክዎ ገጹን ያድሱ።",
     "deleteConfirm": "ይህን ውይይት ይሰርዙ?",
-    "deleteConfirmDescription": "ይህ ድርጊት ሊቀለበስ አይችልም።",
+    "deleteConfirmDescription": "ይህ ውይይትን እና ሁሉንም መልዕክቶቹን በቋሚነት ያስወግዳል። ሊቀለበስ አይችልም።",
     "conversationCreated": "ውይይት ተፈጥሯል",
     "conversationDeleted": "ውይይት ተሰርዟል",
     "backToChatList": "ወደ ውይይት ዝርዝር ተመለስ",
@@ -453,5 +453,37 @@
     "aiThinking": "ማይንድኢዝ እያሰበ ነው...",
     "aiTip": "ምክር: በማንኛውም ጊዜ እርዳታ ለመጠየቅ @MindEase ይጻፉ!",
     "aiModerator": "ማይንድኢዝ"
+  },
+  "settings": {
+    "memory": {
+      "title": "የእርስዎ ትዝታ",
+      "subtitle": "ማይንድኢዝ በውይይትና በድምፅ ስለ እርስዎ የሚያስታውሰው ሁሉ። እንዲረሳው የሚፈልጉትን ማንኛውንም ነገር ይሰርዙ።",
+      "deleteAll": "ሁሉንም ትዝታ ሰርዝ",
+      "delete": "ሰርዝ",
+      "deleted": "ተሰርዟል",
+      "deletedAll": "{count} ንጥል(ዎች) ተሰርዘዋል።",
+      "deleteFailed": "ያን ንጥል መሰረዝ አልተቻለም። እባክዎ እንደገና ይሞክሩ።",
+      "deleteAllFailed": "ትዝታዎን መሰረዝ አልተቻለም። እባክዎ እንደገና ይሞክሩ።",
+      "loadFailed": "ትዝታዎን መጫን አልተቻለም።",
+      "cancel": "ሰርዝ",
+      "confirmDeleteAll": "ሁሉንም ሰርዝ",
+      "confirmDeleteAllTitle": "ሁሉንም ትዝታዎን ይሰረዝ?",
+      "confirmDeleteAllBody": "ይህ {count} ንጥል(ዎች) በቋሚነት ያስወግዳል። AI ከእንግዲህ የነገሩትን አያስታውስም። ይህ ሊቀለበስ አይችልም።",
+      "empty": {
+        "title": "እስካሁን የሚታወስ ነገር የለም",
+        "body": "ከማይንድኢዝ ጋር ይነጋገሩ ወይም ስሜት ይመዝግቡ — ንጥሎች እዚህ ይታያሉ።"
+      },
+      "kinds": {
+        "profile_fact": "ስለ እርስዎ",
+        "summary": "የውይይት ማጠቃለያዎች",
+        "message": "የውይይት መልዕክቶች",
+        "voice_transcript": "የድምፅ ቅጂዎች",
+        "mood_note": "የስሜት ማስታወሻዎች",
+        "assessment_result": "የግምገማ ውጤቶች",
+        "group_message": "የቡድን መልዕክቶች",
+        "resource": "ሀብቶች",
+        "crisis_phrase": "የደህንነት ሐረጎች"
+      }
+    }
   }
 }

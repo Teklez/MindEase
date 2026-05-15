@@ -41,6 +41,21 @@ class AIClient:
             data = resp.json()
             return data.get("response") or ""
 
+    async def embed(self, texts: list[str]) -> list[list[float]]:
+        """POST to {base_url}/embed
+        Body: {"texts": [str, ...]} → returns list of 768-d float vectors.
+        Raises on HTTP error so callers can catch and degrade gracefully.
+        """
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                f"{self.base_url}/embed",
+                json={"texts": texts},
+                timeout=30.0,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            return data.get("embeddings") or []
+
     async def generate_response_stream(
         self, messages: list[dict], *, user_lang: str | None = None
     ):

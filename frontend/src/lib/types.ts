@@ -15,6 +15,13 @@ export interface Conversation {
   status: string;
   total_messages: number;
   crisis_detected: boolean;
+  conversation_type: "text" | "voice";
+  attrs: {
+    persona_id?: string;
+    persona_name?: string;
+    persona_blurb?: string;
+    voice?: string;
+  } | null;
 }
 
 export interface Message {

@@ -7,6 +7,7 @@ from app.models.badge import Badge, UserBadge
 from app.models.resource import Resource, UserResource
 from app.models.assessment import Assessment, UserAssessment
 from app.models.group import Group, GroupMember, GroupMessage
+from app.models.memory_chunk import MemoryChunk
 
 __all__ = [
     "Base",
@@ -23,4 +24,5 @@ __all__ = [
     "Group",
     "GroupMember",
     "GroupMessage",
+    "MemoryChunk",
 ]

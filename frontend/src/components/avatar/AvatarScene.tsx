@@ -15,9 +15,11 @@ import {
 } from "lucide-react";
 import {
   fetchTTS,
-  VoiceSession,
+  resamplePCM,
   type GeminiVoiceId,
 } from "@/lib/gemini-avatar";
+import { BackendVoiceSession } from "@/lib/backend-voice";
+import { createVoiceConversation } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -84,9 +86,69 @@ const AVATARS: AvatarOption[] = [
   },
 ];
 
+// LipsyncEn only knows Latin letters. To drive visemes for non-English
+// languages (Amharic in our case) we transliterate to Latin syllables that
+// approximate the phonemes well enough for the mouth shapes — the exact
+// sound doesn't matter, only the vowel/consonant pattern that the lipsync
+// engine maps to visemes.
+//
+// Ethiopic Fidel (U+1200–U+137F) is a syllabary: glyphs are laid out in
+// blocks of 8 where each row is one consonant and each column is one of
+// 7 vowels (the 8th is a labialized variant). So we can compute the
+// romanization algorithmically from the code point.
+const ETHIOPIC_VOWELS = ["e", "u", "i", "a", "e", "", "o", "wa"];
+const ETHIOPIC_CONSONANTS: Record<number, string> = {
+  0x1200: "h", 0x1208: "l", 0x1210: "h", 0x1218: "m",
+  0x1220: "s", 0x1228: "r", 0x1230: "s", 0x1238: "sh",
+  0x1240: "q", 0x1248: "q", 0x1250: "q", 0x1258: "q",
+  0x1260: "b", 0x1268: "v", 0x1270: "t", 0x1278: "ch",
+  0x1280: "h", 0x1288: "h", 0x1290: "n", 0x1298: "ny",
+  0x12a0: "a", 0x12a8: "k", 0x12b0: "k", 0x12b8: "k",
+  0x12c0: "k", 0x12c8: "w", 0x12d0: "a", 0x12d8: "z",
+  0x12e0: "zh", 0x12e8: "y", 0x12f0: "d", 0x12f8: "j",
+  0x1300: "g", 0x1308: "g", 0x1310: "g", 0x1318: "g",
+  0x1320: "t", 0x1328: "ch", 0x1330: "p", 0x1338: "s",
+  0x1340: "s", 0x1348: "f", 0x1350: "p",
+};
+
+function romanizeForLipsync(text: string): string {
+  let out = "";
+  for (const ch of text) {
+    const code = ch.codePointAt(0)!;
+    if (code >= 0x1200 && code <= 0x137f) {
+      const block = code - ((code - 0x1200) % 8);
+      const consonant = ETHIOPIC_CONSONANTS[block];
+      if (consonant === undefined) {
+        // Punctuation block (U+1360+) and gaps: emit a space so words split correctly.
+        out += " ";
+        continue;
+      }
+      const vowel = ETHIOPIC_VOWELS[(code - 0x1200) % 8];
+      out += consonant + vowel;
+    } else {
+      out += ch;
+    }
+  }
+  return out;
+}
+
+// When the transcript has zero Latin-letter tokens (even after romanization)
+// we fall back to placeholder syllables proportional to the audio duration
+// so the mouth still moves to the speech.
+const FALLBACK_WORDS = ["la", "le", "ma", "mo", "na", "no", "ba", "be"];
+const LIPSYNC_WORD_RE = /[A-Za-z]/;
+
+function buildLipsyncWords(text: string, durationMs: number) {
+  const tokens = romanizeForLipsync(text).trim().split(/\s+/).filter(Boolean);
+  const realWords = tokens.filter((w) => LIPSYNC_WORD_RE.test(w));
+  if (realWords.length) return realWords;
+  // ~400ms per word matches estimateDuration below.
+  const count = Math.max(1, Math.round(durationMs / 400));
+  return Array.from({ length: count }, (_, i) => FALLBACK_WORDS[i % FALLBACK_WORDS.length]);
+}
+
 function estimateWordTimings(text: string, durationMs: number) {
-  const words = text.trim().split(/\s+/).filter(Boolean);
-  if (!words.length) return { words: [], wtimes: [], wdurations: [] };
+  const words = buildLipsyncWords(text, durationMs);
   const msPerWord = durationMs / words.length;
   return {
     words,
@@ -283,13 +345,17 @@ function AvatarPicker({ onSelect }: { onSelect: (a: AvatarOption) => void }) {
 function AvatarViewer({
   avatar,
   onBack,
+  continueConversationId,
 }: {
   avatar: AvatarOption;
   onBack: () => void;
+  continueConversationId?: string | null;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const headRef = useRef<TalkingHead | null>(null);
-  const sessionRef = useRef<VoiceSession | null>(null);
+  const sessionRef = useRef<BackendVoiceSession | null>(null);
+  const conversationIdRef = useRef<string | null>(null);
+  const pendingAiTextRef = useRef<string>("");
 
   const [status, setStatus] = useState<AvatarStatus>("loading");
   const [progress, setProgress] = useState(0);
@@ -319,8 +385,6 @@ function AvatarViewer({
     });
     head.lipsync.en = new LipsyncEn();
     headRef.current = head;
-    // TEMP: lipsync diagnostics
-    console.log("[avatar] lipsync.en attached:", head.lipsync.en, "keys:", Object.keys(head.lipsync.en ?? {}));
     setStatus("loading");
     setProgress(0);
     setError(null);
@@ -335,16 +399,22 @@ function AvatarViewer({
       )
       .then(() => {
         setStatus("ready");
-        // TEMP: confirm armature + viseme morph targets after model load
         const h = headRef.current as unknown as {
-          armature?: { name?: string };
-          lipsync?: Record<string, { wordsToVisemes?: (s: string) => unknown }>;
+          morphs?: Array<{
+            material?: { needsUpdate: boolean } | Array<{ needsUpdate: boolean }>;
+          }>;
         } | null;
-        const sample = h?.lipsync?.en?.wordsToVisemes?.("HELLO");
-        console.log("[avatar] post-load:", {
-          armature: h?.armature?.name ?? null,
-          hasEnEngine: !!h?.lipsync?.en,
-          sampleVisemes: sample,
+        // Nudge the material to recompile so the shader picks up morph
+        // attributes. Do NOT call mesh.updateMorphTargets() here: that
+        // *reassigns* mesh.morphTargetInfluences to a fresh array, which
+        // orphans the references TalkingHead already cached in
+        // mtAvatar[mt].ms[i] — meaning all viseme writes from
+        // speakAudio's animQueue would silently target a dead buffer.
+        h?.morphs?.forEach((m) => {
+          const mats = Array.isArray(m.material) ? m.material : m.material ? [m.material] : [];
+          mats.forEach((mat) => {
+            if (mat) mat.needsUpdate = true;
+          });
         });
         window.dispatchEvent(new Event("resize"));
       })
@@ -363,10 +433,33 @@ function AvatarViewer({
 
     return () => {
       resizeObserver?.disconnect();
-      head.stop();
+      // Full teardown: stop the rAF, drop the WebGL context, AND remove the
+      // canvas from the DOM. With only `head.stop()` (the old code), React
+      // strict-mode's mount → unmount → mount cycle leaves the first head's
+      // canvas in the container; the second head's canvas is added on top,
+      // and morph-target writes on the second instance get visually hidden
+      // behind the first's frozen frame.
+      try {
+        (head as unknown as { dispose?: () => void }).dispose?.();
+      } catch {
+        // dispose() crashes if showAvatar hasn't finished yet (poseBase
+        // isn't populated). Fall back to stop() + manual canvas removal —
+        // the goal is just to prevent two canvases from stacking.
+        try {
+          (head as unknown as { stop?: () => void }).stop?.();
+        } catch {
+          /* ignore */
+        }
+      }
+      if (containerRef.current) {
+        containerRef.current
+          .querySelectorAll("canvas")
+          .forEach((c) => c.remove());
+      }
       if (typeof window !== "undefined") window.speechSynthesis?.cancel();
       sessionRef.current?.close();
       sessionRef.current = null;
+      if (headRef.current === head) headRef.current = null;
     };
   }, [avatar]);
 
@@ -374,34 +467,23 @@ function AvatarViewer({
     async (text: string, pcm: ArrayBuffer | null, durationMs: number) => {
       setStatus("speaking");
 
-      try {
-        const t = new AudioContext();
-        await t.resume();
-        await t.close();
-      } catch {
-        /* ignore */
-      }
-
       // Guard against zero-length audio (Gemini Live can return text with no audio frames).
       const hasRealAudio = !!pcm && pcm.byteLength > 0;
       const safeDurationMs = Math.max(
         durationMs > 0 ? durationMs : estimateDuration(text),
         200,
       );
-      const actualPcm = hasRealAudio ? pcm : makeSilentPcm(safeDurationMs);
+      // Backend delivers raw 24 kHz PCM; resample to 22050 Hz for TalkingHead.
+      let resampled: ArrayBuffer | null = pcm;
+      if (hasRealAudio) {
+        const src16 = new Int16Array(pcm!);
+        const dst16 = resamplePCM(src16, 24000, 22050);
+        resampled = dst16.buffer as ArrayBuffer;
+      }
+      const actualPcm = hasRealAudio ? resampled! : makeSilentPcm(safeDurationMs);
       const timing = estimateWordTimings(text, safeDurationMs);
 
       try {
-        // TEMP: diagnostics on what we're handing TalkingHead
-        console.log("[avatar] speakAudio call:", {
-          textPreview: text.slice(0, 60),
-          pcmBytes: actualPcm.byteLength,
-          words: timing.words.length,
-          firstWord: timing.words[0],
-          firstWtime: timing.wtimes[0],
-          firstWdur: timing.wdurations[0],
-          hasRealAudio,
-        });
         headRef.current?.speakAudio({
           audio: [actualPcm],
           words: timing.words,
@@ -425,11 +507,25 @@ function AvatarViewer({
     [],
   );
 
+  // Resume TalkingHead's audioCtx from within a user gesture. Chrome's
+  // autoplay policy leaves the context suspended otherwise, which makes
+  // playAudio() bail before pushing viseme animations into animQueue —
+  // i.e. audio plays but lips don't move.
+  const resumeAudioCtx = useCallback(() => {
+    const h = headRef.current as unknown as {
+      audioCtx?: { state: string; resume: () => Promise<void> };
+    } | null;
+    if (h?.audioCtx?.state === "suspended") {
+      h.audioCtx.resume().catch(() => {});
+    }
+  }, []);
+
   const beginListening = useCallback(() => {
     if (callStatus !== "ready" || isRecording) return;
+    resumeAudioCtx();
     sessionRef.current?.startRecording();
     setIsRecording(true);
-  }, [callStatus, isRecording]);
+  }, [callStatus, isRecording, resumeAudioCtx]);
 
   const endListening = useCallback(() => {
     if (!isRecording) return;
@@ -470,25 +566,65 @@ function AvatarViewer({
 
   async function startCall() {
     if (status !== "ready") return;
+    resumeAudioCtx();
     setCallStatus("connecting");
     setCallError(null);
-    const session = new VoiceSession();
+
+    const created = await createVoiceConversation({
+      persona_id: avatar.id,
+      persona_name: avatar.name,
+      persona_blurb: avatar.blurb,
+      voice: avatar.geminiVoice,
+      conversation_id: continueConversationId ?? null,
+    });
+    if (!created.ok) {
+      setCallError(created.error ?? "Failed to start call");
+      setCallStatus("idle");
+      return;
+    }
+    conversationIdRef.current = created.data.conversation_id;
+
+    const session = new BackendVoiceSession();
     sessionRef.current = session;
 
     session.onEvent = (e) => {
       if (e.type === "ready") {
         setCallStatus("ready");
-      } else if (e.type === "response") {
+        return;
+      }
+      if (e.type === "transcript" && e.role === "ai") {
+        pendingAiTextRef.current += e.text;
+        return;
+      }
+      if (e.type === "audio") {
+        // Prefer the text the backend bundled with the audio; fall back to
+        // whatever streamed in via transcript events. Either one drives
+        // viseme generation in TalkingHead.
+        const text = (e.text || pendingAiTextRef.current).trim();
+        pendingAiTextRef.current = "";
+        const durationMs = (e.pcm.byteLength / 2 / e.sampleRate) * 1000;
         setCallStatus("ready");
-        speakResponse(e.text, e.pcm, e.durationMs);
-      } else if (e.type === "error") {
+        speakResponse(text, e.pcm, durationMs);
+        return;
+      }
+      if (e.type === "turn_complete") {
+        // Always re-enable the mic when a turn ends, even if no audio arrived.
+        pendingAiTextRef.current = "";
+        setCallStatus("ready");
+        return;
+      }
+      if (e.type === "crisis_alert") {
+        console.warn("crisis_alert on voice", e.resources);
+        return;
+      }
+      if (e.type === "error") {
         setCallError(e.message);
         setCallStatus("idle");
       }
     };
 
     try {
-      await session.open(avatar.geminiVoice, { name: avatar.name, blurb: avatar.blurb });
+      await session.open(conversationIdRef.current!);
     } catch (err) {
       setCallError(err instanceof Error ? err.message : String(err));
       setCallStatus("idle");
@@ -649,9 +785,26 @@ function AvatarViewer({
   );
 }
 
-export function AvatarScene() {
-  const [selected, setSelected] = useState<AvatarOption | null>(null);
+export function AvatarScene({
+  preselectPersonaId,
+  continueConversationId,
+}: {
+  preselectPersonaId?: string;
+  continueConversationId?: string | null;
+} = {}) {
+  const [selected, setSelected] = useState<AvatarOption | null>(() => {
+    if (preselectPersonaId) {
+      return AVATARS.find((a) => a.id === preselectPersonaId) ?? null;
+    }
+    return null;
+  });
 
   if (!selected) return <AvatarPicker onSelect={setSelected} />;
-  return <AvatarViewer avatar={selected} onBack={() => setSelected(null)} />;
+  return (
+    <AvatarViewer
+      avatar={selected}
+      onBack={() => setSelected(null)}
+      continueConversationId={continueConversationId ?? null}
+    />
+  );
 }

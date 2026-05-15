@@ -58,11 +58,14 @@ export default function ChatHomePage() {
 
   const handleDeleteRequest = (id: string) => setDeleteConfirmId(id);
   const handleDeleteConfirm = async () => {
-    if (deleteConfirmId) {
-      await deleteConversation(deleteConfirmId);
-      toast({ title: t("conversationDeleted") });
-      setDeleteConfirmId(null);
+    if (!deleteConfirmId) return;
+    const res = await deleteConversation(deleteConfirmId);
+    setDeleteConfirmId(null);
+    if (!res.ok) {
+      toast({ title: t("messageFailed"), variant: "destructive" });
+      return;
     }
+    toast({ title: t("conversationDeleted") });
   };
 
   return (

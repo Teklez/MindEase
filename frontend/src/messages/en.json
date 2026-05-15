@@ -280,7 +280,7 @@
     "connectionLost": "Connection lost. Reconnecting...",
     "connectionFailed": "Unable to connect. Please refresh the page.",
     "deleteConfirm": "Delete this conversation?",
-    "deleteConfirmDescription": "This action cannot be undone.",
+    "deleteConfirmDescription": "This permanently removes the conversation and all its messages. This cannot be undone.",
     "conversationCreated": "Conversation created",
     "conversationDeleted": "Conversation deleted",
     "backToChatList": "Back to chat list",
@@ -453,5 +453,37 @@
     "aiThinking": "MindEase is thinking...",
     "aiTip": "Tip: Type @MindEase to ask for help anytime!",
     "aiModerator": "MindEase"
+  },
+  "settings": {
+    "memory": {
+      "title": "Your memory",
+      "subtitle": "Everything MindEase remembers about you across chat and voice. Delete anything you'd rather it forget.",
+      "deleteAll": "Delete all memory",
+      "delete": "Delete",
+      "deleted": "Deleted",
+      "deletedAll": "Deleted {count, plural, one {# item} other {# items}}.",
+      "deleteFailed": "Couldn't delete that item. Please try again.",
+      "deleteAllFailed": "Couldn't delete your memory. Please try again.",
+      "loadFailed": "Couldn't load your memory.",
+      "cancel": "Cancel",
+      "confirmDeleteAll": "Delete everything",
+      "confirmDeleteAllTitle": "Delete all of your memory?",
+      "confirmDeleteAllBody": "This will permanently delete {count, plural, one {# item} other {# items}}. The AI will no longer remember anything you've told it. This cannot be undone.",
+      "empty": {
+        "title": "Nothing to remember yet",
+        "body": "Chat with MindEase or log a mood entry and items will start appearing here."
+      },
+      "kinds": {
+        "profile_fact": "About you",
+        "summary": "Conversation summaries",
+        "message": "Chat messages",
+        "voice_transcript": "Voice transcripts",
+        "mood_note": "Mood notes",
+        "assessment_result": "Assessment results",
+        "group_message": "Peer-group messages",
+        "resource": "Resources",
+        "crisis_phrase": "Safety phrases"
+      }
+    }
   }
 }

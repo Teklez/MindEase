@@ -1,4 +1,7 @@
-.PHONY: up down logs migrate makemigrations shell-backend
+.PHONY: dev up down logs migrate makemigrations shell-backend
+
+dev:
+	docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 
 up:
 	docker compose up --build -d
