@@ -5,16 +5,19 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import User
+from app.models.memory_chunk import MemoryChunk
 from app.services.assessment_service import assessment_service
 from app.services.mood_service import mood_service
 
 
 class ProfileService:
+    PROFILE_FACTS_LIMIT = 15
+
     async def build_profile_block(
         self, db: AsyncSession, user_id: uuid.UUID
     ) -> str:
-        """Returns a 3-6 line block: display_name + mood snapshot + latest assessments.
-        Empty string if the user is brand new."""
+        """Returns a multi-line block: display_name + mood snapshot + latest
+        assessments + recent durable facts. Empty string for a brand-new user."""
         result = await db.execute(select(User).where(User.user_id == user_id))
         user = result.scalar_one_or_none()
         if user is None:
@@ -28,7 +31,29 @@ class ProfileService:
             parts.append(mood)
         if assess:
             parts.append("Latest screenings:\n" + assess)
+
+        facts = await self._recent_profile_facts(db, user_id, self.PROFILE_FACTS_LIMIT)
+        if facts:
+            parts.append(
+                "Known facts about this user:\n" + "\n".join(f"- {f}" for f in facts)
+            )
         return "\n\n".join(parts)
+
+    async def _recent_profile_facts(
+        self, db: AsyncSession, user_id: uuid.UUID, limit: int
+    ) -> list[str]:
+        rows = (
+            await db.execute(
+                select(MemoryChunk.text)
+                .where(
+                    MemoryChunk.user_id == user_id,
+                    MemoryChunk.source_kind == "profile_fact",
+                )
+                .order_by(MemoryChunk.created_at.desc())
+                .limit(limit)
+            )
+        ).scalars().all()
+        return [r for r in rows if r]
 
 
 profile_service = ProfileService()

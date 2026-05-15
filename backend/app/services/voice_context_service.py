@@ -15,6 +15,7 @@ from app.models import (
     User,
     UserResource,
 )
+from app.models.memory_chunk import MemoryChunk
 from app.services.assessment_service import assessment_service
 from app.services.mood_service import mood_service
 
@@ -27,6 +28,8 @@ class VoiceContextService:
     as part of system_instruction so the avatar opens every call knowing
     everything MindEase knows about the user."""
 
+    PROFILE_FACTS_LIMIT = 15
+
     async def build(self, db: AsyncSession, user_id: uuid.UUID) -> str:
         sections: list[str] = []
         for fn in (
@@ -34,6 +37,7 @@ class VoiceContextService:
             self._engagement,
             self._mood,
             self._screenings,
+            self._profile_facts,
             self._resource_preferences,
             self._groups,
             self._crisis_signal,
@@ -115,6 +119,22 @@ class VoiceContextService:
         if not block:
             return ""
         return "## Latest screenings\n" + block
+
+    async def _profile_facts(self, db: AsyncSession, user_id: uuid.UUID) -> str:
+        rows = (await db.execute(
+            select(MemoryChunk.text)
+            .where(
+                MemoryChunk.user_id == user_id,
+                MemoryChunk.source_kind == "profile_fact",
+            )
+            .order_by(MemoryChunk.created_at.desc())
+            .limit(self.PROFILE_FACTS_LIMIT)
+        )).scalars().all()
+        facts = [r for r in rows if r]
+        if not facts:
+            return ""
+        body = "\n".join(f"- {f}" for f in facts)
+        return "## Known facts about this user\n" + body
 
     async def _resource_preferences(self, db: AsyncSession, user_id: uuid.UUID) -> str:
         rows = (await db.execute(

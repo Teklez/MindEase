@@ -63,12 +63,11 @@ export default function UserMenu({ user, onLogout, className }: Props) {
             {tNav("dashboard")}
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem disabled>
-          <Settings className="mr-2 h-4 w-4" strokeWidth={1.75} />
-          {tNav("settings")}
-          <span className="ml-auto text-xs text-muted-foreground">
-            ({tCommon("comingSoon").toLowerCase()})
-          </span>
+        <DropdownMenuItem asChild>
+          <Link href="/settings/memory">
+            <Settings className="mr-2 h-4 w-4" strokeWidth={1.75} />
+            {tNav("settings")}
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={onLogout} className="text-destructive focus:text-destructive">

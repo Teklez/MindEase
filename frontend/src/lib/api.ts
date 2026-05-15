@@ -421,3 +421,55 @@ export async function createVoiceConversation(body: {
     body: JSON.stringify(body),
   });
 }
+
+// Memory (RAG)
+export type MemorySourceKind =
+  | "message"
+  | "mood_note"
+  | "assessment_result"
+  | "summary"
+  | "profile_fact"
+  | "voice_transcript"
+  | "group_message"
+  | "resource"
+  | "crisis_phrase";
+
+export type MemoryChunkResponse = {
+  chunk_id: string;
+  source_kind: MemorySourceKind;
+  text: string;
+  conversation_id: string | null;
+  group_id: string | null;
+  attrs: Record<string, unknown> | null;
+  created_at: string;
+};
+
+export type MemoryListResponse = {
+  items: MemoryChunkResponse[];
+  total: number;
+  limit: number;
+  offset: number;
+};
+
+export async function listMyMemory(
+  options: { kind?: string[]; limit?: number; offset?: number } = {},
+): Promise<ApiResponse<MemoryListResponse>> {
+  const params = new URLSearchParams();
+  for (const k of options.kind ?? []) params.append("kind", k);
+  if (options.limit !== undefined) params.set("limit", String(options.limit));
+  if (options.offset !== undefined) params.set("offset", String(options.offset));
+  const qs = params.toString();
+  return apiRequest(`/api/v1/me/memory${qs ? `?${qs}` : ""}`);
+}
+
+export async function deleteMyMemoryChunk(
+  chunkId: string,
+): Promise<ApiResponse<null>> {
+  return apiRequest(`/api/v1/me/memory/${chunkId}`, { method: "DELETE" });
+}
+
+export async function deleteAllMyMemory(): Promise<
+  ApiResponse<{ deleted: number }>
+> {
+  return apiRequest("/api/v1/me/memory", { method: "DELETE" });
+}

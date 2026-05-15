@@ -13,6 +13,7 @@ from app.database import async_session_maker
 from app.models import Conversation, MemoryChunk, Message
 from app.models.mood_entry import MoodEntry
 from app.services.ai_client import AIClient
+from app.services.fact_extractor import extract_and_index_facts
 from app.services.memory_service import memory_service
 from app.services.profile_service import profile_service
 
@@ -234,6 +235,17 @@ Core rules:
                     await db.commit()
                 except Exception as exc:
                     logger.warning("index user message failed: %s", exc)
+
+            # 4b. Extract durable user facts in the background. Failure modes
+            # must not affect the chat turn — this task owns its own session.
+            asyncio.create_task(
+                extract_and_index_facts(
+                    user_id=user_id,
+                    conversation_id=conversation_id,
+                    source_message_id=user_message.message_id,
+                    content=content,
+                )
+            )
 
             # 5. Build layered conversation context.
             profile_block = await profile_service.build_profile_block(db, user_id)

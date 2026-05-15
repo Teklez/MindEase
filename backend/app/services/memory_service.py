@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Sequence
 
-from sqlalchemy import select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.memory_chunk import MemoryChunk
@@ -164,6 +164,64 @@ class MemoryService:
 
         result = await db.execute(stmt)
         return list(result.scalars().all())
+
+    async def list_for_user(
+        self,
+        db: AsyncSession,
+        *,
+        user_id: uuid.UUID,
+        kinds: list[str] | None = None,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> tuple[list[MemoryChunk], int]:
+        """Paginated list of a user's chunks, newest first. Returns (rows, total)."""
+        base = select(MemoryChunk).where(MemoryChunk.user_id == user_id)
+        if kinds:
+            base = base.where(MemoryChunk.source_kind.in_(kinds))
+
+        count_stmt = select(func.count()).select_from(base.subquery())
+        total = (await db.execute(count_stmt)).scalar_one()
+
+        rows = (
+            await db.execute(
+                base.order_by(MemoryChunk.created_at.desc())
+                .limit(limit)
+                .offset(offset)
+            )
+        ).scalars().all()
+        return list(rows), int(total)
+
+    async def delete(
+        self,
+        db: AsyncSession,
+        *,
+        user_id: uuid.UUID,
+        chunk_id: uuid.UUID,
+    ) -> bool:
+        """Delete one chunk, scoped to user_id. Returns True if a row was deleted.
+        Caller manages the surrounding commit boundary."""
+        result = await db.execute(
+            delete(MemoryChunk).where(
+                MemoryChunk.chunk_id == chunk_id,
+                MemoryChunk.user_id == user_id,
+            )
+        )
+        await db.flush()
+        return bool(result.rowcount)
+
+    async def delete_all_for_user(
+        self,
+        db: AsyncSession,
+        *,
+        user_id: uuid.UUID,
+    ) -> int:
+        """Delete every chunk owned by user_id. Returns row count.
+        Caller manages the surrounding commit boundary."""
+        result = await db.execute(
+            delete(MemoryChunk).where(MemoryChunk.user_id == user_id)
+        )
+        await db.flush()
+        return int(result.rowcount or 0)
 
 
 memory_service = MemoryService()
