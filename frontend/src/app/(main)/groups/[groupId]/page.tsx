@@ -65,7 +65,6 @@ export default function GroupChatPage() {
   const locale = useLocale();
 
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [currentUserName, setCurrentUserName] = useState<string | null>(null);
   const [group, setGroup] = useState<GroupResponse | null>(null);
   const [groupLoading, setGroupLoading] = useState(true);
   const [groupError, setGroupError] = useState<string | null>(null);
@@ -84,7 +83,6 @@ export default function GroupChatPage() {
     getMe().then((res) => {
       if (res.ok) {
         setCurrentUserId(res.data.user_id);
-        setCurrentUserName(res.data.display_name ?? null);
       }
     });
   }, [router]);
