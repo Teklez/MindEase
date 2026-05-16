@@ -173,7 +173,6 @@ export default function SidebarContent({
               activeId={currentConversationId}
               onDelete={handleDeleteRequest}
               isLoading={isLoading}
-              collapsed={collapsed}
             />
           </div>
         </ScrollArea>

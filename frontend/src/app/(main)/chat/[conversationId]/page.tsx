@@ -21,7 +21,7 @@ export default function ChatRoomPage() {
   if (!conversationId) return null;
 
   return (
-    <div className="flex h-full flex-col bg-background">
+    <div className="flex h-full min-h-0 flex-col bg-background">
       <ChatContainer conversationId={conversationId} />
     </div>
   );

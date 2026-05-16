@@ -14,13 +14,15 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <ConversationsProvider>
-      <div className="flex h-full min-h-0 flex-1 flex-col md:flex-row">
-        <div className="hidden md:flex h-full min-h-0 flex-col shrink-0">
+      <div className="grid h-[calc(100vh-60px)] grid-cols-1 lg:grid-cols-[280px_1fr]">
+        {/* Desktop sidebar */}
+        <div className="hidden h-full min-h-0 lg:block">
           <ChatSidebar />
         </div>
 
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <div className="flex shrink-0 items-center border-b border-border bg-background px-2 py-2 md:hidden">
+        {/* Mobile chrome + main column */}
+        <div className="flex min-h-0 min-w-0 flex-col bg-secondary/40">
+          <div className="flex shrink-0 items-center border-b border-border bg-background px-3 py-2 lg:hidden">
             <Button
               variant="ghost"
               size="icon"
@@ -34,7 +36,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
         </div>
 
         <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
-          <SheetContent side="left" className="w-[300px] p-0">
+          <SheetContent side="left" className="w-[280px] p-0">
             <div className="h-full overflow-hidden">
               <ChatSidebar onNavigate={() => setMobileSidebarOpen(false)} />
             </div>

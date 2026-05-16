@@ -1,43 +1,59 @@
 "use client";
 
-import type { Conversation } from "@/lib/types";
-import { groupConversationsByDate, type ConversationGroupKey } from "@/lib/utils";
+import { useMemo } from "react";
 import { useTranslations } from "next-intl";
+import type { Conversation } from "@/lib/types";
+import { groupConversations, type ConversationGroups } from "@/lib/group-conversations";
 import ConversationItem from "./ConversationItem";
 import { Skeleton } from "@/components/ui/skeleton";
-
-const GROUP_KEYS: ConversationGroupKey[] = [
-  "today",
-  "yesterday",
-  "previous7",
-  "thisMonth",
-  "older",
-];
 
 type ConversationListProps = {
   conversations: Conversation[];
   activeId?: string | null;
   onDelete: (id: string) => void;
+  onRename?: (conv: Conversation) => void;
   isLoading: boolean;
-  collapsed?: boolean;
+};
+
+const GROUP_ORDER = ["today", "yesterday", "thisWeek", "earlier"] as const;
+const GROUP_LABEL_KEY: Record<(typeof GROUP_ORDER)[number], string> = {
+  today: "today",
+  yesterday: "yesterday",
+  thisWeek: "last7",
+  earlier: "earlier",
 };
 
 export default function ConversationList({
   conversations,
   activeId,
   onDelete,
+  onRename,
   isLoading,
-  collapsed = false,
 }: ConversationListProps) {
-  const t = useTranslations("chat");
+  const t = useTranslations("chat.v2.groups");
+  const tChat = useTranslations("chat");
+
+  const groups = useMemo(() => {
+    // Adapt Conversation → Groupable. The grouper's type bound has
+    // `title: string | undefined` while Conversation has `string | null`, so
+    // we go through `unknown` to satisfy both shapes while keeping the
+    // grouped output typed as Conversation[].
+    const adapted = conversations.map((c) => ({
+      ...c,
+      id: c.conversation_id,
+      updated_at: c.last_message_at,
+      title: c.title ?? undefined,
+    }));
+    return groupConversations(adapted) as unknown as ConversationGroups<Conversation>;
+  }, [conversations]);
 
   if (isLoading) {
     return (
-      <ul className="space-y-1.5 p-2">
-        {[1, 2, 3, 4, 5, 6].map((i) => (
-          <li key={i} className="flex items-center gap-2 rounded-lg px-3 py-2">
-            <Skeleton className="h-3 w-3 shrink-0 rounded-full" />
-            {!collapsed && <Skeleton className="h-3 flex-1 max-w-[80%] rounded" />}
+      <ul className="space-y-2 px-2 py-2">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <li key={i} className="rounded-xl px-3 py-2.5">
+            <Skeleton className="h-3.5 w-4/5 rounded" />
+            <Skeleton className="mt-1.5 h-3 w-1/2 rounded" />
           </li>
         ))}
       </ul>
@@ -46,34 +62,30 @@ export default function ConversationList({
 
   if (conversations.length === 0) {
     return (
-      <p className="px-3 py-6 text-center text-xs text-muted-foreground">
-        {t("noConversations")}
+      <p className="px-3 py-6 text-center text-[12px] text-muted-foreground">
+        {tChat("noConversations")}
       </p>
     );
   }
 
-  const grouped = groupConversationsByDate(conversations);
-
   return (
-    <ul className="flex flex-col gap-3 px-1 pt-1">
-      {GROUP_KEYS.map((key) => {
-        const list = grouped[key].conversations;
+    <ul className="flex flex-col gap-4 px-2 pt-1">
+      {GROUP_ORDER.map((key) => {
+        const list = groups[key];
         if (list.length === 0) return null;
         return (
           <li key={key}>
-            {!collapsed && (
-              <p className="mb-1 px-3 text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-                {t(key)}
-              </p>
-            )}
-            <ul className="space-y-0.5">
+            <p className="mb-1 px-3 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+              {t(GROUP_LABEL_KEY[key])}
+            </p>
+            <ul className="flex flex-col gap-1.5">
               {list.map((conv) => (
                 <ConversationItem
                   key={conv.conversation_id}
                   conversation={conv}
                   isActive={conv.conversation_id === activeId}
                   onDelete={onDelete}
-                  collapsed={collapsed}
+                  onRename={onRename}
                 />
               ))}
             </ul>
