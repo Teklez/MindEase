@@ -23,6 +23,7 @@ import {
   Phone,
   Send,
   Users2,
+  type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -425,7 +426,7 @@ function NextStep({
   onClick,
 }: {
   tone: "sage" | "honey" | "dawn";
-  Icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
+  Icon: LucideIcon;
   title: string;
   subtitle: string;
   onClick: () => void;
