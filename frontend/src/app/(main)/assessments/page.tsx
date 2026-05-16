@@ -71,7 +71,6 @@ function readDue(assessmentType: string): DueInfo {
 
 export default function AssessmentsPage() {
   const t = useTranslations("assessments");
-  const tCard = useTranslations("assessments.card");
   const tSafety = useTranslations("assessments.safety");
   const tStats = useTranslations("assessments.stats");
   const tAvailable = useTranslations("assessments.available");
