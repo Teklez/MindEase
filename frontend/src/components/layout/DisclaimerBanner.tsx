@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { LifeBuoy, X } from "lucide-react";
 
@@ -9,8 +10,10 @@ export default function DisclaimerBanner() {
   const tCommon = useTranslations("common");
   const tLanding = useTranslations("landing.v2");
   const [dismissed, setDismissed] = useState(false);
+  const pathname = usePathname();
 
-  if (dismissed) return null;
+  // Landing renders its own slim DisclaimerStrip; suppress the global banner there.
+  if (pathname === "/" || dismissed) return null;
 
   return (
     <div
