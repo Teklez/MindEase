@@ -20,7 +20,8 @@
     "collapseSidebar": "Collapse sidebar",
     "newChat": "New chat",
     "userMenu": "User menu",
-    "openMenu": "Open menu"
+    "openMenu": "Open menu",
+    "logout": "Logout"
   },
   "disclaimer": {
     "banner": "MindEase is an AI companion, not a substitute for professional therapy.",
@@ -142,6 +143,207 @@
         },
         "copyright": "© 2026 MindEase"
       }
+    },
+    "v3": {
+      "disclaimer": "MindEase is not a substitute for professional therapy. If you're in crisis, please contact emergency services.",
+      "nav": {
+        "howItWorks": "How it works",
+        "features": "Features",
+        "product": "Product",
+        "safety": "Safety",
+        "resources": "Resources",
+        "signIn": "Sign in",
+        "getStarted": "Get started"
+      },
+      "hero": {
+        "pill": "Available 24/7",
+        "label": "Trained in CBT, mindfulness & active listening",
+        "headlineLead": "A quiet companion for the days that feel",
+        "headlineEm": "too loud.",
+        "lede": "MindEase is a private, judgment-free AI companion built on therapeutic techniques. It listens, helps you find calm, and gently tracks how you're feeling over time — in English or አማርኛ.",
+        "ctaPrimary": "Start your first chat",
+        "ctaSecondary": "Watch a 60-sec tour",
+        "stats": [
+          { "num": "End-to-end", "lbl": "Encrypted conversations" },
+          { "num": "2 languages", "lbl": "English & Amharic" },
+          { "num": "Always free", "lbl": "To start, no card required" }
+        ],
+        "chip1Who": "MindEase",
+        "chip1Msg": "That sounds heavy. Let's slow down.",
+        "chip2Who": "Mood logged · Today",
+        "chip2Msg": "Calm — 4-day streak",
+        "altMorningLight": "Morning light through curtains",
+        "altWarmCup": "Hands holding warm cup",
+        "altDetail": "Soft botanical detail"
+      },
+      "trust": {
+        "label": "Built on",
+        "items": [
+          "Cognitive Behavioral Therapy",
+          "Mindfulness",
+          "Active Listening",
+          "Motivational Interviewing",
+          "Trauma-informed care"
+        ]
+      },
+      "how": {
+        "eyebrow": "— How it works",
+        "headlineLead": "Three small steps.",
+        "headlineEm": "No pressure.",
+        "intro": "Most people open MindEase for the first time at 11pm, on a phone, after a hard day. The flow is built for that — short, kind, and asks only what helps.",
+        "steps": [
+          { "num": "01 / CHECK IN", "title": "Notice how you feel", "body": "One tap. Five faces. A short note if you want. We track the line, not the moment." },
+          { "num": "02 / TALK IT OUT", "title": "Talk, in your own words", "body": "Type or speak. MindEase listens, reflects back, and offers grounded techniques — never platitudes." },
+          { "num": "03 / SEE THE PATTERN", "title": "Watch the line settle", "body": "Streaks, gentle nudges, and trends help you see what's working — without turning wellness into a scoreboard." }
+        ]
+      },
+      "featuresSection": {
+        "eyebrow": "— What you get",
+        "headline": "Built carefully, on purpose.",
+        "intro": "We made the boring decisions first — encryption, tone, refusal patterns, crisis routing — so the experience can feel quiet and human.",
+        "items": [
+          {
+            "title": "Empathetic support",
+            "body": "Companions trained in CBT, mindfulness, and active listening. Tone is the product — careful, never clinical-cold.",
+            "metaLeft": "Therapeutic techniques",
+            "metaRight": "5 modes"
+          },
+          {
+            "title": "Private & secure",
+            "body": "Conversations are encrypted in transit and at rest. We don't sell, share, or train public models on your data. Ever.",
+            "metaLeft": "End-to-end encrypted",
+            "metaRight": "Your data, yours"
+          },
+          {
+            "titlePrefix": "English & ",
+            "titleAmharic": "አማርኛ",
+            "body": "Speak in the language you think in. Cultural nuance, idiom, and culturally-grounded resources, not a literal translation.",
+            "metaLeft": "Bilingual by design",
+            "metaRight": "Coming soon"
+          }
+        ]
+      },
+      "moments": {
+        "eyebrow": "— Moments",
+        "headlineLead": "For the small",
+        "headlineEm": "in-between",
+        "headlineTrail": "hours.",
+        "intro": "Late-night spirals. Quiet mornings. The pause before a hard conversation. MindEase meets you in the moments most apps don't notice.",
+        "captions": ["Stillness", "Morning light", "Open air", "Reflection", "Calm"],
+        "alts": ["Mountain stillness at dusk", "Soft window light", "Open path through forest", "Hands writing in journal", "Calm shore"]
+      },
+      "preview": {
+        "eyebrow": "— Inside the app",
+        "headlineLead": "Two surfaces.",
+        "headlineEm": "One steady rhythm.",
+        "intro": "A conversation when you need to be heard, and a quiet log of how the days are going — so you can look back without scrolling through old messages.",
+        "chat": {
+          "label": "Chat · MindEase",
+          "who": "MindEase",
+          "bot1": "How are you feeling today? No pressure to put it neatly.",
+          "user1": "Honestly? Just stretched thin. Couldn't sleep again.",
+          "bot2": "That sounds exhausting — physically and mentally. Want to try a two-minute breathing exercise, or would you rather just keep talking?",
+          "inputPlaceholder": "Message MindEase…",
+          "send": "Send"
+        },
+        "mood": {
+          "label": "Mood · This week",
+          "streak": "4-day streak",
+          "title": "How are you feeling?",
+          "sub": "Wednesday, April 22",
+          "faces": ["Low", "Off", "Okay", "Good", "Great"],
+          "stats": [
+            { "v": "4", "l": "Day streak" },
+            { "v": "3.4", "l": "Avg this week" },
+            { "v": "+0.6", "l": "vs last week" }
+          ],
+          "heatmapLabel": "Last 14 days"
+        }
+      },
+      "bilingual": {
+        "eyebrow": "— Bilingual by design",
+        "headlineLead": "Speak the language",
+        "headlineEm": "you think in.",
+        "body": "Mental health doesn't translate cleanly. MindEase is built natively in English and Amharic — with culturally-grounded resources, idiom, and warmth. Switch any time.",
+        "ctaPrefix": "Try it in",
+        "ctaLang": "አማርኛ",
+        "cards": [
+          { "quote": "It's okay to not have words for it yet. Stay with the feeling — I'm here.", "flag": "EN", "meta": "English · companion reply", "amharic": false },
+          { "quote": "ለስሜትህ ቃላት ማግኘት ባይቻልም ችግር የለውም። ከእኔ ጋር ቆይ።", "flag": "አማ", "meta": "Amharic · companion reply", "amharic": true }
+        ]
+      },
+      "testimonials": {
+        "eyebrow": "— In their words",
+        "headlineLead": "A companion that",
+        "headlineEm": "doesn't flinch.",
+        "intro": "Early MindEase users from Addis Ababa, London, and Toronto on what's changed in the weeks since they started chatting. Names changed; words theirs.",
+        "items": [
+          {
+            "quoteLead": "I used it at 3am when I couldn't call anyone. It didn't try to fix me — it just",
+            "quoteEm": "stayed.",
+            "quoteTrail": "That was enough.",
+            "name": "Sara M.",
+            "role": "Graduate student · Toronto"
+          },
+          {
+            "quoteLead": "Being able to type in",
+            "quoteEm": "Amharic",
+            "quoteTrail": "changed everything. I didn't have to translate my own grief into someone else's words.",
+            "name": "Daniel T.",
+            "role": "Teacher · Addis Ababa"
+          },
+          {
+            "quoteLead": "The mood streaks made me notice patterns my therapist later confirmed. It's not a replacement — it's a",
+            "quoteEm": "better waiting room.",
+            "quoteTrail": "",
+            "name": "Priya R.",
+            "role": "Designer · London"
+          }
+        ]
+      },
+      "safety": {
+        "eyebrow": "— Safety first",
+        "headlineLead": "If it's heavier than us, we route you out —",
+        "headlineEm": "fast.",
+        "lede": "MindEase is an AI companion, not a substitute for professional therapy or emergency services. We surface real human help the moment a conversation needs it.",
+        "cta": "Read our safety model",
+        "resources": [
+          { "region": "Ethiopia", "name": "Mental Health Helpline", "num": "9595", "desc": "Confidential support, 24/7. Amharic and English." },
+          { "region": "International", "name": "Find a hotline near you", "num": "findahelpline.com", "desc": "Verified hotlines in 130+ countries, by region." },
+          { "region": "Emergency", "name": "If life is in danger", "num": "Call local services", "desc": "911 (US), 999 (UK), 911 (Ethiopia), or your local equivalent." },
+          { "region": "In-app", "name": "Crisis banner", "num": "Always one tap", "desc": "Visible at the top of every conversation. Never buried." }
+        ]
+      },
+      "finalCta": {
+        "eyebrow": "— A small step",
+        "headlineLead": "Some days the best thing you can do",
+        "headlineEm": "is talk to someone.",
+        "lede": "Free to start, no card required. Your conversations stay yours.",
+        "ctaPrimary": "Create your account",
+        "ctaSecondary": "Sign in"
+      },
+      "footer": {
+        "tagline": "A private, judgment-free AI companion for mental wellness. Built carefully, on purpose. Not a substitute for professional therapy.",
+        "product": "Product",
+        "company": "Company",
+        "trust": "Trust",
+        "links": {
+          "chat": "Chat",
+          "mood": "Mood tracker",
+          "resources": "Resources",
+          "assessments": "Assessments",
+          "about": "About",
+          "research": "Research",
+          "careers": "Careers",
+          "contact": "Contact",
+          "privacy": "Privacy policy",
+          "terms": "Terms of service",
+          "safety": "Safety model",
+          "crisis": "Crisis resources"
+        },
+        "copyright": "© 2026 MindEase. All rights reserved.",
+        "version": "v0.4 — landing redesign"
+      }
     }
   },
   "auth": {
@@ -219,6 +421,119 @@
         "subcopy": "MindEase is built for unhurried reflection — the small in-between hours that need a calmer place to land.",
         "caption": "Brand · Calm by design"
       }
+    },
+    "v2": {
+      "common": {
+        "backHome": "Back to home",
+        "version": "v0.4 · auth",
+        "footPrivacy": "Privacy",
+        "footTerms": "Terms",
+        "footHelp": "Help",
+        "dividerOr": "or continue with email"
+      },
+      "login": {
+        "eyebrow": "— Sign in",
+        "welcomePill": "Returning",
+        "headlineLead": "Welcome",
+        "headlineEm": "back.",
+        "subtitle": "Sign in to continue your journey.",
+        "googleButton": "Continue with Google",
+        "emailLabel": "Email",
+        "emailPlaceholder": "you@example.com",
+        "passwordLabel": "Password",
+        "forgotPassword": "Forgot password?",
+        "showPassword": "Show password",
+        "hidePassword": "Hide password",
+        "keepSignedIn": "Keep me signed in on this device",
+        "submit": "Sign in",
+        "submitting": "Signing in…",
+        "disclaimerLead": "MindEase is an AI companion, not a substitute for professional therapy. If you're in crisis, please",
+        "disclaimerLink": "find immediate help",
+        "noAccount": "Don't have an account yet?",
+        "createOne": "Create one",
+        "errors": {
+          "invalid": "Invalid email or password",
+          "invalidEmail": "Enter a valid email",
+          "required": "This field is required"
+        },
+        "brand": {
+          "eyebrow": "— Welcome back",
+          "headlineLead": "It's good to see you",
+          "headlineEm": "here again.",
+          "subcopy": "Pick up where you left off. Your conversations, mood log, and streak are exactly as you left them — encrypted and waiting.",
+          "quote": "I open it on the bus home. Five minutes, and I can breathe a little easier before I walk through the door.",
+          "attribution": "M.A. — using MindEase 4 months",
+          "avatar": "M",
+          "copyright": "© 2026 MindEase"
+        }
+      },
+      "register": {
+        "eyebrow": "— Create account",
+        "headlineLead": "Make a place",
+        "headlineEm": "for yourself.",
+        "subtitle": "Start your mental wellness journey. It takes about 90 seconds.",
+        "googleButton": "Sign up with Google",
+        "displayNameLabel": "Display name",
+        "displayNamePlaceholder": "What should we call you?",
+        "emailLabel": "Email",
+        "emailPlaceholder": "you@example.com",
+        "passwordLabel": "Password",
+        "passwordHint": "Min 8 chars · upper · lower · number",
+        "confirmPasswordLabel": "Confirm password",
+        "passwordsMatch": "Passwords match",
+        "showPassword": "Show password",
+        "hidePassword": "Hide password",
+        "requirements": {
+          "length": "8+ characters",
+          "upper": "Uppercase letter",
+          "lower": "Lowercase letter",
+          "number": "Number"
+        },
+        "strength": {
+          "weak": "Weak",
+          "okay": "Okay",
+          "good": "Good",
+          "strong": "Strong"
+        },
+        "agreePrefix": "I agree to the",
+        "agreeTerms": "Terms of Service",
+        "agreeAnd": "and",
+        "agreePrivacy": "Privacy Policy",
+        "agreeSuffix": ", and understand MindEase is not a substitute for professional therapy.",
+        "submit": "Create account",
+        "submitting": "Creating account…",
+        "hasAccount": "Already have an account?",
+        "signIn": "Sign in",
+        "errors": {
+          "emailExists": "Email already registered",
+          "passwordMismatch": "Passwords don't match",
+          "passwordWeak": "Password doesn't meet requirements",
+          "nameTooShort": "Please enter your name",
+          "required": "This field is required",
+          "invalidEmail": "Enter a valid email",
+          "termsRequired": "You must agree to continue"
+        },
+        "brand": {
+          "eyebrow": "— Start your account",
+          "headlineLead": "A small step",
+          "headlineEm": "toward steadier days.",
+          "subcopy": "Three minutes to set up. No card required. Your conversations, mood log, and notes belong to you — encrypted and never sold.",
+          "stats": [
+            { "k": "Free", "v": "To start, no card" },
+            { "k": "EN · አማ", "v": "Bilingual by design" }
+          ],
+          "steps": [
+            { "n": "1", "title": "Create an account.", "body": "Email + password, or continue with Google." },
+            { "n": "2", "title": "Pick a check-in time.", "body": "One gentle nudge a day, never more. You can turn it off anytime." },
+            { "n": "3", "title": "Talk when you need to.", "body": "Type or speak. MindEase listens, no scoreboard, no streak shame." }
+          ]
+        }
+      },
+      "forgot": {
+        "title": "Reset link coming soon",
+        "subtitle": "Self-serve password reset is on the way. For now, please contact support@mindease.co for help.",
+        "backToSignin": "Back to sign in"
+      }
     }
   },
   "dashboard": {
@@ -265,7 +580,119 @@
       "crisis": "Need help now? Crisis resources"
     },
     "days": "days",
-    "daySingular": "day"
+    "daySingular": "day",
+    "v2": {
+      "header": {
+        "crumbHome": "Home",
+        "crumbDashboard": "Dashboard",
+        "notifications": "Notifications",
+        "settings": "Settings",
+        "comingSoonTitle": "Coming soon",
+        "comingSoonBody": "This area isn't wired up yet."
+      },
+      "eyebrow": {
+        "morning": "— {day} morning",
+        "afternoon": "— {day} afternoon",
+        "evening": "— {day} evening",
+        "night": "— Late {day}"
+      },
+      "greeting": {
+        "morningLead": "Good morning,",
+        "afternoonLead": "Good afternoon,",
+        "eveningLead": "Good evening,",
+        "nightLead": "Still up,",
+        "fallback": "Welcome back."
+      },
+      "streakLine": "You're on a {streak}-day check-in streak. No pressure — just here when you need it.",
+      "noStreakLine": "Welcome back — start with a small check-in.",
+      "checkIn": {
+        "title": "How are you feeling right now?",
+        "subtitle": "One tap. No notes required.",
+        "faces": {
+          "veryLow": "Very low",
+          "low": "Low",
+          "okay": "Okay",
+          "good": "Good",
+          "great": "Great"
+        }
+      },
+      "stats": {
+        "totalConversations": "Total conversations",
+        "thisWeek": "This week",
+        "moodStreak": "Mood streak",
+        "deltaUp": "+{n} this month",
+        "deltaFlat": "— same as last",
+        "deltaWeekFlat": "Same as last week",
+        "deltaWeekUp": "+{n} vs last week",
+        "personalBest": "Personal best: {n}",
+        "streakSuffix": "days"
+      },
+      "startChat": {
+        "eyebrow": "— Pick up where you left off",
+        "headlineLead": "Want to talk it",
+        "headlineEm": "out?",
+        "body": "MindEase is here to listen — emotional support, coping strategies, and a safe space to reflect. Free, anytime.",
+        "cta": "Start new chat"
+      },
+      "recent": {
+        "title": "Recent conversations",
+        "viewAll": "View all →",
+        "empty": "Your conversations will appear here.",
+        "emptyCta": "Start one"
+      },
+      "quickActions": {
+        "title": "Quick actions",
+        "comingSoon": "Coming soon",
+        "comingSoonBody": "This action isn't wired up yet.",
+        "breathing": { "title": "Breathing exercise", "sub": "2 min · box breathing" },
+        "journal": { "title": "Journal prompt", "sub": "\"What did today take from you?\"" },
+        "assessment": { "title": "Quick assessment", "sub": "PHQ-2 · 30 seconds" },
+        "findHelp": { "title": "Find help nearby", "sub": "Therapists in Addis Ababa" }
+      },
+      "sparkline": {
+        "title": "Last 7 days",
+        "streak": "{n}-day streak",
+        "avg": "Avg {value} / 5",
+        "trendUp": "Trending up — gentle pace.",
+        "trendFlat": "Holding steady.",
+        "trendDown": "Dipping — be gentle with yourself.",
+        "openTracker": "Open tracker →"
+      },
+      "reflection": {
+        "eyebrow": "— Daily reflection",
+        "attribution": "— A note for {day}",
+        "save": "Save",
+        "newPrompt": "New prompt",
+        "talkAbout": "Talk about this →",
+        "saved": "Saved",
+        "prompts": [
+          "You don't have to feel ready. You just have to begin.",
+          "Rest is not the reward for finishing — it's the bridge that lets you continue.",
+          "What you're carrying matters, even if no one else can see it.",
+          "Slow is a pace, not a failure.",
+          "You can love your life and still find some of its hours hard.",
+          "Listening to yourself is a quiet kind of courage.",
+          "Some days, the bravest thing is to keep being honest.",
+          "You don't have to translate yourself to be understood by someone who cares.",
+          "Pay attention to what makes you feel like a person, and do that more.",
+          "It's okay to want softness."
+        ]
+      },
+      "badges": {
+        "title": "Recent badges",
+        "progress": "{earned} / {total}",
+        "earnedOn": "Earned {date}",
+        "locked": "Locked",
+        "daysToGo": "{n} days to go",
+        "nextHint": "Keep checking in — you're close.",
+        "sample": [
+          { "name": "First check-in", "earned": "Earned April 21" },
+          { "name": "3-day streak", "earned": "Earned April 22" },
+          { "name": "Quiet listener", "earned": "Earned April 24" }
+        ],
+        "lockedSample": { "name": "Steady week", "hint": "3 days to go" }
+      }
+    }
   },
   "chat": {
     "newChat": "New Chat",
@@ -311,7 +738,80 @@
     "yesterday": "Yesterday",
     "previous7": "Previous 7 Days",
     "thisMonth": "This Month",
-    "older": "Older"
+    "older": "Older",
+    "v2": {
+      "newChat": "New chat",
+      "search": "Search conversations…",
+      "groups": {
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "last7": "Previous 7 days",
+        "earlier": "Earlier"
+      },
+      "thread": {
+        "connected": "Connected · MindEase v0.4 · {locale}",
+        "reconnecting": "Reconnecting…",
+        "connectionLost": "We lost the connection. Trying again…",
+        "retry": "Retry",
+        "rename": "Rename conversation",
+        "renameDescription": "Give this conversation a clearer title.",
+        "renamePlaceholder": "e.g. Anxiety before tomorrow's interview",
+        "share": "Share",
+        "shareCopied": "Link copied",
+        "shareFailed": "Couldn't share — try copying the URL.",
+        "more": "More",
+        "regenerateTitle": "Regenerate title",
+        "deleteConversation": "Delete conversation"
+      },
+      "messageActions": {
+        "helpful": "Helpful",
+        "notQuite": "Not quite",
+        "copy": "Copy",
+        "copied": "Copied",
+        "thanks": "Thanks for the feedback"
+      },
+      "composer": {
+        "placeholder": "Message MindEase…  No pressure to put it neatly.",
+        "placeholderEmpty": "Begin in your own words…",
+        "send": "Send message",
+        "stop": "Stop generation",
+        "attach": "Attach",
+        "voice": "Voice",
+        "mood": "Log mood",
+        "hint": "⏎ to send · ⇧⏎ new line",
+        "disclaimer": "MindEase is an AI companion. Not a substitute for professional help.",
+        "voiceComingSoon": "Voice input coming soon",
+        "attachComingSoon": "Attachments coming soon",
+        "moodLogged": "Logged mood: {label}"
+      },
+      "empty": {
+        "headlineLead": "How are you feeling",
+        "headlineEm": "today?",
+        "sub": "I'm here to listen, support, and help you find calm. Take your time — pick a starter or just begin in your own words.",
+        "trustEncrypted": "Encrypted",
+        "trustPrivate": "Private"
+      },
+      "starters": {
+        "anxious": { "title": "I've been feeling anxious lately", "sub": "We'll figure out what's driving it, gently." },
+        "stress":  { "title": "I need help managing stress",        "sub": "Practical techniques, not platitudes." },
+        "talk":    { "title": "I just want someone to talk to",     "sub": "No agenda. I'll listen first." },
+        "breathing": { "title": "Guide me through a breathing exercise", "sub": "Two minutes. I'll set the pace." }
+      },
+      "crisis": {
+        "title": "If you're in crisis, please reach out.",
+        "sub": "Free, confidential support · 24/7",
+        "international": "International",
+        "imOkay": "I'm okay"
+      },
+      "grounding": {
+        "title": "5–4–3–2–1 · Grounding",
+        "step5": "Five things you can see",
+        "step4": "Four things you can feel",
+        "step3": "Three things you can hear",
+        "step2": "Two things you can smell",
+        "step1": "One thing you can taste"
+      }
+    }
   },
   "crisis": {
     "title": "If you're in crisis, please reach out for help",
@@ -550,6 +1050,15 @@
     "noGroups": "No groups found",
     "noMyGroups": "You haven't joined any groups yet",
     "createFirst": "Create the first group in this category!",
+    "eyebrow": "Support Communities",
+    "subtitleHero": "You don't have to face it alone. Connect with a compassionate community that truly understands your journey.",
+    "createNew": "Create New Group",
+    "allGroups": "All Groups",
+    "searchPlaceholderLong": "Search for groups by name, interest or topic...",
+    "noGroupsHereYet": "No groups found here yet",
+    "pioneerMessage": "It looks like this community hasn't started yet. Why not be the pioneer and create the first space for support in this category?",
+    "createTheFirstGroup": "Create the first group",
+    "discoverAllGroups": "Discover all groups",
     "groupFull": "This group is full",
     "create": {
       "title": "Create a Support Group",
