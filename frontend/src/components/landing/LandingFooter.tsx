@@ -1,81 +1,94 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import Logo from "@/components/shared/Logo";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { ThemeToggle } from "@/components/ThemeToggle";
+
+function LeafMark() {
+  return (
+    <span
+      aria-hidden
+      className="grid h-7 w-7 place-items-center rounded-lg bg-primary text-primary-foreground"
+    >
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M12 21c0-7 4-12 9-13-1 9-5 13-9 13Z" />
+        <path d="M12 21c0-5-3-9-8-10 1 7 4 10 8 10Z" />
+      </svg>
+    </span>
+  );
+}
 
 export default function LandingFooter() {
-  const t = useTranslations("landing.v2.footer");
+  const t = useTranslations("landing.v3.footer");
 
   return (
     <footer className="border-t border-border bg-background">
-      <div className="mx-auto grid max-w-7xl gap-12 px-6 py-16 md:grid-cols-12 md:px-8 lg:px-12">
-        <div className="md:col-span-5">
-          <Logo size="md" href="/" />
-          <p className="mt-4 max-w-sm text-[14px] leading-relaxed text-muted-foreground">
-            {t("tagline")}
-          </p>
-          <div className="mt-6 flex items-center gap-2">
-            <LanguageSwitcher />
-            <ThemeToggle />
-          </div>
-        </div>
-
-        <div className="md:col-span-7 grid grid-cols-2 gap-8 sm:grid-cols-3">
+      <div className="mx-auto max-w-[1240px] px-10">
+        <div className="grid gap-12 pb-10 pt-16 md:grid-cols-[1.4fr_1fr_1fr_1fr] md:gap-16">
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <Link
+              href="/"
+              className="flex items-center gap-2.5 font-serif text-[22px] font-medium tracking-[-0.01em] text-foreground"
+            >
+              <LeafMark />
+              MindEase
+            </Link>
+            <p className="mt-3.5 max-w-[32ch] text-[13.5px] leading-[1.6] text-muted-foreground">
+              {t("tagline")}
+            </p>
+          </div>
+
+          <div>
+            <h4 className="mb-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
               {t("product")}
             </h4>
-            <ul className="mt-4 space-y-3 text-sm">
-              <li>
-                <a href="#how-it-works" className="text-foreground/80 hover:text-foreground">
-                  {t("links.howItWorks")}
-                </a>
-              </li>
-              <li>
-                <Link href="/dashboard" className="text-foreground/80 hover:text-foreground">
-                  {t("links.dashboard")}
-                </Link>
-              </li>
+            <ul className="flex flex-col gap-2.5 text-[14px]">
+              <li><Link href="/chat" className="text-foreground/80 transition-colors hover:text-foreground">{t("links.chat")}</Link></li>
+              <li><Link href="/mood" className="text-foreground/80 transition-colors hover:text-foreground">{t("links.mood")}</Link></li>
+              <li><Link href="/resources" className="text-foreground/80 transition-colors hover:text-foreground">{t("links.resources")}</Link></li>
+              <li><Link href="/assessments" className="text-foreground/80 transition-colors hover:text-foreground">{t("links.assessments")}</Link></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {t("legal")}
+            <h4 className="mb-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+              {t("company")}
             </h4>
-            <ul className="mt-4 space-y-3 text-sm">
-              <li>
-                <Link href="/privacy" className="text-foreground/80 hover:text-foreground">
-                  {t("links.privacy")}
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms" className="text-foreground/80 hover:text-foreground">
-                  {t("links.terms")}
-                </Link>
-              </li>
+            <ul className="flex flex-col gap-2.5 text-[14px]">
+              <li><a href="#" className="text-foreground/80 transition-colors hover:text-foreground">{t("links.about")}</a></li>
+              <li><a href="#" className="text-foreground/80 transition-colors hover:text-foreground">{t("links.research")}</a></li>
+              <li><a href="#" className="text-foreground/80 transition-colors hover:text-foreground">{t("links.careers")}</a></li>
+              <li><a href="#" className="text-foreground/80 transition-colors hover:text-foreground">{t("links.contact")}</a></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {t("support")}
+            <h4 className="mb-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+              {t("trust")}
             </h4>
-            <ul className="mt-4 space-y-3 text-sm">
-              <li>
-                <a href="tel:988" className="text-foreground/80 hover:text-foreground">
-                  {t("links.crisis")}
-                </a>
-              </li>
+            <ul className="flex flex-col gap-2.5 text-[14px]">
+              <li><Link href="/privacy" className="text-foreground/80 transition-colors hover:text-foreground">{t("links.privacy")}</Link></li>
+              <li><Link href="/terms" className="text-foreground/80 transition-colors hover:text-foreground">{t("links.terms")}</Link></li>
+              <li><a href="#safety" className="text-foreground/80 transition-colors hover:text-foreground">{t("links.safety")}</a></li>
+              <li><a href="tel:988" className="text-foreground/80 transition-colors hover:text-foreground">{t("links.crisis")}</a></li>
             </ul>
           </div>
         </div>
-      </div>
 
-      <div className="border-t border-border">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-6 text-xs text-muted-foreground md:px-8 lg:px-12">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border py-[22px] text-[12.5px] text-muted-foreground">
           <span>{t("copyright")}</span>
+          <div className="flex gap-6">
+            <span>
+              EN · <span className="font-['Noto_Sans_Ethiopic',sans-serif]">አማ</span>
+            </span>
+            <span>{t("version")}</span>
+          </div>
         </div>
       </div>
     </footer>
