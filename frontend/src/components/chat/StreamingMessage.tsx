@@ -1,7 +1,5 @@
 "use client";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-
 type StreamingMessageProps = {
   tokens: string;
   isComplete: boolean;
@@ -9,21 +7,36 @@ type StreamingMessageProps = {
 
 export default function StreamingMessage({ tokens, isComplete }: StreamingMessageProps) {
   return (
-    <div className="flex animate-fade-in items-start gap-3">
-      <Avatar className="mt-1 h-8 w-8 shrink-0 border border-border bg-card">
-        <AvatarFallback className="bg-card text-[10px] font-semibold uppercase tracking-wider text-primary">
-          ME
-        </AvatarFallback>
-      </Avatar>
-      <div className="min-w-0 max-w-[78%] flex-1 rounded-2xl rounded-tl-md border border-border bg-muted/60 px-4 py-3">
-        <div className="whitespace-pre-wrap break-words text-[14.5px] leading-relaxed text-foreground">
-          {tokens}
-          {!isComplete && (
-            <span
-              aria-hidden
-              className="ml-0.5 inline-block h-4 w-0.5 animate-blink-cursor align-middle bg-primary"
-            />
-          )}
+    <div className="animate-fade-in flex items-start gap-2.5">
+      <span
+        aria-hidden
+        className="mt-1 grid h-[30px] w-[30px] shrink-0 place-items-center rounded-full bg-primary text-[11px] font-semibold text-primary-foreground"
+      >
+        M
+      </span>
+      <div className="min-w-0 max-w-[540px]">
+        <p className="mb-1 font-mono text-[10.5px] font-medium uppercase tracking-[0.1em] text-primary">
+          MindEase
+        </p>
+        <div
+          className="border border-border bg-card text-foreground"
+          style={{
+            borderTopLeftRadius: 4,
+            borderTopRightRadius: 14,
+            borderBottomLeftRadius: 14,
+            borderBottomRightRadius: 14,
+            padding: "12px 16px",
+          }}
+        >
+          <div className="whitespace-pre-wrap break-words text-[14.5px] leading-[1.55]">
+            {tokens}
+            {!isComplete && (
+              <span
+                aria-hidden
+                className="ml-0.5 inline-block h-4 w-[2px] animate-blink-cursor align-middle bg-primary"
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>
