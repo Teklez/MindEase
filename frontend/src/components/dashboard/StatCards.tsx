@@ -1,102 +1,92 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { ArrowDown, ArrowUp, Flame, Smile } from "lucide-react";
-import { Line, LineChart, ResponsiveContainer, YAxis } from "recharts";
-import { getMoodEmoji, getMoodLabel } from "@/lib/mood";
+import { ArrowDown, ArrowRight, ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Props = {
+  totalConversations: number;
+  conversationsThisMonth: number;
+  sessionsThisWeek: number;
+  weekDelta: number;
   currentStreak: number;
   longestStreak: number;
-  averageMood: number | null;
-  moodDelta: number | null;
-  sessionsThisWeek: number;
-  sparkline: Array<{ value: number }>;
+};
+
+type Trend = "up" | "flat" | "down";
+
+function trendOf(n: number): Trend {
+  if (n > 0) return "up";
+  if (n < 0) return "down";
+  return "flat";
+}
+
+const TREND_COLOR: Record<Trend, string> = {
+  up: "text-primary",
+  flat: "text-muted-foreground",
+  down: "text-destructive",
+};
+
+const TREND_ICON: Record<Trend, typeof ArrowUp> = {
+  up: ArrowUp,
+  flat: ArrowRight,
+  down: ArrowDown,
 };
 
 export default function StatCards({
+  totalConversations,
+  conversationsThisMonth,
+  sessionsThisWeek,
+  weekDelta,
   currentStreak,
   longestStreak,
-  averageMood,
-  moodDelta,
-  sessionsThisWeek,
-  sparkline,
 }: Props) {
-  const t = useTranslations("dashboard");
+  const t = useTranslations("dashboard.v2.stats");
+
+  const monthTrend = trendOf(conversationsThisMonth);
+  const weekTrend = trendOf(weekDelta);
 
   return (
-    <div className="grid gap-4 sm:grid-cols-3">
-      <Card>
-        <Eyebrow>{t("streak")}</Eyebrow>
-        <Value>
-          <Flame className="h-6 w-6 text-primary" strokeWidth={1.75} />
-          <span className="font-serif text-4xl tracking-tight">{currentStreak}</span>
-          <span className="text-base text-muted-foreground">{currentStreak === 1 ? t("daySingular") : t("days")}</span>
-        </Value>
-        <SubLabel>{t("longest", { days: longestStreak })}</SubLabel>
-      </Card>
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <StatCard>
+        <Eyebrow>{t("totalConversations")}</Eyebrow>
+        <Value>{totalConversations}</Value>
+        <Delta trend={monthTrend}>
+          {monthTrend === "up"
+            ? t("deltaUp", { n: conversationsThisMonth })
+            : monthTrend === "down"
+              ? t("deltaUp", { n: conversationsThisMonth })
+              : t("deltaFlat")}
+        </Delta>
+      </StatCard>
 
-      <Card>
-        <Eyebrow>{t("averageMood")}</Eyebrow>
-        <Value>
-          {averageMood !== null ? (
-            <>
-              <span className="text-3xl">{getMoodEmoji(averageMood)}</span>
-              <span className="font-serif text-3xl tracking-tight">{averageMood.toFixed(1)}</span>
-              {moodDelta !== null && moodDelta !== 0 && (
-                <span
-                  className={cn(
-                    "inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-medium",
-                    moodDelta > 0 ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive",
-                  )}
-                >
-                  {moodDelta > 0 ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
-                  {Math.abs(moodDelta).toFixed(1)}
-                </span>
-              )}
-            </>
-          ) : (
-            <>
-              <Smile className="h-6 w-6 text-muted-foreground" strokeWidth={1.6} />
-              <span className="font-serif text-3xl text-muted-foreground">—</span>
-            </>
-          )}
-        </Value>
-        <SubLabel>{averageMood !== null ? getMoodLabel(averageMood) : "Last 7 days"}</SubLabel>
-      </Card>
-
-      <Card>
+      <StatCard>
         <Eyebrow>{t("thisWeek")}</Eyebrow>
-        <div className="mt-3 flex items-end justify-between gap-3">
-          <span className="font-serif text-4xl tracking-tight">{sessionsThisWeek}</span>
-          <div className="h-10 w-24">
-            {sparkline.length > 1 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={sparkline} margin={{ top: 4, right: 0, bottom: 4, left: 0 }}>
-                  <YAxis hide domain={["dataMin", "dataMax"]} />
-                  <Line
-                    type="monotone"
-                    dataKey="value"
-                    stroke="var(--primary)"
-                    strokeWidth={1.75}
-                    dot={false}
-                    isAnimationActive={false}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-full w-full rounded-md bg-muted" />
-            )}
-          </div>
+        <Value>{sessionsThisWeek}</Value>
+        <Delta trend={weekTrend}>
+          {weekTrend === "up"
+            ? t("deltaWeekUp", { n: weekDelta })
+            : weekTrend === "down"
+              ? t("deltaWeekUp", { n: weekDelta })
+              : t("deltaWeekFlat")}
+        </Delta>
+      </StatCard>
+
+      <StatCard>
+        <Eyebrow>{t("moodStreak")}</Eyebrow>
+        <div className="mt-3 flex items-end gap-2 leading-none">
+          <span className="font-serif text-[30px] font-[360] tracking-[-0.01em] text-foreground">
+            {currentStreak}
+          </span>
+          <span className="text-[13px] text-muted-foreground">{t("streakSuffix")}</span>
         </div>
-        <SubLabel>Last 7 days</SubLabel>
-      </Card>
+        <Delta trend="flat">{t("personalBest", { n: longestStreak })}</Delta>
+      </StatCard>
     </div>
   );
 }
 
-function Card({ children }: { children: React.ReactNode }) {
+function StatCard({ children }: { children: React.ReactNode }) {
   return (
     <div className="rounded-2xl border border-border bg-card p-5 shadow-soft-sm transition-all hover:-translate-y-0.5 hover:shadow-soft-md">
       {children}
@@ -106,14 +96,31 @@ function Card({ children }: { children: React.ReactNode }) {
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{children}</p>
+    <p className="font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+      {children}
+    </p>
   );
 }
 
 function Value({ children }: { children: React.ReactNode }) {
-  return <div className="mt-3 flex items-end gap-2">{children}</div>;
+  return (
+    <p className="mt-3 font-serif text-[30px] font-[360] leading-none tracking-[-0.01em] text-foreground">
+      {children}
+    </p>
+  );
 }
 
-function SubLabel({ children }: { children: React.ReactNode }) {
-  return <p className="mt-2 text-xs text-muted-foreground">{children}</p>;
+function Delta({ trend, children }: { trend: Trend; children: React.ReactNode }) {
+  const Icon = TREND_ICON[trend];
+  return (
+    <p
+      className={cn(
+        "mt-2 inline-flex items-center gap-1 font-mono text-[10.5px] uppercase tracking-[0.06em]",
+        TREND_COLOR[trend],
+      )}
+    >
+      <Icon className="h-2.5 w-2.5" strokeWidth={2.5} />
+      {children}
+    </p>
+  );
 }
