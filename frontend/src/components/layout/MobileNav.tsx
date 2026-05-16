@@ -17,7 +17,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import Logo from "@/components/shared/Logo";
-import { useGroupsUnread } from "@/hooks/useGroupsUnread";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -59,8 +58,6 @@ export default function MobileNav({ user, onNavigate, onLogout }: Props) {
   const pathname = usePathname();
   const tNav = useTranslations("nav");
   const tCommon = useTranslations("common");
-  const { hasUnread: groupsHaveUnread, count: groupsUnreadCount } =
-    useGroupsUnread();
 
   return (
     <div className="flex h-full flex-col bg-background">
@@ -81,16 +78,10 @@ export default function MobileNav({ user, onNavigate, onLogout }: Props) {
               !active && !disabled && "text-foreground hover:bg-muted",
               disabled && "cursor-not-allowed text-muted-foreground",
             );
-            const showUnread = labelKey === "groups" && groupsHaveUnread;
             const inner = (
               <>
                 <Icon className="h-4 w-4 shrink-0" strokeWidth={1.75} />
                 <span className="flex-1">{tNav(labelKey)}</span>
-                {showUnread && (
-                  <span className="rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-medium text-primary-foreground">
-                    {groupsUnreadCount}
-                  </span>
-                )}
                 {disabled && (
                   <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
                     {tCommon("comingSoon").toLowerCase()}
