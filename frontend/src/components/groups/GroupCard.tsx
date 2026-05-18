@@ -90,7 +90,7 @@ export function GroupCard({ group, lang, onJoin, onOpen }: Props) {
                   {group.has_unread && group.is_member && (
                     <span
                       className="h-2 w-2 shrink-0 rounded-full bg-primary"
-                      aria-label="unread messages"
+                      aria-label={t("unreadAriaLabel")}
                     />
                   )}
                   {name}

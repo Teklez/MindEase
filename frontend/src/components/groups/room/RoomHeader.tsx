@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { ChevronLeft, Info, Menu, MoreVertical, Pin, Users } from "lucide-react";
 import Link from "next/link";
 import {
@@ -36,13 +37,15 @@ export function RoomHeader({
   onDelete,
   leaveLabel,
 }: Props) {
+  const t = useTranslations("groups");
+  const tHead = useTranslations("groups.room.header");
   return (
     <header className="flex shrink-0 items-center justify-between gap-4 border-b border-border bg-background px-4 py-3 md:px-7 md:py-3.5">
       <div className="flex min-w-0 items-center gap-2 md:gap-3.5">
         {/* Mobile-only: back to groups */}
         <Link
           href="/groups"
-          aria-label="Back to groups"
+          aria-label={t("backToGroups")}
           className="-ml-1 inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground lg:hidden"
         >
           <ChevronLeft className="h-4 w-4" strokeWidth={1.75} />
@@ -52,7 +55,7 @@ export function RoomHeader({
         <button
           type="button"
           onClick={onOpenChannels}
-          aria-label="Open channels"
+          aria-label={tHead("openChannels")}
           className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground lg:hidden"
         >
           <Menu className="h-4 w-4" strokeWidth={1.75} />
@@ -68,29 +71,29 @@ export function RoomHeader({
       </div>
 
       <div className="flex shrink-0 items-center gap-1.5">
-        <IconButton title="Pinned posts" disabled>
+        <IconButton title={tHead("pinned")} disabled>
           <Pin className="h-3.5 w-3.5" strokeWidth={1.75} />
         </IconButton>
-        <IconButton title="Members" onClick={onOpenMembers} className="xl:hidden">
+        <IconButton title={tHead("membersAction")} onClick={onOpenMembers} className="xl:hidden">
           <Users className="h-3.5 w-3.5" strokeWidth={1.75} />
         </IconButton>
-        <IconButton title="Group info" onClick={onOpenInfo}>
+        <IconButton title={tHead("info")} onClick={onOpenInfo}>
           <Info className="h-3.5 w-3.5" strokeWidth={1.75} />
         </IconButton>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              aria-label="More actions"
+              aria-label={tHead("more")}
               className="grid h-[34px] w-[34px] place-items-center rounded-full border border-border bg-secondary/50 text-foreground/70 transition-colors hover:bg-background hover:text-foreground"
             >
               <MoreVertical className="h-3.5 w-3.5" strokeWidth={1.75} />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-44">
-            <DropdownMenuItem onClick={onOpenInfo}>About this circle</DropdownMenuItem>
-            <DropdownMenuItem onClick={onOpenMembers}>Members</DropdownMenuItem>
-            {isAdminOrCreator && <DropdownMenuItem disabled>Settings</DropdownMenuItem>}
+            <DropdownMenuItem onClick={onOpenInfo}>{tHead("aboutMenu")}</DropdownMenuItem>
+            <DropdownMenuItem onClick={onOpenMembers}>{tHead("membersMenu")}</DropdownMenuItem>
+            {isAdminOrCreator && <DropdownMenuItem disabled>{tHead("settings")}</DropdownMenuItem>}
             {!isCreator && onLeave && (
               <>
                 <DropdownMenuSeparator />
@@ -109,7 +112,7 @@ export function RoomHeader({
                   onClick={onDelete}
                   className="text-destructive focus:bg-destructive/10 focus:text-destructive"
                 >
-                  Delete group
+                  {tHead("deleteGroup")}
                 </DropdownMenuItem>
               </>
             )}

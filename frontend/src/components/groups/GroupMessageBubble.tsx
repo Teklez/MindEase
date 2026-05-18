@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Sparkles } from "lucide-react";
 import type { GroupMessageResponse } from "@/lib/types";
 import { cn, formatMessageTime } from "@/lib/utils";
@@ -45,6 +46,7 @@ function initialOf(name: string | null | undefined): string {
 }
 
 export function GroupMessageBubble({ message, isCurrentUser }: Props) {
+  const t = useTranslations("groups");
   // ----- system -----
   if (message.sender_type === "system") {
     return (
@@ -103,7 +105,7 @@ export function GroupMessageBubble({ message, isCurrentUser }: Props) {
               isDeleted && "italic opacity-70",
             )}
           >
-            {isDeleted ? "[Message deleted]" : message.content}
+            {isDeleted ? t("messageDeleted") : message.content}
           </div>
           <p className="mt-1.5 text-right text-[10px] uppercase tracking-wider text-primary-foreground/70">
             {formatMessageTime(message.timestamp)}

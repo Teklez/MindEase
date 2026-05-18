@@ -189,6 +189,12 @@ class VoiceService:
                     print(f"[voice] reconnect FAILED: {exc}", flush=True)
                     await self.send_event({"type": "error", "message": "voice reconnect failed"})
                     return
+                # Tell the client the new Live session is ready to receive the
+                # user's next utterance. Without this, the frontend has no way
+                # to know the brief swap window has ended, and audio pushed
+                # during it would be silently dropped by push_audio (session
+                # is None).
+                await self.send_event({"type": "ready"})
             try:
                 await self._receive_loop()
             except asyncio.CancelledError:

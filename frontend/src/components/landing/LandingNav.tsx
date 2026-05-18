@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { ArrowRight } from "lucide-react";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { cn } from "@/lib/utils";
 
 function LeafMark() {
@@ -64,6 +65,7 @@ export default function LandingNav() {
         </div>
 
         <div className="flex items-center gap-2">
+          <LanguageSwitcher className="text-muted-foreground" />
           <Link
             href="/login"
             className="hidden h-9 items-center px-3.5 text-[13px] font-medium text-foreground transition-colors hover:text-primary sm:inline-flex"

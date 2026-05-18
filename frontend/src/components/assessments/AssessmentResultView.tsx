@@ -32,9 +32,9 @@ import { toast } from "@/hooks/use-toast";
 import { getCrisisResources } from "@/lib/crisis-resources";
 import {
   instrumentCode,
-  levelLabel,
   levelToIndex,
 } from "@/lib/assessment-level";
+import { useLevelLabel } from "@/hooks/useLevelLabel";
 import { cn } from "@/lib/utils";
 import type {
   AssessmentRange,
@@ -61,6 +61,7 @@ export function AssessmentResultView({
   lang,
 }: Props) {
   const t = useTranslations("assessments.result");
+  const levelLabel = useLevelLabel();
   const router = useRouter();
   const [range, setRange] = useState<Range>("90D");
 
@@ -95,13 +96,13 @@ export function AssessmentResultView({
 
   const onPdf = () =>
     toast({
-      title: "PDF export coming soon",
-      description: "We'll let you know when it lands.",
+      title: t("toasts.pdfSoonTitle"),
+      description: t("toasts.pdfSoonBody"),
     });
   const onShare = () =>
     toast({
-      title: "Sharing coming soon",
-      description: "We'll let you know when this is ready.",
+      title: t("toasts.shareSoonTitle"),
+      description: t("toasts.shareSoonBody"),
     });
   const onRetakeIn2Weeks = () => {
     try {
@@ -258,7 +259,7 @@ export function AssessmentResultView({
 
             {trendData.length === 0 ? (
               <div className="mt-5 flex h-[140px] items-center justify-center font-mono text-[10.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
-                — No history yet
+                {t("noHistoryYet")}
               </div>
             ) : (
               <div className="mt-3 h-[140px]">
@@ -396,8 +397,10 @@ export function AssessmentResultView({
       {/* Bottom actions */}
       <div className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-secondary/40 px-5 py-4">
         <p className="max-w-[48ch] text-[13px] leading-relaxed text-foreground/85">
-          <strong className="font-medium text-foreground">This isn&apos;t a diagnosis.</strong>{" "}
-          {t("notDiagnosis").replace(/^This isn'?t a diagnosis\.\s*/i, "")}
+          <strong className="font-medium text-foreground">{t("notDiagnosisStrong")}</strong>{" "}
+          {t("notDiagnosis")
+            .replace(t("notDiagnosisStrong"), "")
+            .replace(/^\s+/, "")}
         </p>
         <div className="flex flex-wrap gap-2">
           <Button variant="ghost" onClick={onPdf} className="gap-1.5">

@@ -14,7 +14,8 @@ function isMainPath(pathname: string): boolean {
     pathname.startsWith("/avatar") ||
     pathname.startsWith("/resources") ||
     pathname.startsWith("/assessments") ||
-    pathname.startsWith("/groups")
+    pathname.startsWith("/groups") ||
+    pathname.startsWith("/settings")
   );
 }
 

@@ -45,30 +45,6 @@ export function levelBorderClass(level: string): string {
   return `border-level-${levelToIndex(level)}`;
 }
 
-/** Friendly display label for any backend feedback_level. */
-export function levelLabel(level: string): string {
-  switch (level) {
-    case "minimal":
-      return "Minimal";
-    case "mild":
-      return "Mild";
-    case "moderate":
-      return "Moderate";
-    case "moderately_severe":
-      return "Mod-severe";
-    case "severe":
-      return "Severe";
-    case "low":
-      return "Low";
-    case "high":
-      return "High";
-    case "very_high":
-      return "Very high";
-    default:
-      return level.charAt(0).toUpperCase() + level.slice(1).replace("_", " ");
-  }
-}
-
 /** Short instrument code per assessment_type. Falls back to the type itself. */
 export function instrumentCode(assessmentType: string): string {
   switch (assessmentType) {

@@ -822,25 +822,162 @@
   "assessments": {
     "title": "ራስን መገምገም",
     "subtitle": "ከራስዎ ጋር ለመመርመር ፈጣን፣ ክሊኒካዊ-መሰረት ያላቸው መሳሪያዎች",
-    "disclaimer": "እነዚህ የምርመራ መሳሪያዎች ናቸው፣ ክሊኒካዊ ምርመራዎች አይደሉም። ለክሊኒካዊ ግምገማ ባለሙያን ያማክሩ።",
-    "start": "ግምገማ ጀምር",
+    "disclaimer": "እነዚህ የምልመላ መሳሪያዎች ናቸው፣ ክሊኒካዊ ምርመራዎች አይደሉም። ለክሊኒካዊ ግምገማ ባለሙያን ያማክሩ።",
+    "start": "ምልመላ ጀምር",
     "question": "ጥያቄ {current} ከ {total}",
     "back": "ተመለስ",
     "next": "ቀጣይ",
     "seeResults": "ውጤቶችን ይመልከቱ",
     "retake": "እንደገና ይውሰዱ",
-    "viewAll": "ሁሉንም ግምገማዎች ይመልከቱ",
+    "viewAll": "ሁሉንም ምልመላዎች ይመልከቱ",
     "yourScore": "ውጤትዎ",
     "history": "ታሪክዎ",
-    "noHistory": "መከታተል ለመጀመር የመጀመሪያ ግምገማዎን ይውሰዱ",
+    "noHistory": "መከታተል ለመጀመር የመጀመሪያ ምልመላዎን ይውሰዱ",
     "lastTaken": "የመጨረሻ: {date}",
     "timesTaken": "{count} ጊዜ ተወስዷል",
     "talkTo": "ከ {avatar} ጋር ያናግሩ",
     "exploreResources": "ግብዓቶችን ያስሱ",
     "crisisNotice": "ራስዎን የመጉዳት ሀሳብ ካለዎት፣ እባክዎ እርዳታ እንደሚገኝ ይወቁ።",
-    "notDiagnosis": "ይህ የምርመራ መሳሪያ ነው፣ ክሊኒካዊ ምርመራ አይደለም።",
+    "notDiagnosis": "ይህ የምልመላ መሣሪያ ነው፣ ክሊኒካዊ ምርመራ አይደለም።",
     "improvement": "ውጤትዎ ከመጨረሻው ጊዜ ተሻሽሏል!",
-    "scoreHistory": "የውጤት ታሪክ"
+    "scoreHistory": "የውጤት ታሪክ",
+    "eyebrow": "የተረጋገጡ ምልመላዎች",
+    "headline": "በዚህ ሳምንት የት ነዎት?",
+    "headlineEmphasis": "በዚህ ሳምንት?",
+    "subtitleLong": "በዓለም ዙሪያ በክሊኒኮች የሚጠቀሙ አጭር፣ የተረጋገጡ መጠይቆች። ምርመራ አይደለም — ፎቶ ነው። ለወደፊቱ እራስዎ በደግነት እንዲነጋገሩ የመስመር ክትትል እናደርጋለን።",
+    "scheduleReminder": "ማስታወሻ ይመድቡ",
+    "stats": {
+      "tools": "መሣሪያዎች",
+      "taken": "የተወሰዱ ምልመላዎች",
+      "thisMonth": "በዚህ ወር"
+    },
+    "safety": {
+      "lead": "እነዚህ የምልመላ መሣሪያዎች ናቸው፣ ምርመራ አይደሉም።",
+      "body": "ቅጦችን ለማስተዋል እና ለክሊኒሺያን አንድ ተጨባጭ ነገር ለማቅረብ ይጠቀሙባቸው — ለከባድ ቀን ፍርድ አይደሉም። ከባድ ሆኖ ከተሰማ፣ የችግር ግብዓቶች ሁል ጊዜ በአንድ ጠቅታ ይገኛሉ።",
+      "crisisLink": "የችግር ግብዓቶች",
+      "howScored": "እንዴት እንመዝነዋለን"
+    },
+    "available": {
+      "title": "የሚገኙ መሣሪያዎች",
+      "titleEmphasis": "መሣሪያዎች",
+      "meta": "{count} መሣሪያዎች · ሁሉም በማስረጃ ላይ የተመሰረቱ"
+    },
+    "historyPanel": {
+      "title": "የእርስዎ ታሪክ",
+      "titleEmphasis": "ታሪክ",
+      "meta": "{count} ምልመላዎች · ያለፉት {days} ቀናት",
+      "recent": "የቅርብ ጊዜ ምልመላዎች",
+      "noHistory": "የመጀመሪያ ምልመላ ካደረጉ በኋላ መስመሩ ይጀምራል።",
+      "trendingDown": "↘ እየወረደ",
+      "steady": "→ የተረጋጋ",
+      "trendingUp": "↗ እየወጣ",
+      "noData": "— ምንም መረጃ",
+      "noDataHint": "መስመሩን ለመጀመር የመጀመሪያውን ይውሰዱ።",
+      "lastN": "ያለፉት {days} ቀናት · {n} ምዝገባዎች"
+    },
+    "card": {
+      "lastTakenAt": "የመጨረሻ · {when}",
+      "scoreOf": "ውጤት {value} / {max}",
+      "takenNTimes": "{n} ጊዜ ተወስዷል",
+      "begin": "ጀምር",
+      "retakeBtn": "እንደገና ይውሰዱ",
+      "notTaken": "ገና አልተወሰደም · በቀስታ ይውሰዱ",
+      "isNew": "አዲስ",
+      "validatedBadge": "የተረጋገጠ",
+      "selfPaced": "በራስዎ ፍጥነት",
+      "duration": "{n} ደቂቃ",
+      "items": "{n} ጥያቄዎች",
+      "type": "ራስ-ሪፖርት",
+      "dueAt": "ለ{date} ይሞላል",
+      "dueToday": "ዛሬ ይሞላል"
+    },
+    "take": {
+      "back": "ተመለስ",
+      "next": "ቀጣይ",
+      "seeResultsLabel": "ውጤት ይመልከቱ",
+      "saved": "ተቀምጧል",
+      "questionOf": "ጥያቄ {current} ከ {total}",
+      "preambleDefault": "ባለፉት ሁለት ሳምንታት፣ ምን ያህል ጊዜ ይህ አስቸግሮዎታል…",
+      "preamblePss": "ባለፈው ወር፣ ምን ያህል ጊዜ ተሰምቶዎታል…",
+      "subhint": "ከእውነታው ጋር በጣም የቀረበውን መልስ ይምረጡ። ትክክለኛ መልስ የለም — ለእርስዎ የተሰማውን ብቻ።",
+      "kbdSelect": "{keys} ምረጥ",
+      "kbdNext": "⏎ ቀጣይ",
+      "kbdExit": "⎋ አስቀምጥ እና ውጣ"
+    },
+    "result": {
+      "crumb": "ውጤት · {name} · {code}",
+      "headline": "በዚህ ሳምንት የት እንዳለዎት ይኸውና።",
+      "headlineEmphasis": "ይኸውና።",
+      "completed": "ተጠናቋል",
+      "tookTime": "{time} ወሰደ",
+      "scoreLabel": "{code} ጠቅላላ",
+      "yourScore": "ውጤትዎ",
+      "rangeHeadlinePrefix": "ይህ በ",
+      "rangeHeadlineSuffix": "ክልል ውስጥ ነው።",
+      "severityScale": "የክብደት ሚዛን",
+      "thresholds": "{code} መለኪያዎች",
+      "breakdown": "ምን አበረከተ",
+      "yourLine": "የእርስዎ መስመር",
+      "yourLineEmphasis": "መስመር",
+      "nextSteps": "የተጠቆሙ ቀጣይ እርምጃዎች",
+      "nextStepsEmphasis": "ቀጣይ እርምጃዎች",
+      "talkItThrough": "ከMindEase ጋር ይነጋገሩ",
+      "talkItThroughSub": "ውይይት ይክፈቱ",
+      "findClinician": "በአቅራቢያዎ ክሊኒሺያን ይፈልጉ",
+      "findClinicianSub": "የግብዓቶች ማውጫ",
+      "exploreResources": "ተዛማጅ ግብዓቶችን ያስሱ",
+      "exploreResourcesSub": "ጽሁፎች + ድምፅ",
+      "joinGroup": "የሚረዳ ክበብ ያግኙ",
+      "joinGroupSub": "የእኩዮች ድጋፍ ቡድኖች",
+      "ifHeavy": "ዛሬ ከባድ ከሆነ",
+      "ifHeavyBody": "እርዳታ ለመጠየቅ ቁጥር መጠበቅ የለብዎትም። እነዚህ ነፃ፣ ሚስጥራዊ እና በስልጠና በተወሰዱ ሰዎች የሚካሄዱ ናቸው።",
+      "notDiagnosis": "ይህ ምርመራ አይደለም። ከባድ ስሜት እንዲያስተውሉ እና ወደ አንድ ጠቃሚ ቦታ እንዲያደርሱት የሚረዳ አጭር ምልመላ ነው። ካስፈለገ ውጤቱን ያስቀምጡ እና ለክሊኒሺያን ያጋሩ።",
+      "notDiagnosisStrong": "ይህ ምርመራ አይደለም።",
+      "noHistoryYet": "— ገና ምንም ታሪክ የለም",
+      "downloadPdf": "PDF አውርድ",
+      "shareClinician": "ለክሊኒሺያን አጋራ",
+      "retakeIn": "በ2 ሳምንታት እንደገና ይውሰዱ",
+      "rangeToggle": {
+        "d90": "90ቀ",
+        "m6": "6ወ",
+        "y1": "1አ",
+        "all": "ሁሉም"
+      },
+      "toasts": {
+        "pdfSoonTitle": "PDF ኤክስፖርት በቅርቡ ይመጣል",
+        "pdfSoonBody": "ሲደርስ እናሳውቆታለን።",
+        "shareSoonTitle": "ማጋራት በቅርቡ ይመጣል",
+        "shareSoonBody": "ሲደርስ እናሳውቆታለን።"
+      }
+    },
+    "levels": {
+      "minimal": "በትንሹ",
+      "mild": "ቀላል",
+      "moderate": "መካከለኛ",
+      "moderately_severe": "መካከለኛ-ከባድ",
+      "severe": "ከባድ",
+      "low": "ዝቅተኛ",
+      "high": "ከፍተኛ",
+      "very_high": "በጣም ከፍተኛ"
+    },
+    "crisis": {
+      "eyebrow": "ለትንሽ ቆም ይበሉ",
+      "headline": "ሐቀኛ ስለሆኑልን እናመሰግናለን።",
+      "headlineEmphasis": "ሐቀኛ",
+      "body": "ያን መልስ ለማመልከት ድፍረት ይጠይቃል። እዚህ ላይ ብቻ አይደሉም — እና ምልመላውን እስኪጨርሱ መጠበቅ የለብዎትም። እነዚህ ግብዓቶች ነፃ፣ ሚስጥራዊ እና በስልጠና በተወሰዱ ሰዎች የሚካሄዱ ናቸው።",
+      "comeBack": "በኋላ እመለሳለሁ",
+      "continueCheckIn": "ምልመላውን ቀጥል"
+    },
+    "list": {
+      "relativeToday": "ዛሬ",
+      "relativeYesterday": "ትናንት",
+      "relativeDaysAgo": "ከ{n} ቀናት በፊት",
+      "questionsLine": "{count} ጥያቄዎች",
+      "reminderSoonTitle": "ማስታወሻዎች በቅርቡ ይመጣሉ",
+      "reminderSoonBody": "ሲደርሱ እናሳውቆታለን።",
+      "notFound": "ምልመላው አልተገኘም",
+      "resultNotFound": "ውጤቱ አልተገኘም"
+    }
   },
   "resources": {
     "title": "የግብዓት ቤተ-መጽሐፍት",
@@ -873,11 +1010,13 @@
   "mood": {
     "title": "የስሜት ተከታታይ",
     "checkIn": "ምን ይሰማዎታል?",
-    "veryBad": "በጣም መጥፎ",
-    "bad": "መጥፎ",
-    "neutral": "መካከለኛ",
-    "good": "ጥሩ",
-    "veryGood": "በጣም ጥሩ",
+    "scores": {
+      "awful": "በጣም መጥፎ",
+      "low": "መጥፎ",
+      "okay": "መካከለኛ",
+      "good": "ጥሩ",
+      "great": "በጣም ጥሩ"
+    },
     "addNote": "ስሜትዎን ስለ ማስታወሻ ይጨምሩ... (አማራጭ)",
     "save": "ያስቀምጡ",
     "saving": "በማስቀምጥ ላይ...",
@@ -961,7 +1100,88 @@
     "lastActive": "የመጨረሻ ንቁ {time}",
     "aiThinking": "ማይንድኢዝ እያሰበ ነው...",
     "aiTip": "ምክር: በማንኛውም ጊዜ እርዳታ ለመጠየቅ @MindEase ይጻፉ!",
-    "aiModerator": "ማይንድኢዝ"
+    "aiModerator": "ማይንድኢዝ",
+    "notFound": "ቡድኑ አልተገኘም",
+    "loading": "በመጫን ላይ…",
+    "backToGroups": "ወደ ቡድኖች ተመለስ",
+    "loadOlder": "የቆዩ መልዕክቶችን ጫን",
+    "messageDeleted": "[መልዕክት ተሰርዟል]",
+    "unreadAriaLabel": "ያልተነበቡ መልዕክቶች",
+    "iconAriaLabel": "ምልክት {emoji}",
+    "actions": {
+      "loadFailed": "ቡድኑን መጫን አልተቻለም",
+      "joinFailed": "ቡድኑን መቀላቀል አልተቻለም",
+      "leaveFailed": "ቡድኑን መልቀቅ አልተቻለም",
+      "deleteFailed": "ቡድኑን መሰረዝ አልተቻለም"
+    },
+    "connection": {
+      "connecting": "በመገናኘት ላይ…",
+      "problem": "የግንኙነት ችግር። እንደገና ለመገናኘት ገጹን ያድሱ።"
+    },
+    "composer": {
+      "messagePlaceholder": "ለ{name} መልዕክት ይላኩ…",
+      "mutedPlaceholder": "በአስተዳዳሪ ድምጽ-ተከልክለዋል",
+      "channelDefault": "ውይይት"
+    },
+    "disclaimer": {
+      "body": "ይህ የእኩዮች ድጋፍ ቦታ ነው። ደግ እና አክባሪ ይሁኑ። ማይንድኢዝ የባለሙያ እርዳታ ምትክ አይደለም።",
+      "dismiss": "ማሳወቂያውን አስወግድ"
+    },
+    "confirmDelete": {
+      "title": "ይህን ቡድን ይሰረዝ?",
+      "body": "ይህ ለስላሳ ስረዛ ነው — ቡድኑ ከአባላት ይደበቃል። ያሉ መልዕክቶች እና አባላት ይቀመጣሉ።",
+      "cancel": "ሰርዝ",
+      "delete": "ያስወግዱ"
+    },
+    "rulesLabel": "የቡድን ደንቦች",
+    "membersPanel": {
+      "titleCount": "አባላት ({count})",
+      "search": "አባላትን ፈልግ...",
+      "online": "ኦንላይን",
+      "loading": "በመጫን ላይ…",
+      "empty": "አባላት አልተገኙም",
+      "muted": "ድምጽ-የተከለከለ",
+      "actions": "የአባል ድርጊቶች",
+      "promote": "ወደ አስተዳዳሪ ያሳድጉ",
+      "mute": "ድምጽ ይከልክሉ",
+      "unmute": "ድምጽ ይፍቀዱ",
+      "remove": "ያስወግዱ"
+    },
+    "room": {
+      "back": "ወደ ክበቦች ተመለስ",
+      "online": "{n} ኦንላይን",
+      "members": "{n} አባላት",
+      "rooms": "ክፍሎች",
+      "events": "ዝግጅቶች",
+      "rsvp": "RSVP →",
+      "moderatedBy": "በ{name} ይመራል · የተረጋጋ ደንቦች ይሠራሉ",
+      "composerHint": "⌘⏎ ለመላክ · ⇧⏎ አዲስ መስመር",
+      "membersPanel": {
+        "title": "አባላት",
+        "search": "አባል ይፈልጉ…",
+        "moderators": "ሞዴሬተሮች",
+        "onlineGroup": "ኦንላይን — {n}",
+        "idleGroup": "ሥራ አጥ — {n}",
+        "offlineGroup": "ኦፍላይን — {n}",
+        "you": "(እርስዎ)",
+        "mod": "ሞድ"
+      },
+      "about": {
+        "title": "ስለዚህ ክበብ",
+        "readCharter": "ቻርተሩን ያንብቡ"
+      },
+      "header": {
+        "openChannels": "ክፍሎችን ይክፈቱ",
+        "pinned": "የተሰኩ መልዕክቶች",
+        "membersAction": "አባላት",
+        "info": "የቡድን መረጃ",
+        "more": "ተጨማሪ ድርጊቶች",
+        "aboutMenu": "ስለዚህ ክበብ",
+        "membersMenu": "አባላት",
+        "settings": "ቅንብሮች",
+        "deleteGroup": "ቡድኑን ሰርዝ"
+      }
+    }
   },
   "settings": {
     "memory": {
@@ -992,6 +1212,61 @@
         "group_message": "የቡድን መልዕክቶች",
         "resource": "ሀብቶች",
         "crisis_phrase": "የደህንነት ሐረጎች"
+      }
+    }
+  },
+  "avatar": {
+    "picker": {
+      "eyebrow": "የውይይት ጓደኛ ይምረጡ",
+      "title": "ከማን ጋር መነጋገር ይፈልጋሉ?",
+      "subtitle": "ለደህንነት ጓደኛዎ ፊት ይምረጡ — ድምፃቸውን ለማዳመጥ የመጫወቻ ቁልፉን ይጫኑ። በማንኛውም ጊዜ መቀየር ይችላሉ።",
+      "previewUnavailable": "ቅድመ ዕይታ አይገኝም: {message}",
+      "comingSoon": "በቅርቡ ይመጣል",
+      "playPreview": "የ{name}ን ቅድመ ዕይታ አጫውት",
+      "stopPreview": "የ{name}ን ቅድመ ዕይታ አቁም",
+      "speaking": "እያወራ ነው…"
+    },
+    "viewer": {
+      "chooseAnother": "ሌላ ይምረጡ",
+      "loading": "{name} እየጫነ ነው… {progress}%",
+      "loadError": "አቫታር መጫን አልተቻለም",
+      "startConversation": "ውይይት ይጀምሩ",
+      "connecting": "በመገናኘት ላይ…",
+      "listening": "በማዳመጥ ላይ…",
+      "responding": "{name} እየመለሰ ነው…",
+      "speakingNow": "{name} እያወራ ነው…",
+      "holdMic": "ማይክሮፎኑን ይያዙ ወይም የSpace ቁልፉን ይያዙ",
+      "recording": "በመቅረጽ ላይ",
+      "holdToSpeak": "ለመናገር ይያዙ",
+      "endCall": "ጥሪውን ያቁሙ",
+      "startCallFailed": "ጥሪ ለመጀመር አልተቻለም",
+      "audioInitFailed": "ድምጽ ለመጀመር አልተቻለም"
+    },
+    "personas": {
+      "serenity": {
+        "name": "ሰላም",
+        "blurb": "ሞቅ ያለ፣ አዳሚ፣ ለመነጋገር ቀላል።",
+        "intro": "ሰላም፣ እኔ ሰላም ነኝ። ለማዳመጥ እዚህ ነኝ — ምንም ቢሆን፣ ጊዜ ይውሰዱ።"
+      },
+      "maya": {
+        "name": "ዳዊት",
+        "blurb": "የተረጋጋ እና ጽኑ።",
+        "intro": "ሰላም፣ እኔ ዳዊት ነኝ። ቀስ ብለን አብረን እናስብ።"
+      },
+      "alex": {
+        "name": "ሄኖክ",
+        "blurb": "ብሩህ እና ጉጉ።",
+        "intro": "ሰላም፣ እኔ ሄኖክ ነኝ። ዛሬ ምን አሳሰበዎት? መስማት እወዳለሁ።"
+      },
+      "sora": {
+        "name": "ሳባ",
+        "blurb": "ጸጥተኛ እና አስተዋይ።",
+        "intro": "ሰላም፣ እኔ ሳባ ነኝ። ችኮላ የለም — ከፈለጉበት ቦታ ይጀምሩ።"
+      },
+      "kai": {
+        "name": "ዮናስ",
+        "blurb": "የተረጋጋ፣ ቀስ ያለ።",
+        "intro": "ሰላም፣ እኔ ዮናስ ነኝ። ዘና ይበሉ። ዝግጁ ሲሆኑ እዚህ ነኝ።"
       }
     }
   }

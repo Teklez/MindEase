@@ -51,6 +51,7 @@ export function MembersRail({
   onlineUserIds,
 }: Props) {
   const t = useTranslations("groups.room");
+  const tGroups = useTranslations("groups");
   const [members, setMembers] = useState<GroupMemberResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -117,7 +118,7 @@ export function MembersRail({
 
       <div className="flex-1 overflow-y-auto px-2 py-3">
         {loading ? (
-          <p className="px-3 text-[12px] text-muted-foreground">Loading…</p>
+          <p className="px-3 text-[12px] text-muted-foreground">{tGroups("loading")}</p>
         ) : (
           <>
             <BucketSection

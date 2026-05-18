@@ -48,6 +48,7 @@ export function CreateGroupModal({
   onCreated,
 }: Props) {
   const t = useTranslations("groups.create");
+  const tGroups = useTranslations("groups");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<string>("");
@@ -209,7 +210,7 @@ export function CreateGroupModal({
                       ? "border-primary bg-primary/10"
                       : "border-border bg-background hover:bg-muted",
                   )}
-                  aria-label={`Icon ${emoji}`}
+                  aria-label={tGroups("iconAriaLabel", { emoji })}
                   aria-pressed={icon === emoji}
                 >
                   {emoji}

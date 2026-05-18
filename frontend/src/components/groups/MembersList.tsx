@@ -65,6 +65,7 @@ export function MembersList({
   onlineUserIds,
 }: Props) {
   const t = useTranslations("groups");
+  const tPanel = useTranslations("groups.membersPanel");
   const [members, setMembers] = useState<GroupMemberResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -146,7 +147,7 @@ export function MembersList({
       >
         <SheetHeader className="border-b border-border px-6 py-4">
           <SheetTitle className="font-serif text-lg">
-            Members ({members.length})
+            {tPanel("titleCount", { count: members.length })}
           </SheetTitle>
         </SheetHeader>
 
@@ -160,7 +161,7 @@ export function MembersList({
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search members..."
+              placeholder={tPanel("search")}
               className="h-9 w-full rounded-md border border-input bg-background pl-9 pr-3 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             />
           </div>
@@ -170,11 +171,11 @@ export function MembersList({
           {loading ? (
             <div className="flex items-center justify-center gap-2 py-12 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.75} />
-              Loading…
+              {tPanel("loading")}
             </div>
           ) : filtered.length === 0 ? (
             <p className="py-12 text-center text-sm text-muted-foreground">
-              No members found
+              {tPanel("empty")}
             </p>
           ) : (
             <ul className="space-y-1">
@@ -196,7 +197,7 @@ export function MembersList({
                       {isOnline && (
                         <span
                           className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-background bg-success"
-                          aria-label="online"
+                          aria-label={tPanel("online")}
                         />
                       )}
                     </div>
@@ -207,7 +208,7 @@ export function MembersList({
                         </span>
                         {member.is_muted && (
                           <span className="rounded bg-muted px-1 py-0.5 text-[9.5px] uppercase tracking-wide text-muted-foreground">
-                            muted
+                            {tPanel("muted")}
                           </span>
                         )}
                       </div>
@@ -227,7 +228,7 @@ export function MembersList({
                               actingOn === member.user_id && "opacity-50",
                             )}
                             disabled={actingOn === member.user_id}
-                            aria-label="Member actions"
+                            aria-label={tPanel("actions")}
                           >
                             <MoreVertical className="h-4 w-4" strokeWidth={1.75} />
                           </button>
@@ -237,7 +238,7 @@ export function MembersList({
                             <DropdownMenuItem
                               onClick={() => handlePromote(member.user_id)}
                             >
-                              Promote to Admin
+                              {tPanel("promote")}
                             </DropdownMenuItem>
                           )}
                           <DropdownMenuItem
@@ -245,13 +246,13 @@ export function MembersList({
                               handleMute(member.user_id, !member.is_muted)
                             }
                           >
-                            {member.is_muted ? "Unmute" : "Mute"}
+                            {member.is_muted ? tPanel("unmute") : tPanel("mute")}
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => handleRemove(member.user_id)}
                             className="text-destructive focus:bg-destructive/10 focus:text-destructive"
                           >
-                            Remove
+                            {tPanel("remove")}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>

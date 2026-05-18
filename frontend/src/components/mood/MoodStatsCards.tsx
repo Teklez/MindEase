@@ -3,7 +3,8 @@
 import { useTranslations } from "next-intl";
 import { Flame, TrendingUp } from "lucide-react";
 import type { MoodStats } from "@/lib/types";
-import { getMoodEmoji, getMoodLabel } from "@/lib/mood";
+import { getMoodEmoji } from "@/lib/mood";
+import { useMoodLabels } from "@/hooks/useMoodLabels";
 
 type Props = {
   stats: MoodStats;
@@ -11,6 +12,7 @@ type Props = {
 
 export default function MoodStatsCards({ stats }: Props) {
   const t = useTranslations("mood");
+  const { getMoodLabel } = useMoodLabels();
 
   return (
     <div className="grid gap-4 sm:grid-cols-3">

@@ -28,9 +28,9 @@ import { toast } from "@/hooks/use-toast";
 import {
   instrumentCode,
   instrumentTone,
-  levelLabel,
   levelToIndex,
 } from "@/lib/assessment-level";
+import { useLevelLabel } from "@/hooks/useLevelLabel";
 import { cn } from "@/lib/utils";
 
 function formatDate(iso: string, locale: string): string {
@@ -41,13 +41,16 @@ function formatDate(iso: string, locale: string): string {
   });
 }
 
-function relativeDay(iso: string): string {
-  const d = new Date(iso);
-  const days = Math.floor((Date.now() - d.getTime()) / (24 * 3600 * 1000));
-  if (days === 0) return "Today";
-  if (days === 1) return "Yesterday";
-  if (days < 7) return `${days} days ago`;
-  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+function useRelativeDay() {
+  const tList = useTranslations("assessments.list");
+  return (iso: string): string => {
+    const d = new Date(iso);
+    const days = Math.floor((Date.now() - d.getTime()) / (24 * 3600 * 1000));
+    if (days === 0) return tList("relativeToday");
+    if (days === 1) return tList("relativeYesterday");
+    if (days < 7) return tList("relativeDaysAgo", { n: days });
+    return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  };
 }
 
 interface DueInfo {
@@ -75,6 +78,7 @@ export default function AssessmentsPage() {
   const tStats = useTranslations("assessments.stats");
   const tAvailable = useTranslations("assessments.available");
   const tHist = useTranslations("assessments.historyPanel");
+  const tList = useTranslations("assessments.list");
   const locale = useLocale();
   const router = useRouter();
 
@@ -141,8 +145,8 @@ export default function AssessmentsPage() {
             type="button"
             onClick={() =>
               toast({
-                title: "Reminders coming soon",
-                description: "We'll let you know when this lands.",
+                title: tList("reminderSoonTitle"),
+                description: tList("reminderSoonBody"),
               })
             }
             className="gap-1.5"
@@ -306,6 +310,8 @@ interface CardProps {
 
 function AssessmentCard({ item, lang, lastResult, onStart }: CardProps) {
   const tCard = useTranslations("assessments.card");
+  const tList = useTranslations("assessments.list");
+  const relativeDay = useRelativeDay();
   const name = lang === "am" && item.name_am ? item.name_am : item.name;
   const description =
     lang === "am" && item.description_am ? item.description_am : item.description;
@@ -356,7 +362,7 @@ function AssessmentCard({ item, lang, lastResult, onStart }: CardProps) {
           {name}
         </h3>
         <p className="relative mt-1 font-mono text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground">
-          {code} · {item.question_count} questions
+          {code} · {tList("questionsLine", { count: item.question_count })}
         </p>
       </div>
 
@@ -481,6 +487,7 @@ function HistoryRow({
 
 function SeverityPill({ level }: { level: string }) {
   const idx = levelToIndex(level);
+  const levelLabel = useLevelLabel();
   return (
     <span
       className="rounded-full px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide"

@@ -1,23 +1,47 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Menu } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ConversationsProvider } from "@/contexts/ConversationsContext";
 import ChatSidebar from "@/components/chat/ChatSidebar";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
+
+const COLLAPSED_KEY = "mindease-chat-sidebar-collapsed";
 
 export default function ChatLayout({ children }: { children: React.ReactNode }) {
   const t = useTranslations("chat");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setCollapsed(localStorage.getItem(COLLAPSED_KEY) === "1");
+  }, []);
+
+  const toggleCollapsed = () => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(COLLAPSED_KEY, next ? "1" : "0");
+      } catch {}
+      return next;
+    });
+  };
 
   return (
     <ConversationsProvider>
-      <div className="grid h-[calc(100vh-60px)] grid-cols-1 lg:grid-cols-[280px_1fr]">
+      <div
+        className={cn(
+          "grid h-[calc(100vh-60px)] grid-cols-1 transition-[grid-template-columns] duration-200 ease-out",
+          collapsed ? "lg:grid-cols-[64px_1fr]" : "lg:grid-cols-[280px_1fr]",
+        )}
+      >
         {/* Desktop sidebar */}
         <div className="hidden h-full min-h-0 lg:block">
-          <ChatSidebar />
+          <ChatSidebar collapsed={collapsed} onToggleCollapsed={toggleCollapsed} />
         </div>
 
         {/* Mobile chrome + main column */}

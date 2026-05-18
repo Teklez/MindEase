@@ -932,6 +932,8 @@
       "ifHeavy": "If today is heavy",
       "ifHeavyBody": "You don't have to wait for a number to ask for help. These are free, confidential, and run by trained humans.",
       "notDiagnosis": "This isn't a diagnosis. It's a brief screen that helps you notice what's heavy and bring it somewhere useful. Save the result and share it with a clinician if that feels right.",
+      "notDiagnosisStrong": "This isn't a diagnosis.",
+      "noHistoryYet": "— No history yet",
       "downloadPdf": "Download PDF",
       "shareClinician": "Share with clinician",
       "retakeIn": "Retake in 2 weeks",
@@ -940,6 +942,12 @@
         "m6": "6M",
         "y1": "1Y",
         "all": "All"
+      },
+      "toasts": {
+        "pdfSoonTitle": "PDF export coming soon",
+        "pdfSoonBody": "We'll let you know when it lands.",
+        "shareSoonTitle": "Sharing coming soon",
+        "shareSoonBody": "We'll let you know when this is ready."
       }
     },
     "levels": {
@@ -959,6 +967,16 @@
       "body": "It takes courage to mark that answer. You're not alone in this — and you don't have to wait until you finish the check-in to talk to a real person. These resources are free, confidential, and run by trained humans.",
       "comeBack": "I'll come back later",
       "continueCheckIn": "Continue check-in"
+    },
+    "list": {
+      "relativeToday": "Today",
+      "relativeYesterday": "Yesterday",
+      "relativeDaysAgo": "{n} days ago",
+      "questionsLine": "{count} questions",
+      "reminderSoonTitle": "Reminders coming soon",
+      "reminderSoonBody": "We'll let you know when this lands.",
+      "notFound": "Assessment not found",
+      "resultNotFound": "Result not found"
     }
   },
   "resources": {
@@ -992,11 +1010,13 @@
   "mood": {
     "title": "Mood Tracker",
     "checkIn": "How are you feeling?",
-    "veryBad": "Very Bad",
-    "bad": "Bad",
-    "neutral": "Neutral",
-    "good": "Good",
-    "veryGood": "Very Good",
+    "scores": {
+      "awful": "Awful",
+      "low": "Low",
+      "okay": "Okay",
+      "good": "Good",
+      "great": "Great"
+    },
     "addNote": "Add a note about how you're feeling... (optional)",
     "save": "Save Entry",
     "saving": "Saving...",
@@ -1081,6 +1101,52 @@
     "aiThinking": "MindEase is thinking...",
     "aiTip": "Tip: Type @MindEase to ask for help anytime!",
     "aiModerator": "MindEase",
+    "notFound": "Group not found",
+    "loading": "Loading…",
+    "backToGroups": "Back to groups",
+    "loadOlder": "Load older messages",
+    "messageDeleted": "[Message deleted]",
+    "unreadAriaLabel": "unread messages",
+    "iconAriaLabel": "Icon {emoji}",
+    "actions": {
+      "loadFailed": "Failed to load group",
+      "joinFailed": "Failed to join group",
+      "leaveFailed": "Failed to leave group",
+      "deleteFailed": "Failed to delete group"
+    },
+    "connection": {
+      "connecting": "Connecting…",
+      "problem": "Connection problem. Refresh the page to reconnect."
+    },
+    "composer": {
+      "messagePlaceholder": "Message {name}…",
+      "mutedPlaceholder": "You have been muted by an admin",
+      "channelDefault": "chat"
+    },
+    "disclaimer": {
+      "body": "This is a peer support space. Be kind and respectful. MindEase is not a substitute for professional help.",
+      "dismiss": "Dismiss disclaimer"
+    },
+    "confirmDelete": {
+      "title": "Delete this group?",
+      "body": "This is a soft delete — the group will be hidden from members. Existing messages and members are kept.",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "rulesLabel": "Group Rules",
+    "membersPanel": {
+      "titleCount": "Members ({count})",
+      "search": "Search members...",
+      "online": "online",
+      "loading": "Loading…",
+      "empty": "No members found",
+      "muted": "muted",
+      "actions": "Member actions",
+      "promote": "Promote to Admin",
+      "mute": "Mute",
+      "unmute": "Unmute",
+      "remove": "Remove"
+    },
     "room": {
       "back": "Back to circles",
       "online": "{n} online",
@@ -1103,6 +1169,17 @@
       "about": {
         "title": "About this circle",
         "readCharter": "Read the charter"
+      },
+      "header": {
+        "openChannels": "Open channels",
+        "pinned": "Pinned posts",
+        "membersAction": "Members",
+        "info": "Group info",
+        "more": "More actions",
+        "aboutMenu": "About this circle",
+        "membersMenu": "Members",
+        "settings": "Settings",
+        "deleteGroup": "Delete group"
       }
     }
   },
@@ -1135,6 +1212,61 @@
         "group_message": "Peer-group messages",
         "resource": "Resources",
         "crisis_phrase": "Safety phrases"
+      }
+    }
+  },
+  "avatar": {
+    "picker": {
+      "eyebrow": "Pick a companion",
+      "title": "Who would you like to talk with?",
+      "subtitle": "Choose a face for your wellness companion — tap the play button to hear them first. You can switch any time.",
+      "previewUnavailable": "Preview unavailable: {message}",
+      "comingSoon": "Coming soon",
+      "playPreview": "Play preview for {name}",
+      "stopPreview": "Stop preview for {name}",
+      "speaking": "Speaking…"
+    },
+    "viewer": {
+      "chooseAnother": "Choose another",
+      "loading": "Loading {name}… {progress}%",
+      "loadError": "Avatar failed to load",
+      "startConversation": "Start conversation",
+      "connecting": "Connecting…",
+      "listening": "Listening…",
+      "responding": "{name} is responding…",
+      "speakingNow": "{name} is speaking…",
+      "holdMic": "Hold the mic, or press and hold Space",
+      "recording": "Recording",
+      "holdToSpeak": "Hold to speak",
+      "endCall": "End call",
+      "startCallFailed": "Failed to start call",
+      "audioInitFailed": "Audio init failed"
+    },
+    "personas": {
+      "serenity": {
+        "name": "Selam",
+        "blurb": "Warm, attentive, easy to talk to.",
+        "intro": "Hi, I'm Selam. I'm here to listen — whatever's on your mind, take your time."
+      },
+      "maya": {
+        "name": "Dawit",
+        "blurb": "Steady and grounded.",
+        "intro": "Hello, I'm Dawit. Let's slow things down and think them through, together."
+      },
+      "alex": {
+        "name": "Henok",
+        "blurb": "Bright and curious.",
+        "intro": "Hey, I'm Henok. What's been on your mind today? I'd love to hear about it."
+      },
+      "sora": {
+        "name": "Saba",
+        "blurb": "Quiet and reflective.",
+        "intro": "Hi, I'm Saba. There's no rush here — start anywhere that feels right."
+      },
+      "kai": {
+        "name": "Yonas",
+        "blurb": "Calm, low and slow.",
+        "intro": "Hey, I'm Yonas. Take a breath. I'm right here whenever you're ready."
       }
     }
   }
