@@ -1,98 +1,103 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-import { ExternalLink, LifeBuoy, Phone, X } from "lucide-react";
+import { AlertTriangle, X } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import type { CrisisResources } from "@/lib/types";
-import { Button } from "@/components/ui/button";
+import { getCrisisResources } from "@/lib/crisis-resources";
+
+type Pill = { label: string; href?: string };
 
 type CrisisBannerProps = {
-  resources: CrisisResources;
+  // Optional WebSocket-pushed resource payload — when present its phone /
+  // international entries take precedence over the locale defaults.
+  resources?: CrisisResources | null;
   onDismiss: () => void;
 };
 
+function pillsFor(
+  resources: CrisisResources | null | undefined,
+  locale: string,
+): Pill[] {
+  // 1) Prefer the WebSocket-pushed shape if it carries phone + international.
+  if (resources) {
+    const out: Pill[] = [];
+    const eth = resources.ethiopia?.[0];
+    if (eth) out.push({ label: `Ethiopia · ${eth.phone}`, href: `tel:${eth.phone.replace(/\D/g, "")}` });
+    const intl = resources.international?.find((r) => r.url) ?? resources.international?.[0];
+    if (intl) out.push({ label: intl.name, href: intl.url });
+    if (out.length > 0) return out;
+  }
+  // 2) Locale-derived from the shared crisis-resources lib.
+  return getCrisisResources(locale)
+    .slice(0, 2)
+    .map((r) => ({ label: r.contact, href: r.href }));
+}
+
 export default function CrisisBanner({ resources, onDismiss }: CrisisBannerProps) {
-  const t = useTranslations("crisis");
-  const ethiopia = resources.ethiopia ?? [];
-  const international = resources.international ?? [];
+  const t = useTranslations("chat.v2.crisis");
+  const locale = useLocale();
+  const pills = pillsFor(resources, locale);
 
   return (
     <div
       role="alert"
-      className="mb-4 animate-slide-down overflow-hidden rounded-2xl border border-destructive/30 bg-card shadow-soft"
+      className="animate-slide-down grid grid-cols-[auto_1fr_auto] items-center gap-3.5 border-b px-6 py-3.5 md:grid-cols-[auto_1fr_auto_auto]"
+      style={{
+        background: "oklch(0.95 0.04 35)",
+        borderBottomColor: "color-mix(in oklab, oklch(0.55 0.14 35) 25%, transparent)",
+      }}
     >
-      <div className="flex items-start gap-3 border-b border-destructive/20 bg-destructive/[0.06] px-4 py-3">
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-destructive/15 text-destructive">
-          <LifeBuoy className="h-5 w-5" strokeWidth={1.75} />
+      <div
+        aria-hidden
+        className="grid h-7 w-7 place-items-center rounded-full text-white"
+        style={{ background: "oklch(0.55 0.14 35)" }}
+      >
+        <AlertTriangle className="h-3.5 w-3.5" strokeWidth={2} />
+      </div>
+      <div className="min-w-0">
+        <b className="text-[14px] font-semibold text-foreground">{t("title")}</b>
+        <span className="mt-0.5 block font-mono text-[10.5px] tracking-[0.06em] text-foreground/85">
+          {t("sub")}
         </span>
-        <div className="min-w-0 flex-1">
-          <p className="font-serif text-base text-foreground">{t("title")}</p>
-        </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onDismiss}
-          aria-label={t("dismiss")}
-          className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground"
-        >
-          <X className="h-4 w-4" strokeWidth={1.75} />
-        </Button>
       </div>
-      <div className="grid gap-4 p-4 text-sm sm:grid-cols-2">
-        {ethiopia.length > 0 && (
-          <div>
-            <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-              {t("ethiopia")}
-            </p>
-            <ul className="mt-2 space-y-1.5">
-              {ethiopia.map((r, i) => (
-                <li key={i} className="flex items-center gap-2">
-                  <Phone className="h-3.5 w-3.5 shrink-0 text-destructive" strokeWidth={1.75} />
-                  <a
-                    href={`tel:${r.phone.replace(/\D/g, "")}`}
-                    className="text-foreground underline-offset-2 hover:underline"
-                  >
-                    {r.name}: {r.phone}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-        {international.length > 0 && (
-          <div>
-            <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-              {t("international")}
-            </p>
-            <ul className="mt-2 space-y-1.5">
-              {international.map((r, i) => (
-                <li key={i} className="flex items-center gap-2">
-                  {r.url ? (
-                    <>
-                      <ExternalLink
-                        className="h-3.5 w-3.5 shrink-0 text-destructive"
-                        strokeWidth={1.75}
-                      />
-                      <a
-                        href={r.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-foreground underline-offset-2 hover:underline"
-                      >
-                        {r.name}
-                      </a>
-                    </>
-                  ) : (
-                    <span className="text-foreground">
-                      {r.name}
-                      {r.info ? `: ${r.info}` : ""}
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
+      <div className="hidden gap-2 md:flex">
+        {pills.map((p, i) =>
+          p.href ? (
+            <a
+              key={i}
+              href={p.href}
+              target={p.href.startsWith("http") ? "_blank" : undefined}
+              rel={p.href.startsWith("http") ? "noreferrer" : undefined}
+              className="inline-flex items-center rounded-full border px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] transition-colors hover:bg-foreground/5"
+              style={{
+                borderColor: "color-mix(in oklab, oklch(0.55 0.14 35) 35%, transparent)",
+                color: "oklch(0.42 0.14 35)",
+              }}
+            >
+              {p.label}
+            </a>
+          ) : (
+            <span
+              key={i}
+              className="inline-flex items-center rounded-full border px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em]"
+              style={{
+                borderColor: "color-mix(in oklab, oklch(0.55 0.14 35) 35%, transparent)",
+                color: "oklch(0.42 0.14 35)",
+              }}
+            >
+              {p.label}
+            </span>
+          ),
         )}
       </div>
+      <button
+        type="button"
+        onClick={onDismiss}
+        className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-2.5 py-1.5 text-[12px] text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <X className="h-3.5 w-3.5" strokeWidth={1.8} />
+        {t("imOkay")}
+      </button>
     </div>
   );
 }

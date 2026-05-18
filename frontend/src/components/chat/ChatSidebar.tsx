@@ -1,14 +1,16 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ChevronLeft, Lock, Plus, Search } from "lucide-react";
+import { ChevronLeft, LogOut, Plus, Search } from "lucide-react";
 import { useConversationsContext } from "@/contexts/ConversationsContext";
 import { toast } from "@/hooks/use-toast";
+import { getMe, clearStoredToken, type ApiResponse } from "@/lib/api";
 import ConversationList from "./ConversationList";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import RenameDialog from "./RenameDialog";
+import type { Conversation } from "@/lib/types";
 import {
   Dialog,
   DialogContent,
@@ -17,9 +19,50 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const COLLAPSED_KEY = "mindease-chat-sidebar-collapsed";
+function LeafMark() {
+  return (
+    <span
+      aria-hidden
+      className="grid h-7 w-7 place-items-center rounded-lg bg-primary text-primary-foreground"
+    >
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M12 21c0-7 4-12 9-13-1 9-5 13-9 13Z" />
+        <path d="M12 21c0-5-3-9-8-10 1 7 4 10 8 10Z" />
+      </svg>
+    </span>
+  );
+}
+
+function initialsOf(name: string | undefined): string {
+  if (!name) return "·";
+  return name
+    .trim()
+    .split(/\s+/)
+    .map((s) => s[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
+type Me = { display_name: string; email: string };
 
 type ChatSidebarProps = {
   onNavigate?: () => void;
@@ -28,50 +71,47 @@ type ChatSidebarProps = {
 
 export default function ChatSidebar({ onNavigate, className }: ChatSidebarProps) {
   const t = useTranslations("chat");
+  const tV2 = useTranslations("chat.v2");
   const tCommon = useTranslations("common");
-  const pathname = usePathname();
   const router = useRouter();
+  const pathname = usePathname();
   const currentConversationId = pathname?.startsWith("/chat/")
     ? pathname.replace("/chat/", "").split("/")[0]
     : null;
 
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-  const [collapsed, setCollapsed] = useState(false);
   const [search, setSearch] = useState("");
-  const { conversations, isLoading, createConversation, deleteConversation } =
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [renameTarget, setRenameTarget] = useState<Conversation | null>(null);
+  const [user, setUser] = useState<Me | null>(null);
+
+  const { conversations, isLoading, createConversation, deleteConversation, refresh } =
     useConversationsContext();
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    setCollapsed(localStorage.getItem(COLLAPSED_KEY) === "1");
+    const handle = window.setTimeout(() => setDebouncedSearch(search.trim().toLowerCase()), 200);
+    return () => window.clearTimeout(handle);
+  }, [search]);
+
+  useEffect(() => {
+    getMe().then((res: ApiResponse<{ display_name: string; email: string }>) => {
+      if (res.ok) setUser({ display_name: res.data.display_name, email: res.data.email });
+    });
   }, []);
 
-  const handleToggleCollapse = () => {
-    setCollapsed((prev) => {
-      const next = !prev;
-      try {
-        localStorage.setItem(COLLAPSED_KEY, next ? "1" : "0");
-      } catch {}
-      return next;
-    });
-  };
+  const filtered = useMemo(() => {
+    if (!debouncedSearch) return conversations;
+    return conversations.filter((c) =>
+      (c.title ?? "").toLowerCase().includes(debouncedSearch),
+    );
+  }, [conversations, debouncedSearch]);
 
   const handleNewChat = async () => {
     onNavigate?.();
     const conv = await createConversation();
-    if (conv) {
-      toast({ title: t("conversationCreated") });
-      router.push(`/chat/${conv.conversation_id}`);
-    }
+    if (conv) router.push(`/chat/${conv.conversation_id}`);
   };
 
-  const filtered = useMemo(() => {
-    if (!search.trim()) return conversations;
-    const q = search.toLowerCase();
-    return conversations.filter((c) => (c.title ?? "").toLowerCase().includes(q));
-  }, [conversations, search]);
-
-  const handleDeleteRequest = (id: string) => setDeleteConfirmId(id);
   const handleDeleteConfirm = async () => {
     if (!deleteConfirmId) return;
     const wasActive = deleteConfirmId === currentConversationId;
@@ -85,88 +125,124 @@ export default function ChatSidebar({ onNavigate, className }: ChatSidebarProps)
     if (wasActive) router.push("/chat");
   };
 
+  const handleLogout = () => {
+    clearStoredToken();
+    window.location.href = "/login";
+  };
+
   return (
     <>
       <aside
         className={cn(
-          "flex h-full flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-all",
-          collapsed ? "w-[72px]" : "w-[300px]",
+          "flex h-full w-[280px] shrink-0 flex-col border-r border-border bg-background",
           className,
         )}
       >
-        <div className="shrink-0 px-3 pt-4">
+        {/* Brand row */}
+        <div className="flex items-center justify-between border-b border-border px-4 py-3.5">
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2.5 font-serif text-[18px] font-medium tracking-[-0.01em] text-foreground"
+          >
+            <LeafMark />
+            MindEase
+          </Link>
+          <button
+            type="button"
+            onClick={onNavigate}
+            aria-label={tCommon("collapseSidebar")}
+            className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground lg:hidden"
+          >
+            <ChevronLeft className="h-4 w-4" strokeWidth={1.8} />
+          </button>
+        </div>
+
+        {/* New chat */}
+        <div className="px-3 pt-3">
           <Button
             type="button"
             onClick={handleNewChat}
-            className={cn(
-              "w-full justify-center rounded-xl bg-foreground text-background hover:bg-foreground/90",
-              collapsed ? "h-10 px-0" : "h-10 gap-2",
-            )}
+            className="flex h-10 w-full items-center justify-between rounded-xl bg-foreground px-3.5 text-background hover:bg-foreground/90"
           >
-            <Plus className="h-4 w-4 shrink-0" strokeWidth={1.75} />
-            {!collapsed && <span className="text-sm font-medium">{t("newConversation")}</span>}
+            <span className="inline-flex items-center gap-2 text-[13.5px] font-medium">
+              <Plus className="h-4 w-4" strokeWidth={1.8} />
+              {tV2("newChat")}
+            </span>
+            <kbd className="hidden rounded-md border border-background/25 bg-background/10 px-1.5 py-0.5 font-mono text-[10px] tracking-wider text-background/80 sm:inline-block">
+              ⌘ K
+            </kbd>
           </Button>
         </div>
 
-        {!collapsed && (
-          <div className="shrink-0 px-3 pt-3">
-            <label className="relative block">
-              <Search
-                className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
-                strokeWidth={1.75}
-              />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={t("searchConversations")}
-                className="h-9 w-full rounded-lg border border-sidebar-border bg-background pl-8 pr-3 text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
-                aria-label={t("searchConversations")}
-              />
-            </label>
-          </div>
-        )}
-
-        <ScrollArea className="mt-2 min-h-0 flex-1 [&>div>div]:!block">
-          <div className="px-2 pb-2">
-            <ConversationList
-              conversations={filtered}
-              activeId={currentConversationId}
-              onDelete={handleDeleteRequest}
-              isLoading={isLoading}
-              collapsed={collapsed}
+        {/* Search */}
+        <div className="px-3 pt-3">
+          <label className="relative block">
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
+              strokeWidth={1.75}
             />
-          </div>
-        </ScrollArea>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={tV2("search")}
+              aria-label={tV2("search")}
+              className="h-9 w-full rounded-lg border border-border bg-card pl-8 pr-3 text-[13px] text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/12"
+            />
+          </label>
+        </div>
 
-        <div className="shrink-0 border-t border-sidebar-border px-3 py-3">
-          {!collapsed ? (
-            <div className="flex items-center justify-between">
-              <span className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">
-                <Lock className="h-3 w-3 text-primary" strokeWidth={1.75} />
-                {t("encryptedFooter")}
-              </span>
+        {/* List (scrollable) */}
+        <div className="mt-3 min-h-0 flex-1 overflow-y-auto pb-2">
+          <ConversationList
+            conversations={filtered}
+            activeId={currentConversationId}
+            onDelete={setDeleteConfirmId}
+            onRename={setRenameTarget}
+            isLoading={isLoading}
+          />
+        </div>
+
+        {/* User footer */}
+        <div className="shrink-0 border-t border-border px-3 py-3">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                onClick={handleToggleCollapse}
-                className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground"
-                aria-label={tCommon("collapseSidebar")}
+                className="flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left transition-colors hover:bg-accent"
               >
-                <ChevronLeft className="h-4 w-4" strokeWidth={1.75} />
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-[12px] font-semibold text-secondary-foreground">
+                  {initialsOf(user?.display_name)}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[13px] font-medium text-foreground">
+                    {user?.display_name ?? "—"}
+                  </span>
+                  <span className="block truncate text-[11px] text-muted-foreground">
+                    {user?.email ?? ""}
+                  </span>
+                </span>
               </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={handleToggleCollapse}
-              className="mx-auto block rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground"
-              aria-label={tCommon("expandSidebar")}
-            >
-              <ChevronLeft className="h-4 w-4 rotate-180" strokeWidth={1.75} />
-            </button>
-          )}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="top" align="start" className="w-56 shadow-soft-md">
+              <DropdownMenuItem onSelect={handleLogout} className="text-destructive focus:text-destructive">
+                <LogOut className="mr-2 h-3.5 w-3.5" strokeWidth={1.75} />
+                {tCommon("logout")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </aside>
+
+      <RenameDialog
+        conversationId={renameTarget?.conversation_id ?? null}
+        currentTitle={renameTarget?.title ?? null}
+        open={!!renameTarget}
+        onOpenChange={(open) => !open && setRenameTarget(null)}
+        onRenamed={() => {
+          refresh?.();
+        }}
+      />
 
       <Dialog open={!!deleteConfirmId} onOpenChange={(open) => !open && setDeleteConfirmId(null)}>
         <DialogContent>

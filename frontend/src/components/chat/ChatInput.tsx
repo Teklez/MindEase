@@ -1,92 +1,69 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
-import { ArrowUp, Sparkles, Square } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+import { useLocale, useTranslations } from "next-intl";
+import { Mic, Paperclip, Send, Smile, Sparkles, Square } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import MoodCheckIn from "@/components/mood/MoodCheckIn";
+import { getMoodLabel } from "@/lib/mood";
 
-const MIN_ROWS = 1;
-const MAX_HEIGHT_PX = 168;
-const LINE_HEIGHT_APPROX = 24;
-const RESIZE_DEBOUNCE_MS = 120;
-const CHAR_LIMIT = 2000;
+const MAX_HEIGHT_PX = 168; // ~6 rows at 28px line-height
+const CHAR_SOFT_LIMIT = 800; // counter appears only past this length
 
 export type ChatInputMention = {
-  /** The single character that summons the suggestion (e.g. "@"). */
   trigger: string;
-  /** The full text to insert in place of the trigger (e.g. "@MindEase "). */
   insert: string;
-  /** Label to show on the chip (e.g. "@MindEase"). */
   label: string;
 };
 
 type ChatInputProps = {
   onSend: (content: string) => void;
-  disabled: boolean;
+  /** While streaming the send button morphs into a stop button. */
+  isStreaming?: boolean;
+  onStop?: () => void;
+  /** Disables both the textarea and the send button (e.g. socket reconnecting). */
+  disabled?: boolean;
   placeholder?: string;
-  /** Optional autocomplete suggestion. When the user types `mention.trigger`
-   * and the `insert` token isn't already present in the value, a small chip
-   * appears above the input; clicking it replaces the trigger with `insert`. */
+  /** Optional autocomplete chip used by group rooms (@MindEase etc). */
   mention?: ChatInputMention;
 };
 
 export default function ChatInput({
   onSend,
-  disabled,
+  isStreaming = false,
+  onStop,
+  disabled = false,
   placeholder,
   mention,
 }: ChatInputProps) {
-  const t = useTranslations("chat");
-  const tDisclaimer = useTranslations("disclaimer");
+  const t = useTranslations("chat.v2.composer");
+  const locale = useLocale();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const placeholderText = placeholder ?? t("placeholder");
   const [value, setValue] = useState("");
-  const resizeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [moodOpen, setMoodOpen] = useState(false);
 
-  const adjustHeight = useCallback((el: HTMLTextAreaElement) => {
-    el.style.height = "auto";
-    const newHeight = Math.min(
-      Math.max(el.scrollHeight, MIN_ROWS * LINE_HEIGHT_APPROX),
-      MAX_HEIGHT_PX,
-    );
-    el.style.height = `${newHeight}px`;
-  }, []);
+  const placeholderText = placeholder ?? t("placeholder");
 
-  const scheduleResize = useCallback(() => {
+  const adjustHeight = useCallback(() => {
     const el = textareaRef.current;
     if (!el) return;
-    if (resizeTimeoutRef.current) clearTimeout(resizeTimeoutRef.current);
-    resizeTimeoutRef.current = setTimeout(() => {
-      resizeTimeoutRef.current = null;
-      adjustHeight(el);
-    }, RESIZE_DEBOUNCE_MS);
-  }, [adjustHeight]);
-
-  useEffect(() => {
-    return () => {
-      if (resizeTimeoutRef.current) clearTimeout(resizeTimeoutRef.current);
-    };
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, MAX_HEIGHT_PX)}px`;
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setValue(e.target.value.slice(0, CHAR_LIMIT));
-    scheduleResize();
-  };
+  useEffect(() => {
+    adjustHeight();
+  }, [value, adjustHeight]);
 
-  const send = useCallback(() => {
+  const send = () => {
     const trimmed = value.trim();
-    if (!trimmed || disabled) return;
+    if (!trimmed || disabled || isStreaming) return;
     onSend(trimmed);
     setValue("");
-    const el = textareaRef.current;
-    if (el) {
-      el.style.height = "auto";
-      adjustHeight(el);
-      el.focus();
-    }
-  }, [value, disabled, onSend, adjustHeight]);
+    requestAnimationFrame(() => adjustHeight());
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -96,112 +73,171 @@ export default function ChatInput({
   };
 
   const hasContent = value.trim().length > 0;
-  const showCharCounter = value.length > CHAR_LIMIT * 0.8;
-  const charsLeft = CHAR_LIMIT - value.length;
+  const showCounter = value.length > CHAR_SOFT_LIMIT;
 
   const showMentionSuggestion = useMemo(() => {
     if (!mention) return false;
     if (!value.includes(mention.trigger)) return false;
-    // Hide once the user has fully typed the mention (case-insensitive).
     return !value.toLowerCase().includes(mention.insert.trim().toLowerCase());
   }, [mention, value]);
 
-  const insertMention = useCallback(() => {
+  const insertMention = () => {
     if (!mention) return;
-    const el = textareaRef.current;
-    // Replace only the *last* trigger occurrence so we don't disturb earlier
-    // text the user has typed.
     const idx = value.lastIndexOf(mention.trigger);
     const next =
       idx === -1
         ? `${mention.insert}${value}`
-        : `${value.slice(0, idx)}${mention.insert}${value.slice(
-            idx + mention.trigger.length,
-          )}`;
-    setValue(next.slice(0, CHAR_LIMIT));
+        : `${value.slice(0, idx)}${mention.insert}${value.slice(idx + mention.trigger.length)}`;
+    setValue(next);
     requestAnimationFrame(() => {
+      const el = textareaRef.current;
       if (!el) return;
       el.focus();
-      const cursor = Math.min(idx + mention.insert.length, next.length);
+      const cursor = idx === -1 ? mention.insert.length : idx + mention.insert.length;
       el.setSelectionRange(cursor, cursor);
-      adjustHeight(el);
+      adjustHeight();
     });
-  }, [mention, value, adjustHeight]);
+  };
 
   return (
-    <div className="shrink-0 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-      <div className="mx-auto w-full max-w-3xl">
+    <div className="shrink-0 border-t border-border bg-background px-6 pb-5 pt-4">
+      <div className="mx-auto w-full max-w-[760px]">
         {showMentionSuggestion && mention && (
-          <div className="mb-1.5 flex justify-start">
+          <div className="mb-2 flex justify-start">
             <button
               type="button"
               onClick={insertMention}
-              className={cn(
-                "inline-flex items-center gap-1.5 rounded-full border border-primary/30",
-                "bg-primary/10 px-2.5 py-1 text-[12px] font-medium text-primary",
-                "transition-colors hover:border-primary/50 hover:bg-primary/15",
-              )}
+              className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-accent px-2.5 py-1 text-[12px] font-medium text-primary transition-colors hover:border-primary/50"
             >
               <Sparkles className="h-3 w-3" strokeWidth={2} />
               {mention.label}
             </button>
           </div>
         )}
+        {/* Wrapper */}
         <div
           className={cn(
-            "relative flex flex-col rounded-2xl border bg-card shadow-soft-sm transition-all",
-            "border-border focus-within:border-primary/50 focus-within:shadow-soft",
-            disabled && "opacity-70",
+            "rounded-2xl border bg-card p-3 transition-all",
+            "border-border focus-within:border-primary",
           )}
+          style={{
+            // Sage glow on focus — Tailwind can't compute the alpha modifier
+            // against an oklch CSS variable, so apply via style.
+            ["--ring-color" as string]:
+              "color-mix(in oklab, var(--primary) 12%, transparent)",
+            boxShadow: hasContent
+              ? "0 0 0 4px color-mix(in oklab, var(--primary) 12%, transparent)"
+              : undefined,
+          }}
         >
-          <Textarea
+          <textarea
             ref={textareaRef}
             value={value}
-            onChange={handleChange}
+            onChange={(e) => setValue(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={disabled ? t("thinkingPlaceholder") : placeholderText}
+            placeholder={placeholderText}
             disabled={disabled}
-            rows={MIN_ROWS}
-            maxLength={CHAR_LIMIT}
-            className={cn(
-              "min-h-[48px] max-h-[168px] resize-none border-0 bg-transparent",
-              "focus-visible:ring-0 focus-visible:ring-offset-0",
-              "px-4 py-3.5 pr-14 text-[15px] placeholder:text-muted-foreground",
-            )}
-            style={{ fontSize: "16px" }}
+            rows={1}
+            className="block w-full resize-none bg-transparent px-1 text-[14.5px] leading-[1.55] text-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-60"
           />
-          {showCharCounter && (
-            <span className="absolute bottom-3 right-14 text-[11px] tabular-nums text-muted-foreground">
-              {t("charsLeft", { count: charsLeft })}
-            </span>
-          )}
-          <div className="absolute bottom-2 right-2">
-            <Button
+          <div className="mt-1.5 flex items-center justify-between">
+            <div className="flex items-center gap-0.5">
+              <ToolbarButton
+                aria-label={t("attach")}
+                onClick={() => toast({ title: t("attachComingSoon") })}
+                disabled={disabled}
+              >
+                <Paperclip className="h-4 w-4" strokeWidth={1.75} />
+              </ToolbarButton>
+              <ToolbarButton
+                aria-label={t("voice")}
+                onClick={() => toast({ title: t("voiceComingSoon") })}
+                disabled={disabled}
+              >
+                <Mic className="h-4 w-4" strokeWidth={1.75} />
+              </ToolbarButton>
+              <ToolbarButton
+                aria-label={t("mood")}
+                onClick={() => setMoodOpen(true)}
+                disabled={disabled}
+              >
+                <Smile className="h-4 w-4" strokeWidth={1.75} />
+              </ToolbarButton>
+              {showCounter && (
+                <span className="ml-2 font-mono text-[10.5px] tabular-nums text-muted-foreground">
+                  {value.length}
+                </span>
+              )}
+            </div>
+            <button
               type="button"
-              size="icon"
+              onClick={isStreaming ? onStop : send}
+              disabled={isStreaming ? false : !hasContent || disabled}
+              aria-label={isStreaming ? t("stop") : t("send")}
               className={cn(
-                "h-9 w-9 rounded-full bg-primary text-primary-foreground transition-all",
-                hasContent || disabled ? "opacity-100" : "opacity-60",
-                "hover:bg-primary/90 disabled:opacity-50",
+                "grid h-9 w-9 place-items-center rounded-full bg-primary text-primary-foreground transition-all",
+                "hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50",
               )}
-              disabled={disabled ? false : !hasContent}
-              onClick={disabled ? undefined : send}
-              aria-label={disabled ? t("stopGeneration") : t("sendMessage")}
             >
-              {disabled ? (
-                <Square className="h-3.5 w-3.5" strokeWidth={2} />
+              {isStreaming ? (
+                <Square className="h-3.5 w-3.5" strokeWidth={2} fill="currentColor" />
               ) : (
-                <ArrowUp className="h-4 w-4" strokeWidth={2} />
+                <Send className="h-3.5 w-3.5" strokeWidth={2} />
               )}
-            </Button>
+            </button>
           </div>
         </div>
-        <p className="mt-2 flex items-center justify-center gap-3 text-[11px] text-muted-foreground">
-          <span className="hidden sm:inline">{t("keyboardHint")}</span>
-          <span className="hidden sm:inline">·</span>
-          <span>{tDisclaimer("chat")}</span>
-        </p>
+
+        {/* Footer hints */}
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-2 font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">
+          <span>
+            {locale === "am" ? (
+              <span className="font-['Noto_Sans_Ethiopic',var(--font-mono)]">አማ</span>
+            ) : (
+              "EN"
+            )}
+          </span>
+          <span className="hidden flex-1 px-3 text-center normal-case tracking-normal sm:inline-block">
+            {t("disclaimer")}
+          </span>
+          <span className="hidden sm:inline">{t("hint")}</span>
+        </div>
       </div>
+
+      <Dialog open={moodOpen} onOpenChange={setMoodOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-[22px] font-[360]">{t("mood")}</DialogTitle>
+          </DialogHeader>
+          <MoodCheckIn
+            compact
+            onEntryCreated={(entry) => {
+              setMoodOpen(false);
+              toast({
+                title: t("moodLogged", { label: getMoodLabel(entry.mood_level) }),
+              });
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
+  );
+}
+
+function ToolbarButton({
+  children,
+  ...rest
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & { children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      className={cn(
+        "grid h-9 w-9 place-items-center rounded-md text-muted-foreground transition-colors",
+        "hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50",
+      )}
+      {...rest}
+    >
+      {children}
+    </button>
   );
 }
