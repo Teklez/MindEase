@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ChevronLeft, LogOut, Plus, Search } from "lucide-react";
@@ -28,29 +27,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-function LeafMark() {
-  return (
-    <span
-      aria-hidden
-      className="grid h-7 w-7 place-items-center rounded-lg bg-primary text-primary-foreground"
-    >
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M12 21c0-7 4-12 9-13-1 9-5 13-9 13Z" />
-        <path d="M12 21c0-5-3-9-8-10 1 7 4 10 8 10Z" />
-      </svg>
-    </span>
-  );
-}
-
 function initialsOf(name: string | undefined): string {
   if (!name) return "·";
   return name
@@ -67,9 +43,16 @@ type Me = { display_name: string; email: string };
 type ChatSidebarProps = {
   onNavigate?: () => void;
   className?: string;
+  collapsed?: boolean;
+  onToggleCollapsed?: () => void;
 };
 
-export default function ChatSidebar({ onNavigate, className }: ChatSidebarProps) {
+export default function ChatSidebar({
+  onNavigate,
+  className,
+  collapsed = false,
+  onToggleCollapsed,
+}: ChatSidebarProps) {
   const t = useTranslations("chat");
   const tV2 = useTranslations("chat.v2");
   const tCommon = useTranslations("common");
@@ -134,94 +117,120 @@ export default function ChatSidebar({ onNavigate, className }: ChatSidebarProps)
     <>
       <aside
         className={cn(
-          "flex h-full w-[280px] shrink-0 flex-col border-r border-border bg-background",
+          "flex h-full shrink-0 flex-col border-r border-border bg-background transition-[width] duration-200 ease-out",
+          collapsed ? "w-16" : "w-[280px]",
           className,
         )}
       >
-        {/* Brand row */}
-        <div className="flex items-center justify-between border-b border-border px-4 py-3.5">
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-2.5 font-serif text-[18px] font-medium tracking-[-0.01em] text-foreground"
+        {/* Collapse toggle (desktop only) */}
+        {onToggleCollapsed && (
+          <div
+            className={cn(
+              "hidden shrink-0 items-center border-b border-border px-3 py-2 lg:flex",
+              collapsed ? "justify-center" : "justify-end",
+            )}
           >
-            <LeafMark />
-            MindEase
-          </Link>
-          <button
-            type="button"
-            onClick={onNavigate}
-            aria-label={tCommon("collapseSidebar")}
-            className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground lg:hidden"
-          >
-            <ChevronLeft className="h-4 w-4" strokeWidth={1.8} />
-          </button>
-        </div>
+            <button
+              type="button"
+              onClick={onToggleCollapsed}
+              aria-label={collapsed ? tCommon("expandSidebar") : tCommon("collapseSidebar")}
+              className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <ChevronLeft
+                className={cn("h-4 w-4 transition-transform", collapsed && "rotate-180")}
+                strokeWidth={1.8}
+              />
+            </button>
+          </div>
+        )}
 
         {/* New chat */}
-        <div className="px-3 pt-3">
+        <div className={cn("pt-3", collapsed ? "px-2" : "px-3")}>
           <Button
             type="button"
             onClick={handleNewChat}
-            className="flex h-10 w-full items-center justify-between rounded-xl bg-foreground px-3.5 text-background hover:bg-foreground/90"
+            aria-label={collapsed ? tV2("newChat") : undefined}
+            className={cn(
+              "flex h-10 w-full items-center rounded-xl bg-foreground text-background hover:bg-foreground/90",
+              collapsed ? "justify-center px-0" : "justify-between px-3.5",
+            )}
           >
-            <span className="inline-flex items-center gap-2 text-[13.5px] font-medium">
+            {collapsed ? (
               <Plus className="h-4 w-4" strokeWidth={1.8} />
-              {tV2("newChat")}
-            </span>
-            <kbd className="hidden rounded-md border border-background/25 bg-background/10 px-1.5 py-0.5 font-mono text-[10px] tracking-wider text-background/80 sm:inline-block">
-              ⌘ K
-            </kbd>
+            ) : (
+              <>
+                <span className="inline-flex items-center gap-2 text-[13.5px] font-medium">
+                  <Plus className="h-4 w-4" strokeWidth={1.8} />
+                  {tV2("newChat")}
+                </span>
+                <kbd className="hidden rounded-md border border-background/25 bg-background/10 px-1.5 py-0.5 font-mono text-[10px] tracking-wider text-background/80 sm:inline-block">
+                  ⌘ K
+                </kbd>
+              </>
+            )}
           </Button>
         </div>
 
         {/* Search */}
-        <div className="px-3 pt-3">
-          <label className="relative block">
-            <Search
-              className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
-              strokeWidth={1.75}
-            />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={tV2("search")}
-              aria-label={tV2("search")}
-              className="h-9 w-full rounded-lg border border-border bg-card pl-8 pr-3 text-[13px] text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/12"
-            />
-          </label>
-        </div>
+        {!collapsed && (
+          <div className="px-3 pt-3">
+            <label className="relative block">
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
+                strokeWidth={1.75}
+              />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={tV2("search")}
+                aria-label={tV2("search")}
+                className="h-9 w-full rounded-lg border border-border bg-card pl-8 pr-3 text-[13px] text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/12"
+              />
+            </label>
+          </div>
+        )}
 
         {/* List (scrollable) */}
-        <div className="mt-3 min-h-0 flex-1 overflow-y-auto pb-2">
-          <ConversationList
-            conversations={filtered}
-            activeId={currentConversationId}
-            onDelete={setDeleteConfirmId}
-            onRename={setRenameTarget}
-            isLoading={isLoading}
-          />
-        </div>
+        {collapsed ? (
+          <div className="min-h-0 flex-1" />
+        ) : (
+          <div className="mt-3 min-h-0 flex-1 overflow-y-auto pb-2">
+            <ConversationList
+              conversations={filtered}
+              activeId={currentConversationId}
+              onDelete={setDeleteConfirmId}
+              onRename={setRenameTarget}
+              isLoading={isLoading}
+            />
+          </div>
+        )}
 
         {/* User footer */}
-        <div className="shrink-0 border-t border-border px-3 py-3">
+        <div className={cn("shrink-0 border-t border-border py-3", collapsed ? "px-2" : "px-3")}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left transition-colors hover:bg-accent"
+                aria-label={collapsed ? user?.display_name ?? tCommon("logout") : undefined}
+                className={cn(
+                  "flex w-full items-center rounded-xl text-left transition-colors hover:bg-accent",
+                  collapsed ? "justify-center p-1.5" : "gap-2.5 px-2.5 py-2",
+                )}
               >
                 <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-[12px] font-semibold text-secondary-foreground">
                   {initialsOf(user?.display_name)}
                 </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[13px] font-medium text-foreground">
-                    {user?.display_name ?? "—"}
+                {!collapsed && (
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[13px] font-medium text-foreground">
+                      {user?.display_name ?? "—"}
+                    </span>
+                    <span className="block truncate text-[11px] text-muted-foreground">
+                      {user?.email ?? ""}
+                    </span>
                   </span>
-                  <span className="block truncate text-[11px] text-muted-foreground">
-                    {user?.email ?? ""}
-                  </span>
-                </span>
+                )}
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent side="top" align="start" className="w-56 shadow-soft-md">

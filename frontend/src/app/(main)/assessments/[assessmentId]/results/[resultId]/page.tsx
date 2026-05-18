@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import { AssessmentResultView } from "@/components/assessments/AssessmentResultView";
 import { getAssessment, getAssessmentHistory, getAssessmentResult } from "@/lib/api";
@@ -16,6 +16,7 @@ export default function PastResultPage() {
   const params = useParams<{ assessmentId: string; resultId: string }>();
   const router = useRouter();
   const locale = useLocale();
+  const tList = useTranslations("assessments.list");
 
   const [result, setResult] = useState<AssessmentResult | null>(null);
   const [assessment, setAssessment] = useState<AssessmentFull | null>(null);
@@ -59,7 +60,7 @@ export default function PastResultPage() {
   if (notFound || !result || !assessment) {
     return (
       <div className="mx-auto w-full max-w-xl px-4 py-12 text-center">
-        <p className="font-serif text-lg text-foreground">Result not found</p>
+        <p className="font-serif text-lg text-foreground">{tList("resultNotFound")}</p>
       </div>
     );
   }

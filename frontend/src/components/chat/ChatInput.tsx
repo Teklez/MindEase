@@ -7,7 +7,7 @@ import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import MoodCheckIn from "@/components/mood/MoodCheckIn";
-import { getMoodLabel } from "@/lib/mood";
+import { useMoodLabels } from "@/hooks/useMoodLabels";
 
 const MAX_HEIGHT_PX = 168; // ~6 rows at 28px line-height
 const CHAR_SOFT_LIMIT = 800; // counter appears only past this length
@@ -40,6 +40,7 @@ export default function ChatInput({
 }: ChatInputProps) {
   const t = useTranslations("chat.v2.composer");
   const locale = useLocale();
+  const { getMoodLabel } = useMoodLabels();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [value, setValue] = useState("");
   const [moodOpen, setMoodOpen] = useState(false);

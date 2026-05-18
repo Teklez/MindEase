@@ -39,9 +39,6 @@ export class BackendVoiceSession {
   private processor: ScriptProcessorNode | null = null;
   private recording = false;
   private closed = false;
-  private rxChunks: Uint8Array[] = [];
-  private rxRate = 24000;
-  private rxAiText = "";
 
   onEvent: (e: VoiceSessionEvent) => void = () => {};
 
@@ -121,37 +118,23 @@ export class BackendVoiceSession {
       return;
     }
     if (t === "audio" && typeof msg.data === "string") {
+      // Forward each Gemini Live chunk to the avatar IMMEDIATELY rather than
+      // buffering until turn_complete. TalkingHead.speakAudio queues onto its
+      // speechQueue so back-to-back calls play seamlessly, and the avatar can
+      // start talking the moment the first ~100 ms chunk lands instead of
+      // waiting for the full response.
       const rate = typeof msg.sample_rate === "number" ? msg.sample_rate : 24000;
-      this.rxRate = rate;
       const ab = b64ToArrayBuffer(msg.data as string);
-      this.rxChunks.push(new Uint8Array(ab));
+      this.onEvent({ type: "audio", pcm: ab, sampleRate: rate, text: "" });
       return;
     }
     if (t === "transcript") {
       const role = msg.role as "user" | "ai";
       const text = (msg.text as string) || "";
-      if (role === "ai") this.rxAiText += text;
       this.onEvent({ type: "transcript", role, text });
       return;
     }
     if (t === "turn_complete") {
-      const total = this.rxChunks.reduce((s, c) => s + c.byteLength, 0);
-      if (total > 0) {
-        const combined = new Uint8Array(total);
-        let off = 0;
-        for (const c of this.rxChunks) {
-          combined.set(c, off);
-          off += c.byteLength;
-        }
-        this.onEvent({
-          type: "audio",
-          pcm: combined.buffer as ArrayBuffer,
-          sampleRate: this.rxRate,
-          text: this.rxAiText,
-        });
-      }
-      this.rxChunks = [];
-      this.rxAiText = "";
       this.onEvent({ type: "turn_complete" });
       return;
     }

@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import Link from "next/link";
 
 function LeafMark() {
@@ -30,9 +29,6 @@ type BrandPanelProps = {
   headlineLead: string;
   headlineEm: string;
   subcopy: string;
-  quote?: { text: string; attribution: string; avatar: string };
-  footStart?: ReactNode;
-  footEnd?: ReactNode;
 };
 
 export default function BrandPanel({
@@ -41,28 +37,7 @@ export default function BrandPanel({
   headlineLead,
   headlineEm,
   subcopy,
-  quote,
-  footStart,
-  footEnd,
 }: BrandPanelProps) {
-  const defaultFootEnd = (
-    <span className="flex items-center gap-3">
-      <Link
-        href="/privacy"
-        className="border-b border-background/20 pb-[1px] text-background/85 transition-colors hover:text-background"
-      >
-        Privacy
-      </Link>
-      <span aria-hidden>·</span>
-      <Link
-        href="/terms"
-        className="border-b border-background/20 pb-[1px] text-background/85 transition-colors hover:text-background"
-      >
-        Terms
-      </Link>
-    </span>
-  );
-
   return (
     <aside className="relative hidden overflow-hidden text-background lg:flex lg:flex-col lg:p-11">
       {/* Photo bg */}
@@ -107,25 +82,6 @@ export default function BrandPanel({
         <p className="mt-4 max-w-[38ch] text-[15px] leading-[1.6] text-background/85">
           {subcopy}
         </p>
-
-        {quote ? (
-          <div className="mt-6 rounded-[10px] border border-background/25 bg-foreground/55 p-5 backdrop-blur-md">
-            <div className="font-serif text-[16px] font-[360] leading-[1.45] tracking-[-0.005em] text-background">
-              &ldquo;{quote.text}&rdquo;
-            </div>
-            <div className="mt-3.5 flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.1em] text-background/75">
-              <span className="grid h-[22px] w-[22px] place-items-center rounded-full bg-primary text-[10px] font-semibold text-primary-foreground">
-                {quote.avatar}
-              </span>
-              {quote.attribution}
-            </div>
-          </div>
-        ) : null}
-
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-background/25 pt-[18px] text-[12px] text-background/75">
-          <span>{footStart ?? null}</span>
-          <span>{footEnd ?? defaultFootEnd}</span>
-        </div>
       </div>
     </aside>
   );

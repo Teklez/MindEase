@@ -39,21 +39,24 @@ function dayKey(iso: string): string {
   return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 }
 
-function dayLabel(iso: string): string {
-  const d = new Date(iso);
-  const now = new Date();
-  const todayKey = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
-  const y = new Date(now);
-  y.setDate(now.getDate() - 1);
-  const yKey = `${y.getFullYear()}-${y.getMonth()}-${y.getDate()}`;
-  const k = dayKey(iso);
-  if (k === todayKey) return "Today";
-  if (k === yKey) return "Yesterday";
-  return d.toLocaleDateString(undefined, {
-    weekday: "long",
-    month: "short",
-    day: "numeric",
-  });
+function useDayLabel() {
+  const tList = useTranslations("assessments.list");
+  return (iso: string): string => {
+    const d = new Date(iso);
+    const now = new Date();
+    const todayKey = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
+    const y = new Date(now);
+    y.setDate(now.getDate() - 1);
+    const yKey = `${y.getFullYear()}-${y.getMonth()}-${y.getDate()}`;
+    const k = dayKey(iso);
+    if (k === todayKey) return tList("relativeToday");
+    if (k === yKey) return tList("relativeYesterday");
+    return d.toLocaleDateString(undefined, {
+      weekday: "long",
+      month: "short",
+      day: "numeric",
+    });
+  };
 }
 
 export default function GroupChatPage() {
@@ -62,6 +65,11 @@ export default function GroupChatPage() {
   const groupId = params?.groupId as string;
   const t = useTranslations("groups");
   const tRoom = useTranslations("groups.room");
+  const tActions = useTranslations("groups.actions");
+  const tConn = useTranslations("groups.connection");
+  const tComp = useTranslations("groups.composer");
+  const tConfirm = useTranslations("groups.confirmDelete");
+  const dayLabel = useDayLabel();
   const locale = useLocale();
 
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -95,10 +103,10 @@ export default function GroupChatPage() {
       setGroup(res.data);
       setGroupError(null);
     } else {
-      setGroupError(res.error ?? "Failed to load group");
+      setGroupError(res.error ?? tActions("loadFailed"));
     }
     setGroupLoading(false);
-  }, [groupId]);
+  }, [groupId, tActions]);
 
   useEffect(() => {
     if (!groupId) return;
@@ -186,7 +194,7 @@ export default function GroupChatPage() {
     setJoining(false);
     if (!res.ok) {
       toast({
-        title: res.error ?? "Failed to join group",
+        title: res.error ?? tActions("joinFailed"),
         variant: "destructive",
       });
       return;
@@ -198,7 +206,7 @@ export default function GroupChatPage() {
     const res = await leaveGroup(groupId);
     if (!res.ok) {
       toast({
-        title: res.error ?? "Failed to leave group",
+        title: res.error ?? tActions("leaveFailed"),
         variant: "destructive",
       });
       return;
@@ -210,7 +218,7 @@ export default function GroupChatPage() {
     const res = await deleteGroup(groupId);
     if (!res.ok) {
       toast({
-        title: res.error ?? "Failed to delete group",
+        title: res.error ?? tActions("deleteFailed"),
         variant: "destructive",
       });
       return;
@@ -225,13 +233,13 @@ export default function GroupChatPage() {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4 p-8 text-center">
         <p className="font-serif text-xl text-foreground">
-          {groupError ?? "Group not found"}
+          {groupError ?? t("notFound")}
         </p>
         <Link
           href="/groups"
           className="text-sm font-medium text-primary hover:underline"
         >
-          ← Back to groups
+          ← {t("backToGroups")}
         </Link>
       </div>
     );
@@ -241,7 +249,7 @@ export default function GroupChatPage() {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground">
         <Loader2 className="h-5 w-5 animate-spin" strokeWidth={1.75} />
-        <span className="text-sm">Loading…</span>
+        <span className="text-sm">{t("loading")}</span>
       </div>
     );
   }
@@ -264,7 +272,7 @@ export default function GroupChatPage() {
           className="self-start inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ChevronLeft className="h-4 w-4" strokeWidth={1.75} />
-          Back to groups
+          {t("backToGroups")}
         </Link>
 
         <div
@@ -288,7 +296,7 @@ export default function GroupChatPage() {
         {(group.rules || group.rules_am) && (
           <div className="w-full rounded-xl border border-border bg-muted/30 p-5 text-left">
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Group Rules
+              {t("rulesLabel")}
             </p>
             <p className="whitespace-pre-wrap text-[13.5px] leading-relaxed text-foreground">
               {isAm && group.rules_am ? group.rules_am : group.rules}
@@ -331,7 +339,7 @@ export default function GroupChatPage() {
     <div className="flex h-full min-h-0">
       <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
       <RoomHeader
-        roomName="chat"
+        roomName={tComp("channelDefault")}
         topic={groupDescription}
         isCreator={isCreator}
         isAdminOrCreator={isAdminOrCreator}
@@ -346,12 +354,12 @@ export default function GroupChatPage() {
       {/* Connection state strip */}
       {connectionStatus === "connecting" && (
         <p className="shrink-0 bg-muted py-1.5 text-center text-xs text-muted-foreground">
-          Connecting…
+          {tConn("connecting")}
         </p>
       )}
       {connectionStatus === "error" && (
         <div className="shrink-0 border-b border-destructive/20 bg-destructive/10 py-2 px-4 text-center text-sm text-destructive">
-          Connection problem. Refresh the page to reconnect.
+          {tConn("problem")}
         </div>
       )}
 
@@ -377,7 +385,7 @@ export default function GroupChatPage() {
                   onClick={() => void loadMoreMessages()}
                   className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground hover:text-foreground"
                 >
-                  Load older messages
+                  {t("loadOlder")}
                 </button>
               )}
             </div>
@@ -431,8 +439,8 @@ export default function GroupChatPage() {
             disabled={isMutedForMe || connectionStatus !== "connected"}
             placeholder={
               isMutedForMe
-                ? "You have been muted by an admin"
-                : `Message ${groupName}…`
+                ? tComp("mutedPlaceholder")
+                : tComp("messagePlaceholder", { name: groupName })
             }
             mention={{
               trigger: "@",
@@ -491,24 +499,21 @@ export default function GroupChatPage() {
             className="w-full max-w-sm rounded-lg border border-border bg-background p-5 shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="font-serif text-lg text-foreground">Delete this group?</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              This is a soft delete — the group will be hidden from members.
-              Existing messages and members are kept.
-            </p>
+            <h3 className="font-serif text-lg text-foreground">{tConfirm("title")}</h3>
+            <p className="mt-2 text-sm text-muted-foreground">{tConfirm("body")}</p>
             <div className="mt-5 flex justify-end gap-2">
               <Button
                 variant="ghost"
                 onClick={() => setConfirmDelete(false)}
               >
-                Cancel
+                {tConfirm("cancel")}
               </Button>
               <Button
                 variant="outline"
                 onClick={handleDelete}
                 className="border-destructive/40 text-destructive hover:bg-destructive/10"
               >
-                Delete
+                {tConfirm("delete")}
               </Button>
             </div>
           </div>

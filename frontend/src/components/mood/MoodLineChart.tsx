@@ -13,7 +13,8 @@ import {
 } from "recharts";
 import { getMoodTrends } from "@/lib/api";
 import type { MoodTrend } from "@/lib/types";
-import { getMoodEmoji, getMoodLabel } from "@/lib/mood";
+import { getMoodEmoji } from "@/lib/mood";
+import { useMoodLabels } from "@/hooks/useMoodLabels";
 import { cn } from "@/lib/utils";
 
 function formatXDate(dateStr: string): string {
@@ -52,6 +53,7 @@ function MoodTooltip({
   payload?: { value: number; payload: MoodTrend }[];
   label?: string;
 }) {
+  const { getMoodLabel } = useMoodLabels();
   if (!active || !payload?.length || !payload[0].value) return null;
   const avg = payload[0].value;
   const entry = payload[0].payload;

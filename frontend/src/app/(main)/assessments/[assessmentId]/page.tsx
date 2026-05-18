@@ -25,6 +25,7 @@ export default function TakeAssessmentPage() {
   const router = useRouter();
   const t = useTranslations("assessments");
   const tTake = useTranslations("assessments.take");
+  const tList = useTranslations("assessments.list");
   const locale = useLocale();
 
   const {
@@ -120,7 +121,7 @@ export default function TakeAssessmentPage() {
     return (
       <div className="mx-auto w-full max-w-xl px-4 py-12 text-center">
         <p className="font-serif text-lg text-foreground">
-          {loadError ?? "Assessment not found"}
+          {loadError ?? tList("notFound")}
         </p>
         <Button onClick={() => router.replace("/assessments")} className="mt-4">
           {t("viewAll")}
@@ -277,8 +278,7 @@ export default function TakeAssessmentPage() {
       <div className="shrink-0 border-t border-border bg-background px-4 py-3 md:px-7">
         <div className="mx-auto flex w-full max-w-3xl flex-wrap items-center justify-between gap-3">
           <p className="hidden font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground md:block">
-            <Kbd>{keyboardKeys || "1"}</Kbd> {tTake("kbdSelect", { keys: "" }).replace("select", "select") /* keep template safe */} ·{" "}
-            <Kbd>⏎</Kbd> next · <Kbd>⎋</Kbd> save &amp; exit
+            <Kbd>{keyboardKeys || "1"}</Kbd> {tTake("kbdSelect", { keys: "" }).trim()} · {tTake("kbdNext")} · {tTake("kbdExit")}
           </p>
           <div className="ml-auto flex items-center gap-2">
             <Button

@@ -3,7 +3,8 @@
 import { useTranslations } from "next-intl";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import type { MoodStats } from "@/lib/types";
-import { getMoodColor, getMoodEmoji, getMoodLabel } from "@/lib/mood";
+import { getMoodColor, getMoodEmoji } from "@/lib/mood";
+import { useMoodLabels } from "@/hooks/useMoodLabels";
 
 type Props = {
   stats: MoodStats;
@@ -11,6 +12,7 @@ type Props = {
 
 export default function MoodDistribution({ stats }: Props) {
   const t = useTranslations("mood");
+  const { getMoodLabel } = useMoodLabels();
   const total = stats.total_entries;
   if (total === 0) return null;
 

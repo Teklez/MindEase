@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2, Check } from "lucide-react";
 import { createMoodEntry, type MoodEntryResponse, type BadgeResponse } from "@/lib/api";
-import { MOOD_OPTIONS, getMoodColor, getMoodLabel } from "@/lib/mood";
+import { getMoodColor } from "@/lib/mood";
+import { useMoodLabels } from "@/hooks/useMoodLabels";
 import { cn } from "@/lib/utils";
 import BadgeCelebration from "./BadgeCelebration";
 
@@ -15,6 +16,7 @@ type Props = {
 
 export default function MoodCheckIn({ compact = false, onEntryCreated }: Props) {
   const t = useTranslations("mood");
+  const { getMoodLabel, moodOptions } = useMoodLabels();
   const [selected, setSelected] = useState<number | null>(null);
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
@@ -59,7 +61,7 @@ export default function MoodCheckIn({ compact = false, onEntryCreated }: Props) 
         )}
 
         <div className={cn("grid grid-cols-5 gap-2", !compact && "mt-5")}>
-          {MOOD_OPTIONS.map((m) => {
+          {moodOptions.map((m) => {
             const active = selected === m.score;
             return (
               <button
