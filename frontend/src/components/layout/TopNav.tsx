@@ -4,9 +4,8 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Menu, LayoutDashboard, MessageCircle, HeartPulse, BookOpen, ClipboardList, Sparkles, Users, type LucideIcon } from "lucide-react";
+import { Menu, LayoutDashboard, MessageCircle, Sparkles, HeartPulse, BookOpen, ClipboardList, Users, type LucideIcon } from "lucide-react";
 import { getMe, clearStoredToken } from "@/lib/api";
-import { useGroupsUnread } from "@/hooks/useGroupsUnread";
 import Logo from "@/components/shared/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -20,7 +19,6 @@ const NAV_LINKS: Array<{
   href: string;
   labelKey: "dashboard" | "chat" | "avatar" | "moodTracker" | "resources" | "assessments" | "groups";
   icon: LucideIcon;
-  disabled?: boolean;
 }> = [
   { href: "/dashboard", labelKey: "dashboard", icon: LayoutDashboard },
   { href: "/chat", labelKey: "chat", icon: MessageCircle },
@@ -45,7 +43,6 @@ export default function TopNav() {
   const tCommon = useTranslations("common");
   const [user, setUser] = useState<{ display_name: string } | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { hasUnread: groupsHaveUnread } = useGroupsUnread();
 
   useEffect(() => {
     getMe().then((res) => {
@@ -66,30 +63,16 @@ export default function TopNav() {
         </Link>
 
         <nav className="hidden md:flex h-full items-center gap-1" aria-label="Primary">
-          {NAV_LINKS.map(({ href, labelKey, icon: Icon, disabled }) => {
+          {NAV_LINKS.map(({ href, labelKey, icon: Icon }) => {
             const label = tNav(labelKey);
-            const active = !disabled && isActive(href, pathname ?? null);
+            const active = isActive(href, pathname ?? null);
             const baseClass = cn(
               "relative inline-flex h-full items-center gap-2 px-3.5 text-[13.5px] font-medium transition-colors",
-              active && "text-primary",
-              !active && !disabled && "text-muted-foreground hover:text-foreground",
-              disabled && "cursor-not-allowed opacity-60 text-muted-foreground",
+              active ? "text-primary" : "text-muted-foreground hover:text-foreground",
             );
             const indicator = active ? (
               <span className="pointer-events-none absolute inset-x-3.5 -bottom-px h-0.5 rounded-t-sm bg-primary" />
             ) : null;
-            if (disabled) {
-              return (
-                <span key={href} className={baseClass}>
-                  <Icon className="h-4 w-4 shrink-0" strokeWidth={1.75} />
-                  {label}
-                  <span className="ml-1 rounded-md border border-border bg-muted px-1.5 py-px text-[9.5px] uppercase tracking-wider text-muted-foreground">
-                    {tCommon("comingSoon").toLowerCase()}
-                  </span>
-                </span>
-              );
-            }
-            const showUnreadDot = labelKey === "groups" && groupsHaveUnread;
             return (
               <Link
                 key={href}
@@ -97,15 +80,7 @@ export default function TopNav() {
                 className={baseClass}
                 aria-current={active ? "page" : undefined}
               >
-                <span className="relative inline-flex shrink-0">
-                  <Icon className="h-4 w-4" strokeWidth={1.75} />
-                  {showUnreadDot && (
-                    <span
-                      className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-primary ring-2 ring-background"
-                      aria-label="unread groups"
-                    />
-                  )}
-                </span>
+                <Icon className="h-4 w-4 shrink-0" strokeWidth={1.75} />
                 {label}
                 {indicator}
               </Link>

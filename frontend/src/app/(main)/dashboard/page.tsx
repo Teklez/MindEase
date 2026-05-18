@@ -1,64 +1,56 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
 import {
   getChatConversations,
   getMe,
+  getMoodBadges,
   getMoodHistory,
   getStoredToken,
   type BadgeResponse,
-  type MoodEntryResponse,
 } from "@/lib/api";
-import type { Conversation, MoodTrend, MoodStats } from "@/lib/types";
+import type { Conversation, MoodStats, MoodTrend } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { toast } from "@/hooks/use-toast";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import GreetingHero from "@/components/dashboard/GreetingHero";
+import MoodCheckInCard from "@/components/dashboard/MoodCheckInCard";
 import StatCards from "@/components/dashboard/StatCards";
-import ReflectionCard from "@/components/dashboard/ReflectionCard";
-import ResourceCard from "@/components/dashboard/ResourceCard";
+import StartChatCTA from "@/components/dashboard/StartChatCTA";
 import RecentConversations from "@/components/dashboard/RecentConversations";
-import YourGroups from "@/components/dashboard/YourGroups";
-import FooterBand from "@/components/dashboard/FooterBand";
-import DashboardMoodWidget from "@/components/mood/DashboardMoodWidget";
-import MoodCheckIn from "@/components/mood/MoodCheckIn";
+import QuickActions from "@/components/dashboard/QuickActions";
+import MoodSparkline from "@/components/dashboard/MoodSparkline";
+import DailyReflection from "@/components/dashboard/DailyReflection";
+import BadgesPanel from "@/components/dashboard/BadgesPanel";
 
-function daysSince(iso: string | undefined): number | null {
-  if (!iso) return null;
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return null;
-  const diff = Date.now() - d.getTime();
-  return Math.max(0, Math.floor(diff / (24 * 60 * 60 * 1000)));
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function countSince(conversations: Conversation[], windowMs: number): number {
+  const cutoff = Date.now() - windowMs;
+  return conversations.filter((c) => new Date(c.last_message_at).getTime() >= cutoff).length;
 }
 
-function sessionsThisWeek(conversations: Conversation[]): number {
-  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-  return conversations.filter((c) => new Date(c.last_message_at).getTime() >= weekAgo).length;
-}
-
-function sessionsSparkline(conversations: Conversation[]): Array<{ value: number }> {
-  const today = new Date();
-  const buckets: number[] = Array.from({ length: 7 }, () => 0);
-  for (const c of conversations) {
-    const d = new Date(c.last_message_at);
-    const diff = Math.floor((today.getTime() - d.getTime()) / (24 * 60 * 60 * 1000));
-    if (diff >= 0 && diff < 7) buckets[6 - diff]++;
-  }
-  return buckets.map((value) => ({ value }));
+function countWithinPrevious(
+  conversations: Conversation[],
+  fromMs: number,
+  toMs: number,
+): number {
+  const now = Date.now();
+  return conversations.filter((c) => {
+    const t = new Date(c.last_message_at).getTime();
+    return t >= now - fromMs && t < now - toMs;
+  }).length;
 }
 
 export default function DashboardPage() {
   const router = useRouter();
-  const tMood = useTranslations("mood");
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [trends, setTrends] = useState<MoodTrend[]>([]);
   const [stats, setStats] = useState<MoodStats | null>(null);
+  const [badges, setBadges] = useState<BadgeResponse[]>([]);
   const [loading, setLoading] = useState(true);
-  const [checkInOpen, setCheckInOpen] = useState(false);
-  const refreshMoodRef = useRef(0);
+  const [moodVersion, setMoodVersion] = useState(0);
 
   useEffect(() => {
     const token = getStoredToken();
@@ -67,75 +59,65 @@ export default function DashboardPage() {
       return;
     }
     let cancelled = false;
-    Promise.all([getMe(), getChatConversations(), getMoodHistory(30)]).then(
-      ([meRes, convRes, moodRes]) => {
-        if (cancelled) return;
-        setLoading(false);
-        if (!meRes.ok) {
-          if (meRes.status === 401) return;
-          router.replace("/login");
-          return;
-        }
-        setDisplayName(meRes.data.display_name);
-        if (convRes.ok) setConversations(convRes.data as Conversation[]);
-        if (moodRes.ok) {
-          setTrends(moodRes.data.daily_trends);
-          setStats(moodRes.data.stats);
-        }
-      },
-    );
+    Promise.all([
+      getMe(),
+      getChatConversations(),
+      getMoodHistory(30),
+      getMoodBadges(),
+    ]).then(([meRes, convRes, moodRes, badgesRes]) => {
+      if (cancelled) return;
+      setLoading(false);
+      if (!meRes.ok) {
+        if (meRes.status === 401) router.replace("/login");
+        return;
+      }
+      setDisplayName(meRes.data.display_name);
+      if (convRes.ok) setConversations(convRes.data as Conversation[]);
+      if (moodRes.ok) {
+        setTrends(moodRes.data.daily_trends);
+        setStats(moodRes.data.stats);
+      }
+      if (badgesRes.ok) setBadges(badgesRes.data);
+    });
     return () => {
       cancelled = true;
     };
-  }, [router, refreshMoodRef.current]);
+  }, [router, moodVersion]);
 
-  const lastCheckIn = useMemo(() => {
-    const sorted = [...trends].filter((t) => t.entry_count > 0).sort((a, b) => b.date.localeCompare(a.date));
-    return sorted[0]?.date;
-  }, [trends]);
-
-  const moodDelta = useMemo(() => {
-    if (!stats?.average_mood) return null;
-    const last7 = trends.slice(-7).filter((t) => t.entry_count > 0);
-    const prev7 = trends.slice(-14, -7).filter((t) => t.entry_count > 0);
-    if (last7.length === 0 || prev7.length === 0) return null;
-    const avg = (arr: MoodTrend[]) => arr.reduce((s, t) => s + t.average_mood, 0) / arr.length;
-    return avg(last7) - avg(prev7);
-  }, [trends, stats]);
-
-  const handleMoodCreated = (_entry: MoodEntryResponse, newBadges: BadgeResponse[]) => {
-    refreshMoodRef.current++;
-    setCheckInOpen(false);
-    toast({
-      title: tMood("logged"),
-      description:
-        newBadges.length > 0
-          ? `${tMood("badgeEarned")} ${newBadges.map((b) => b.icon + " " + b.name).join(", ")}`
-          : undefined,
-    });
-    getMoodHistory(30).then((res) => {
-      if (res.ok) {
-        setTrends(res.data.daily_trends);
-        setStats(res.data.stats);
-      }
-    });
-  };
+  const derivedStats = useMemo(() => {
+    const totalConversations = conversations.length;
+    const conversationsThisMonth = countSince(conversations, 30 * DAY_MS);
+    const sessionsThisWeek = countSince(conversations, 7 * DAY_MS);
+    const sessionsPrevWeek = countWithinPrevious(conversations, 14 * DAY_MS, 7 * DAY_MS);
+    return {
+      totalConversations,
+      conversationsThisMonth,
+      sessionsThisWeek,
+      weekDelta: sessionsThisWeek - sessionsPrevWeek,
+    };
+  }, [conversations]);
 
   if (loading) {
     return (
-      <div className="mx-auto w-full max-w-6xl px-4 py-8 md:px-8 md:py-10">
-        <div className="space-y-6">
-          <Skeleton className="h-32 rounded-2xl" />
-          <div className="grid gap-4 sm:grid-cols-3">
-            <Skeleton className="h-28 rounded-2xl" />
-            <Skeleton className="h-28 rounded-2xl" />
-            <Skeleton className="h-28 rounded-2xl" />
+      <div className="mx-auto max-w-[1180px] px-4 py-9 md:px-9">
+        <Skeleton className="h-28 rounded-2xl" />
+        <div className="mt-8 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+          <div className="flex flex-col gap-6">
+            <Skeleton className="h-32 rounded-2xl" />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <Skeleton className="h-28 rounded-2xl" />
+              <Skeleton className="h-28 rounded-2xl" />
+              <Skeleton className="h-28 rounded-2xl" />
+            </div>
+            <Skeleton className="h-40 rounded-2xl" />
+            <Skeleton className="h-64 rounded-2xl" />
+            <Skeleton className="h-40 rounded-2xl" />
           </div>
-          <div className="grid gap-4 lg:grid-cols-12">
-            <Skeleton className="h-44 rounded-2xl lg:col-span-8" />
-            <Skeleton className="h-44 rounded-2xl lg:col-span-4" />
+          <div className="flex flex-col gap-6">
+            <Skeleton className="h-64 rounded-2xl" />
+            <Skeleton className="h-56 rounded-2xl" />
+            <Skeleton className="h-56 rounded-2xl" />
           </div>
-          <Skeleton className="h-40 rounded-2xl" />
         </div>
       </div>
     );
@@ -144,52 +126,37 @@ export default function DashboardPage() {
   if (displayName === null) return null;
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8 md:px-8 md:py-10">
-      <div className="space-y-6">
-        <GreetingHero
-          displayName={displayName}
-          daysSinceCheckIn={daysSince(lastCheckIn)}
-          onQuickCheckIn={() => setCheckInOpen(true)}
-        />
-
-        <StatCards
-          currentStreak={stats?.current_streak ?? 0}
-          longestStreak={stats?.longest_streak ?? 0}
-          averageMood={stats?.average_mood ?? null}
-          moodDelta={moodDelta}
-          sessionsThisWeek={sessionsThisWeek(conversations)}
-          sparkline={sessionsSparkline(conversations)}
-        />
-
-        <div className="grid gap-6 lg:grid-cols-12">
-          <div className="lg:col-span-8">
-            <DashboardMoodWidget
-              trends={trends}
-              streak={stats?.current_streak ?? 0}
-              onPillClick={() => setCheckInOpen(true)}
-            />
-          </div>
-          <div className="space-y-6 lg:col-span-4">
-            <ReflectionCard />
-            <ResourceCard />
-          </div>
-        </div>
-
-        <RecentConversations conversations={conversations} />
-
-        <YourGroups />
-
-        <FooterBand />
+    <div className="mx-auto max-w-[1180px] px-4 py-9 md:px-9">
+      <DashboardHeader />
+      <div className="mt-7">
+        <GreetingHero displayName={displayName} streak={stats?.current_streak ?? 0} />
       </div>
 
-      <Dialog open={checkInOpen} onOpenChange={setCheckInOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="font-serif text-2xl tracking-tight">{tMood("checkIn")}</DialogTitle>
-          </DialogHeader>
-          <MoodCheckIn onEntryCreated={handleMoodCreated} />
-        </DialogContent>
-      </Dialog>
+      <div className="mt-8 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+        <div className="flex flex-col gap-6">
+          <MoodCheckInCard onMoodLogged={() => setMoodVersion((v) => v + 1)} />
+          <StatCards
+            totalConversations={derivedStats.totalConversations}
+            conversationsThisMonth={derivedStats.conversationsThisMonth}
+            sessionsThisWeek={derivedStats.sessionsThisWeek}
+            weekDelta={derivedStats.weekDelta}
+            currentStreak={stats?.current_streak ?? 0}
+            longestStreak={stats?.longest_streak ?? 0}
+          />
+          <StartChatCTA />
+          <RecentConversations conversations={conversations} />
+          <QuickActions />
+        </div>
+        <div className="flex flex-col gap-6">
+          <MoodSparkline
+            trends={trends}
+            streak={stats?.current_streak ?? 0}
+            averageMood={stats?.average_mood ?? null}
+          />
+          <DailyReflection />
+          <BadgesPanel badges={badges} />
+        </div>
+      </div>
     </div>
   );
 }
