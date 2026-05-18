@@ -1,100 +1,148 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { ArrowRight, Lock, ShieldCheck, Heart } from "lucide-react";
+import { ArrowRight, Play } from "lucide-react";
+
+type Stat = { num: string; lbl: string };
+
+// TODO: replace Unsplash hotlinks with approved imagery in public/landing/ before launch.
+const PHOTO_MORNING_LIGHT =
+  "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?auto=format&fit=crop&w=900&q=70";
+const PHOTO_WARM_CUP =
+  "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=800&q=70";
+const PHOTO_DETAIL =
+  "https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?auto=format&fit=crop&w=400&q=70";
 
 export default function Hero() {
-  const t = useTranslations("landing.v2.hero");
-  const tPreview = useTranslations("landing.v2.preview");
+  const t = useTranslations("landing.v3.hero");
+  const stats = t.raw("stats") as Stat[];
 
   return (
-    <section className="relative overflow-hidden">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 opacity-[0.04]"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle at 1px 1px, hsl(var(--foreground) / 0.5) 1px, transparent 0)",
-          backgroundSize: "32px 32px",
-        }}
-      />
-      <div className="mx-auto grid max-w-7xl items-center gap-12 px-6 pb-20 pt-16 md:grid-cols-12 md:gap-10 md:px-8 md:pb-32 md:pt-24 lg:px-12">
-        <div className="md:col-span-7 lg:col-span-7">
-          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background/60 px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-50" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
-            </span>
-            {t("eyebrow")}
+    <header className="relative overflow-hidden pb-24 pt-16">
+      <div className="mx-auto max-w-[1240px] px-10">
+        <div className="grid items-center gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-[72px]">
+          {/* Copy */}
+          <div className="hero-copy">
+            <div className="mb-7 inline-flex items-center gap-2.5 rounded-full border border-border bg-background py-1.5 pl-2 pr-3">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-2 py-[3px] font-mono text-[10.5px] font-medium uppercase tracking-[0.1em] text-primary">
+                <span className="relative inline-block h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_0_3px_oklch(var(--primary)/0.25)]" />
+                {t("pill")}
+              </span>
+              <span className="text-[12.5px] text-muted-foreground">{t("label")}</span>
+            </div>
+
+            <h1 className="font-serif text-[44px] font-[360] leading-[1.06] tracking-[-0.018em] text-foreground text-balance sm:text-[56px] md:text-[64px]">
+              {t("headlineLead")}{" "}
+              <em
+                className="font-[360] text-primary"
+                style={{ fontStyle: "italic" }}
+              >
+                {t("headlineEm")}
+              </em>
+            </h1>
+
+            <p className="mt-8 max-w-[38em] text-[18px] leading-[1.55] text-muted-foreground">
+              {t("lede")}
+            </p>
+
+            <div className="mt-9 flex flex-wrap items-center gap-3.5">
+              <Link
+                href="/register"
+                className="inline-flex h-11 items-center gap-2 rounded-[10px] bg-foreground px-5 text-[14px] font-medium text-background transition-colors hover:bg-foreground/85"
+              >
+                {t("ctaPrimary")}
+                <ArrowRight className="h-3.5 w-3.5" strokeWidth={1.6} />
+              </Link>
+              <a
+                href="#preview"
+                className="inline-flex h-11 items-center gap-2 rounded-[10px] border border-border bg-transparent px-5 text-[14px] font-medium text-foreground transition-colors hover:bg-muted"
+              >
+                <Play className="h-3.5 w-3.5" strokeWidth={1.6} />
+                {t("ctaSecondary")}
+              </a>
+            </div>
+
+            <ul className="mt-9 flex flex-wrap gap-x-8 gap-y-4 border-t border-border pt-7">
+              {stats.map((s) => (
+                <li key={s.num} className="stat">
+                  <div className="font-serif text-[28px] font-normal leading-tight tracking-[-0.01em] text-foreground">
+                    {s.num}
+                  </div>
+                  <div className="mt-0.5 text-[12px] text-muted-foreground">{s.lbl}</div>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          <h1 className="mt-6 font-serif text-[44px] leading-[1.04] tracking-tight text-foreground sm:text-[60px] md:text-[72px] lg:text-[80px]">
-            {t("headlineLead")}{" "}
-            <em className="text-primary">{t("headlineEm")}</em>
-          </h1>
+          {/* Art */}
+          <div
+            aria-hidden
+            className="relative min-h-[520px] aspect-[1/1.1] lg:min-h-[620px]"
+          >
+            {/* Blurred blobs */}
+            <div
+              className="absolute -right-20 -top-16 h-[460px] w-[460px] rounded-full bg-primary/15 opacity-55 blur-[40px]"
+            />
+            <div
+              className="absolute -left-16 bottom-5 h-[320px] w-[320px] rounded-full bg-accent/30 opacity-55 blur-[40px]"
+            />
 
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-            {t("lede")}
-          </p>
+            {/* Photo 1 — large 4:5 top-right */}
+            <div className="absolute right-0 top-0 z-[2] aspect-[4/5] w-[70%] overflow-hidden rounded-2xl border border-border bg-muted shadow-[0_1px_2px_rgba(20,30,25,0.04),0_24px_48px_-24px_rgba(20,30,25,0.18)]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={PHOTO_MORNING_LIGHT}
+                alt={t("altMorningLight")}
+                className="h-full w-full object-cover"
+              />
+            </div>
 
-          <div className="mt-9 flex flex-wrap items-center gap-3">
-            <Link
-              href="/register"
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3.5 text-[15px] font-medium text-primary-foreground transition-all hover:-translate-y-px hover:bg-primary/90 shadow-soft"
-            >
-              {t("primaryCta")}
-              <ArrowRight className="h-4 w-4" strokeWidth={1.75} />
-            </Link>
-            <a
-              href="#how-it-works"
-              className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-6 py-3.5 text-[15px] font-medium text-foreground transition-all hover:-translate-y-px hover:bg-muted"
-            >
-              {t("secondaryCta")}
-            </a>
-          </div>
+            {/* Photo 2 — square bottom-left */}
+            <div className="absolute bottom-0 left-0 z-[3] aspect-square w-[56%] overflow-hidden rounded-2xl border border-border bg-muted shadow-[0_1px_2px_rgba(20,30,25,0.04),0_24px_48px_-24px_rgba(20,30,25,0.18)]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={PHOTO_WARM_CUP}
+                alt={t("altWarmCup")}
+                className="h-full w-full object-cover"
+              />
+            </div>
 
-          <ul className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 text-xs uppercase tracking-wider text-muted-foreground">
-            <li className="inline-flex items-center gap-2">
-              <Lock className="h-3.5 w-3.5 text-primary" strokeWidth={1.75} />
-              {t("trust.encrypted")}
-            </li>
-            <li className="inline-flex items-center gap-2">
-              <ShieldCheck className="h-3.5 w-3.5 text-primary" strokeWidth={1.75} />
-              {t("trust.evidence")}
-            </li>
-            <li className="inline-flex items-center gap-2">
-              <Heart className="h-3.5 w-3.5 text-primary" strokeWidth={1.75} />
-              {t("trust.noJudgment")}
-            </li>
-          </ul>
-        </div>
+            {/* Photo 3 — circular detail bottom-right */}
+            <div className="absolute bottom-[16%] right-[4%] z-[4] aspect-square w-[36%] overflow-hidden rounded-full border border-border bg-muted shadow-[0_1px_2px_rgba(20,30,25,0.04),0_24px_48px_-24px_rgba(20,30,25,0.18)]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={PHOTO_DETAIL}
+                alt={t("altDetail")}
+                className="h-full w-full object-cover"
+              />
+            </div>
 
-        <div className="md:col-span-5 lg:col-span-5">
-          <div className="relative">
-            <div className="absolute inset-0 -z-10 -rotate-2 rounded-[28px] bg-secondary/70" aria-hidden />
-            <div className="rounded-[28px] border border-border bg-card p-6 shadow-soft-md md:p-7">
-              <div className="mb-4 flex items-center justify-between">
-                <span className="font-serif text-base text-foreground">a quiet evening</span>
-                <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary">
-                  {tPreview("moodPill")}
-                </span>
+            {/* Chip 1 — MindEase reply */}
+            <div className="absolute left-[-20px] top-[38%] z-[5] flex min-w-[220px] items-center gap-2.5 rounded-[10px] border border-border bg-card p-3 shadow-[0_12px_28px_-16px_rgba(20,30,25,0.22)]">
+              <span className="grid h-8 w-8 place-items-center rounded-full bg-primary text-[13px] font-semibold text-primary-foreground">
+                M
+              </span>
+              <div>
+                <div className="text-[12px] text-muted-foreground">{t("chip1Who")}</div>
+                <div className="text-[13px] text-foreground">{t("chip1Msg")}</div>
               </div>
-              <div className="space-y-3 text-[14.5px] leading-relaxed">
-                <div className="ml-auto max-w-[80%] rounded-2xl rounded-tr-sm bg-primary px-4 py-3 text-primary-foreground">
-                  {tPreview("user")}
-                </div>
-                <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-muted px-4 py-3 text-foreground">
-                  <span className="italic font-serif text-foreground/90">{tPreview("assistant")}</span>
-                </div>
-                <div className="flex items-center gap-1.5 pl-1 pt-1">
-                  <span className="h-2 w-2 animate-bounce-dot rounded-full bg-muted-foreground" style={{ animationDelay: "0ms" }} />
-                  <span className="h-2 w-2 animate-bounce-dot rounded-full bg-muted-foreground" style={{ animationDelay: "150ms" }} />
-                  <span className="h-2 w-2 animate-bounce-dot rounded-full bg-muted-foreground" style={{ animationDelay: "300ms" }} />
+            </div>
+
+            {/* Chip 2 — mood logged */}
+            <div className="absolute bottom-[4%] right-[-20px] z-[5] flex min-w-[220px] items-center gap-2.5 rounded-[10px] border border-border bg-card p-3 shadow-[0_12px_28px_-16px_rgba(20,30,25,0.22)]">
+              <span className="grid h-8 w-8 place-items-center rounded-full border border-border bg-muted text-[13px] font-semibold text-foreground">
+                A
+              </span>
+              <div>
+                <div className="text-[12px] text-muted-foreground">{t("chip2Who")}</div>
+                <div className="flex items-center gap-1.5 text-[13px] text-foreground">
+                  <span className="h-2 w-2 rounded-full bg-primary" />
+                  {t("chip2Msg")}
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </section>
+    </header>
   );
 }
