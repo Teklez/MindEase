@@ -2,6 +2,8 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { ArrowRight, Play } from "lucide-react";
 
+import GuestCTAButton from "@/components/auth/GuestCTAButton";
+
 type Stat = { num: string; lbl: string };
 
 // TODO: replace Unsplash hotlinks with approved imagery in public/landing/ before launch.
@@ -59,6 +61,9 @@ export default function Hero() {
                 <Play className="h-3.5 w-3.5" strokeWidth={1.6} />
                 {t("ctaSecondary")}
               </a>
+            </div>
+            <div className="mt-3">
+              <GuestCTAButton />
             </div>
 
             <ul className="mt-9 flex flex-wrap gap-x-8 gap-y-4 border-t border-border pt-7">

@@ -2,7 +2,9 @@
 
 import { useCallback, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Plus } from "lucide-react";
+import { Download, Plus } from "lucide-react";
+import { exportMood } from "@/lib/export";
+import { isGuestUser } from "@/lib/guest";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,9 +20,30 @@ import type { BadgeResponse, MoodEntryResponse } from "@/lib/api";
 
 export default function MoodPage() {
   const t = useTranslations("mood");
+  const tExport = useTranslations("export");
   const { stats, badges, isLoading, refresh } = useMoodData(90);
   const [refreshKey, setRefreshKey] = useState(0);
   const [checkInOpen, setCheckInOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+
+  const handleExport = useCallback(async () => {
+    if (isGuestUser()) {
+      toast({ title: tExport("guestBlock"), variant: "destructive" });
+      return;
+    }
+    setExporting(true);
+    try {
+      await exportMood("csv");
+    } catch (err) {
+      toast({
+        title: tExport("title"),
+        description: err instanceof Error ? err.message : String(err),
+        variant: "destructive",
+      });
+    } finally {
+      setExporting(false);
+    }
+  }, [tExport]);
 
   const handleEntryCreated = useCallback(
     (_entry: MoodEntryResponse, newBadges: BadgeResponse[]) => {
@@ -49,14 +72,26 @@ export default function MoodPage() {
           </h1>
           <p className="mt-2 text-[15px] text-muted-foreground">{t("checkIn")}</p>
         </div>
-        <button
-          type="button"
-          onClick={() => setCheckInOpen(true)}
-          className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-all hover:-translate-y-px hover:bg-primary/90 shadow-soft-sm"
-        >
-          <Plus className="h-4 w-4" strokeWidth={1.75} />
-          {t("logMood")}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleExport}
+            disabled={exporting || (stats?.total_entries ?? 0) === 0}
+            className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label={tExport("exportMood")}
+          >
+            <Download className="h-4 w-4" strokeWidth={1.75} />
+            {tExport("exportMood")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setCheckInOpen(true)}
+            className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-all hover:-translate-y-px hover:bg-primary/90 shadow-soft-sm"
+          >
+            <Plus className="h-4 w-4" strokeWidth={1.75} />
+            {t("logMood")}
+          </button>
+        </div>
       </header>
 
       <div className="mt-8 space-y-6">

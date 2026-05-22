@@ -93,3 +93,15 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
     return user
+
+
+async def get_registered_user(
+    current_user: User = Depends(get_current_user),
+) -> User:
+    """Like get_current_user but rejects guest accounts with 403."""
+    if current_user.account_status == "guest":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Please create an account to use this feature",
+        )
+    return current_user

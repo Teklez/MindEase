@@ -1269,5 +1269,53 @@
         "intro": "Hey, I'm Yonas. Take a breath. I'm right here whenever you're ready."
       }
     }
+  },
+  "guest": {
+    "tryAsGuest": "Continue as Guest",
+    "banner": "You're in guest mode. Create an account to save your data.",
+    "signUp": "Sign Up",
+    "disclaimerTitle": "Guest Mode",
+    "disclaimer": "Welcome! You can chat with MindEase without an account. Your data will not be saved when you leave. Create an account anytime to save your progress.",
+    "gotIt": "Got it, let's chat",
+    "upgradeTitle": "Create Your Account",
+    "upgradeSubtitle": "Save your conversations and progress",
+    "upgradeSuccess": "Account created! Your data has been saved.",
+    "featureRequiresAccount": "Create an account to use this feature",
+    "displayNameLabel": "Display name",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "confirmPasswordLabel": "Confirm password",
+    "submitting": "Creating account…",
+    "submit": "Create account",
+    "passwordMismatch": "Passwords do not match",
+    "starting": "Starting guest session…"
+  },
+  "export": {
+    "title": "Export Your Data",
+    "subtitle": "Download your MindEase data for personal backup or to share with a healthcare professional.",
+    "privacyNotice": "Exports are generated on-demand and are not stored on our servers. Only you can initiate an export.",
+    "moodHistory": "Mood History",
+    "moodDesc": "Download your mood entries, notes, and statistics",
+    "moodCount": "{count} mood entries",
+    "chatLogs": "Chat Logs",
+    "chatDesc": "Download your conversations with MindEase",
+    "chatCount": "{conversations} conversations, {messages} messages",
+    "allConversations": "All Conversations",
+    "assessmentResults": "Assessment Results",
+    "assessmentDesc": "Download your self-assessment history and scores",
+    "assessmentCount": "{count} assessments completed",
+    "downloadCsv": "Download CSV",
+    "downloadPdf": "Download PDF",
+    "exportAll": "Export Everything",
+    "exportAllDesc": "Download all your data in one PDF",
+    "downloading": "Preparing download…",
+    "downloadComplete": "Download started",
+    "noData": "No data to export yet",
+    "disclaimer": "Exported data is for personal use. MindEase is not a clinical tool.",
+    "exportConversation": "Export Conversation",
+    "exportMood": "Export",
+    "downloadResults": "Download Results",
+    "navLink": "Export Data",
+    "guestBlock": "Create an account to export your data."
   }
 }

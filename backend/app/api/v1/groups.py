@@ -19,7 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 
-from app.core.security import get_current_user, verify_token
+from app.core.security import get_current_user, get_registered_user, verify_token
 from app.database import async_session_maker, get_db
 from app.models.group import GroupMember
 from app.models.user import User
@@ -64,7 +64,7 @@ async def get_unread_summary(
 async def create_group(
     body: GroupCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_registered_user),
 ) -> GroupResponse:
     group = await group_service.create_group(db, current_user.user_id, body)
     return await group_service.get_group(db, group.group_id, current_user.user_id)
