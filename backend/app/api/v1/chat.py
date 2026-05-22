@@ -1,7 +1,11 @@
+import asyncio
+import logging
 import uuid
 
 from fastapi import APIRouter, Depends, status, WebSocket
 from fastapi.websockets import WebSocketDisconnect
+
+logger = logging.getLogger(__name__)
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -139,29 +143,89 @@ async def websocket_chat(websocket: WebSocket, conversation_id: uuid.UUID):
 
     await websocket.accept()
 
-    while True:
-        try:
-            data = await websocket.receive_json()
-        except WebSocketDisconnect:
-            break
-        except Exception:
-            await websocket.send_json({"type": "error", "content": "Invalid message format"})
-            continue
+    # Concurrency: the receive loop and the streaming task share the socket,
+    # so all writes go through a lock. The stream runs in its own task so a
+    # "stop" message can land while it's mid-flight and cancel it.
+    send_lock = asyncio.Lock()
+    current_stream: asyncio.Task | None = None
 
-        if data.get("type") != "message":
-            await websocket.send_json({"type": "error", "content": "Expected type: message"})
-            continue
-        content = (data.get("content") or "").strip()
-        if not content:
-            await websocket.send_json({"type": "error", "content": "Content cannot be empty"})
-            continue
-        user_lang = data.get("locale") if data.get("locale") in ("en", "am") else None
+    async def safe_send(payload: dict) -> None:
+        async with send_lock:
+            try:
+                await websocket.send_json(payload)
+            except Exception:
+                # Socket gone — let the receive loop notice and exit cleanly.
+                pass
 
+    async def run_stream(content: str, user_lang: str | None) -> None:
         try:
             async with async_session_maker() as db:
                 async for event in chat_service.process_message_stream(
                     db, conversation_id, user_id, content, user_lang=user_lang
                 ):
-                    await websocket.send_json(event)
+                    await safe_send(event)
+        except asyncio.CancelledError:
+            # User pressed "stop" (or sent a new message). Tell the client to
+            # clear its streaming indicator. The partial AI response is
+            # intentionally NOT persisted — process_message_stream only saves
+            # the AI message after the full stream completes.
+            await safe_send({"type": "stopped"})
+            raise
         except Exception:
-            await websocket.send_json({"type": "error", "content": "Something went wrong"})
+            logger.exception("chat stream failed")
+            await safe_send({"type": "error", "content": "Something went wrong"})
+
+    try:
+        while True:
+            try:
+                data = await websocket.receive_json()
+            except WebSocketDisconnect:
+                break
+            except Exception:
+                await safe_send(
+                    {"type": "error", "content": "Invalid message format"}
+                )
+                continue
+
+            mtype = data.get("type")
+
+            if mtype == "stop":
+                if current_stream and not current_stream.done():
+                    current_stream.cancel()
+                continue
+
+            if mtype != "message":
+                await safe_send(
+                    {"type": "error", "content": "Expected type: message or stop"}
+                )
+                continue
+
+            content = (data.get("content") or "").strip()
+            if not content:
+                await safe_send(
+                    {"type": "error", "content": "Content cannot be empty"}
+                )
+                continue
+            user_lang = (
+                data.get("locale") if data.get("locale") in ("en", "am") else None
+            )
+
+            # New turn while a previous one is still streaming: cancel the
+            # in-flight task before starting the next.
+            if current_stream and not current_stream.done():
+                current_stream.cancel()
+                # Wait for the cancellation to settle so its 'stopped' lands
+                # before any tokens from the new turn.
+                try:
+                    await current_stream
+                except (asyncio.CancelledError, Exception):
+                    pass
+
+            current_stream = asyncio.create_task(run_stream(content, user_lang))
+    finally:
+        if current_stream and not current_stream.done():
+            current_stream.cancel()
+            try:
+                await current_stream
+            except (asyncio.CancelledError, Exception):
+                pass

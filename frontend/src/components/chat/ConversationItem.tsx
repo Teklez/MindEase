@@ -4,9 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Download, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import type { Conversation } from "@/lib/types";
 import { relativeTime } from "@/lib/relative-time";
+import { exportChat } from "@/lib/export";
+import { toast } from "@/hooks/use-toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,6 +33,7 @@ export default function ConversationItem({
   const t = useTranslations("chat");
   const tV2 = useTranslations("chat.v2");
   const tCommon = useTranslations("common");
+  const tExport = useTranslations("export");
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -115,6 +118,24 @@ export default function ConversationItem({
             >
               <Pencil className="mr-2 h-3.5 w-3.5" strokeWidth={1.75} />
               {tV2("thread.rename")}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={async (e) => {
+                e.preventDefault();
+                setMenuOpen(false);
+                try {
+                  await exportChat("pdf", conversation.conversation_id);
+                } catch (err) {
+                  toast({
+                    title: tExport("title"),
+                    description: err instanceof Error ? err.message : String(err),
+                    variant: "destructive",
+                  });
+                }
+              }}
+            >
+              <Download className="mr-2 h-3.5 w-3.5" strokeWidth={1.75} />
+              {tExport("exportConversation")}
             </DropdownMenuItem>
             <DropdownMenuItem
               className="text-destructive focus:text-destructive"

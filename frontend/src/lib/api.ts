@@ -1,6 +1,9 @@
 // Use empty string to hit same origin (Next.js rewrites /api to backend); otherwise full API URL
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 const TOKEN_KEY = "mindease-access-token";
+// Mirrored by lib/guest.ts; cleared here so any token churn (login/logout/401)
+// resets it. Guest login re-sets the flag *after* setStoredToken.
+const GUEST_FLAG_KEY = "is_guest";
 
 export function getStoredToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -10,11 +13,13 @@ export function getStoredToken(): string | null {
 export function setStoredToken(token: string): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(TOKEN_KEY, token);
+  localStorage.removeItem(GUEST_FLAG_KEY);
 }
 
 export function clearStoredToken(): void {
   if (typeof window === "undefined") return;
   localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(GUEST_FLAG_KEY);
 }
 
 function redirectToLogin(): void {
@@ -84,6 +89,73 @@ export async function apiRequest<T>(
 
 export async function getMe(): Promise<ApiResponse<{ user_id: string; email: string; display_name: string; is_verified: boolean; account_status: string; created_at: string }>> {
   return apiRequest("/api/v1/auth/me");
+}
+
+/**
+ * Mirror of {@link apiRequest} for binary downloads. Same auth, same 401
+ * redirect, same timeout — but returns the raw Blob plus the filename
+ * parsed from Content-Disposition (or null if the header is absent).
+ */
+export async function apiRequestBlob(
+  path: string,
+  options: RequestInit = {},
+): Promise<ApiResponse<{ blob: Blob; filename: string | null }>> {
+  const url = path.startsWith("http") ? path : (BASE_URL ? `${BASE_URL}${path}` : path);
+  const token = typeof window !== "undefined" ? getStoredToken() : null;
+  const headers: HeadersInit = { ...(options.headers as Record<string, string>) };
+  if (token) {
+    (headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  let res: Response;
+  try {
+    res = await fetch(url, { ...options, headers, signal: controller.signal });
+  } catch (err) {
+    clearTimeout(timeoutId);
+    const message =
+      err instanceof Error && err.name === "AbortError"
+        ? "Request timed out. Check that the API is running and reachable."
+        : "Network error. Check that the API is running and CORS is allowed.";
+    return { ok: false, status: 0, error: message };
+  }
+  clearTimeout(timeoutId);
+
+  if (!res.ok) {
+    // Best-effort error parse — body may be JSON ({detail}) or plain text.
+    let error = res.statusText;
+    try {
+      const text = await res.text();
+      if (text) {
+        try {
+          const data = JSON.parse(text) as { detail?: string | unknown[] };
+          if (data && "detail" in data) {
+            const d = data.detail;
+            error = Array.isArray(d)
+              ? d[0] && typeof d[0] === "object" && "msg" in d[0]
+                ? String((d[0] as { msg: string }).msg)
+                : String(d)
+              : String(d);
+          }
+        } catch {
+          error = text;
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+    if (res.status === 401) {
+      redirectToLogin();
+    }
+    return { ok: false, status: res.status, error };
+  }
+
+  const blob = await res.blob();
+  const disposition = res.headers.get("Content-Disposition") ?? "";
+  const match = disposition.match(/filename="?([^";]+)"?/i);
+  const filename = match ? match[1] : null;
+  return { ok: true, data: { blob, filename } };
 }
 
 // Chat API types

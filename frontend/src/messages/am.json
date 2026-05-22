@@ -1269,5 +1269,53 @@
         "intro": "ሰላም፣ እኔ ዮናስ ነኝ። ዘና ይበሉ። ዝግጁ ሲሆኑ እዚህ ነኝ።"
       }
     }
+  },
+  "guest": {
+    "tryAsGuest": "እንደ እንግዳ ይቀጥሉ",
+    "banner": "በእንግዳ ሁነታ ላይ ነዎት። ውሂብዎን ለማስቀመጥ መለያ ይፍጠሩ።",
+    "signUp": "ይመዝገቡ",
+    "disclaimerTitle": "የእንግዳ ሁነታ",
+    "disclaimer": "እንኳን ደህና መጡ! ያለ መለያ ከማይንድኢዝ ጋር ማውራት ይችላሉ። ሲወጡ ውሂብዎ አይቀመጥም። በማንኛውም ጊዜ መለያ ይፍጠሩ።",
+    "gotIt": "ገባኝ፣ እንጀምር",
+    "upgradeTitle": "መለያዎን ይፍጠሩ",
+    "upgradeSubtitle": "ውይይቶችዎን እና ሂደትዎን ያስቀምጡ",
+    "upgradeSuccess": "መለያ ተፈጥሯል! ውሂብዎ ተቀምጧል።",
+    "featureRequiresAccount": "ይህን ባህሪ ለመጠቀም መለያ ይፍጠሩ",
+    "displayNameLabel": "የሚታይ ስም",
+    "emailLabel": "ኢሜይል",
+    "passwordLabel": "የይለፍ ቃል",
+    "confirmPasswordLabel": "የይለፍ ቃል አረጋግጥ",
+    "submitting": "መለያ እየተፈጠረ ነው…",
+    "submit": "መለያ ፍጠር",
+    "passwordMismatch": "የይለፍ ቃሎቹ አይዛመዱም",
+    "starting": "የእንግዳ ክፍለ-ጊዜ እየጀመረ ነው…"
+  },
+  "export": {
+    "title": "ውሂብዎን ያውርዱ",
+    "subtitle": "ለግል ምትኬ ወይም ለጤና ባለሙያ ለማጋራት የማይንድኢዝ ውሂብዎን ያውርዱ።",
+    "privacyNotice": "ወረዶች በፍላጎት ይፈጠራሉ እና በአገልጋዮቻችን ላይ አይቀመጡም።",
+    "moodHistory": "የስሜት ታሪክ",
+    "moodDesc": "የስሜት ማስታወሻዎችዎን፣ ማስታወሻዎችን እና ስታቲስቲክስን ያውርዱ",
+    "moodCount": "{count} የስሜት ማስታወሻዎች",
+    "chatLogs": "የውይይት ምዝግብ ማስታወሻዎች",
+    "chatDesc": "ከማይንድኢዝ ጋር ያደረጉትን ውይይት ያውርዱ",
+    "chatCount": "{conversations} ውይይቶች፣ {messages} መልዕክቶች",
+    "allConversations": "ሁሉም ውይይቶች",
+    "assessmentResults": "የግምገማ ውጤቶች",
+    "assessmentDesc": "የራስ-ግምገማ ታሪክዎን እና ውጤቶችዎን ያውርዱ",
+    "assessmentCount": "{count} ግምገማዎች ተጠናቅቀዋል",
+    "downloadCsv": "CSV አውርድ",
+    "downloadPdf": "PDF አውርድ",
+    "exportAll": "ሁሉንም ያውርዱ",
+    "exportAllDesc": "ሁሉንም ውሂብዎን በአንድ PDF ያውርዱ",
+    "downloading": "ማውረድ በመዘጋጀት ላይ…",
+    "downloadComplete": "ማውረድ ተጀምሯል",
+    "noData": "ገና ለማውረድ ውሂብ የለም",
+    "disclaimer": "የወረደ ውሂብ ለግል ጥቅም ነው። ማይንድኢዝ ክሊኒካዊ መሣሪያ አይደለም።",
+    "exportConversation": "ውይይት ያውርዱ",
+    "exportMood": "ያውርዱ",
+    "downloadResults": "ውጤቶችን ያውርዱ",
+    "navLink": "ውሂብ ያውርዱ",
+    "guestBlock": "ውሂብዎን ለማውረድ መለያ ይፍጠሩ።"
   }
 }

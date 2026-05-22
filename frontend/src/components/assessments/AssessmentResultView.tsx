@@ -29,6 +29,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ScoreRing } from "@/components/assessments/ScoreRing";
 import { toast } from "@/hooks/use-toast";
+import { exportAssessments } from "@/lib/export";
 import { getCrisisResources } from "@/lib/crisis-resources";
 import {
   instrumentCode,
@@ -61,6 +62,7 @@ export function AssessmentResultView({
   lang,
 }: Props) {
   const t = useTranslations("assessments.result");
+  const tExport = useTranslations("export");
   const levelLabel = useLevelLabel();
   const router = useRouter();
   const [range, setRange] = useState<Range>("90D");
@@ -94,11 +96,17 @@ export function AssessmentResultView({
 
   const showSafetyCard = levelIdx >= 3 || result.crisis_detected;
 
-  const onPdf = () =>
-    toast({
-      title: t("toasts.pdfSoonTitle"),
-      description: t("toasts.pdfSoonBody"),
-    });
+  const onPdf = async () => {
+    try {
+      await exportAssessments("pdf", result.user_assessment_id);
+    } catch (err) {
+      toast({
+        title: tExport("title"),
+        description: err instanceof Error ? err.message : String(err),
+        variant: "destructive",
+      });
+    }
+  };
   const onShare = () =>
     toast({
       title: t("toasts.shareSoonTitle"),
@@ -405,7 +413,7 @@ export function AssessmentResultView({
         <div className="flex flex-wrap gap-2">
           <Button variant="ghost" onClick={onPdf} className="gap-1.5">
             <Download className="h-3.5 w-3.5" strokeWidth={1.75} />
-            {t("downloadPdf")}
+            {tExport("downloadResults")}
           </Button>
           <Button variant="ghost" onClick={onShare} className="gap-1.5">
             <Send className="h-3.5 w-3.5" strokeWidth={1.75} />

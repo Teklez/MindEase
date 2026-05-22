@@ -7,7 +7,10 @@ import { useLocale, useTranslations } from "next-intl";
 import { Loader2, Plus, Search, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CreateGroupModal } from "@/components/groups/CreateGroupModal";
+import UpgradeModal from "@/components/auth/UpgradeModal";
 import { useGroups } from "@/hooks/useGroups";
+import { toast } from "@/hooks/use-toast";
+import { isGuestUser } from "@/lib/guest";
 import { cn } from "@/lib/utils";
 import type { GroupListItem } from "@/lib/types";
 
@@ -28,6 +31,7 @@ interface Props {
  */
 export function GroupsSidebar({ onNavigate }: Props) {
   const t = useTranslations("groups");
+  const tGuest = useTranslations("guest");
   const locale = useLocale();
   const router = useRouter();
   const params = useParams<{ groupId?: string }>();
@@ -38,6 +42,21 @@ export function GroupsSidebar({ onNavigate }: Props) {
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [isGuest, setIsGuest] = useState(false);
+
+  useEffect(() => {
+    setIsGuest(isGuestUser());
+  }, []);
+
+  const handleCreateClick = () => {
+    if (isGuest) {
+      toast({ title: tGuest("featureRequiresAccount") });
+      setUpgradeOpen(true);
+      return;
+    }
+    setCreateOpen(true);
+  };
 
   useEffect(() => {
     const id = setTimeout(() => setDebouncedSearch(searchInput.trim()), 300);
@@ -84,7 +103,7 @@ export function GroupsSidebar({ onNavigate }: Props) {
           </Link>
           <button
             type="button"
-            onClick={() => setCreateOpen(true)}
+            onClick={handleCreateClick}
             aria-label={t("createGroup")}
             className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
           >
@@ -181,7 +200,7 @@ export function GroupsSidebar({ onNavigate }: Props) {
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => setCreateOpen(true)}
+              onClick={handleCreateClick}
               className="mt-3 gap-1.5"
             >
               <Plus className="h-3.5 w-3.5" strokeWidth={2} />
@@ -208,6 +227,15 @@ export function GroupsSidebar({ onNavigate }: Props) {
         onOpenChange={setCreateOpen}
         categories={categories}
         onCreated={handleCreated}
+      />
+
+      <UpgradeModal
+        open={upgradeOpen}
+        onOpenChange={setUpgradeOpen}
+        onUpgraded={() => {
+          setIsGuest(false);
+          if (typeof window !== "undefined") window.location.reload();
+        }}
       />
     </div>
   );

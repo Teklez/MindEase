@@ -1,11 +1,19 @@
 "use client";
 
-import { AlertTriangle, X } from "lucide-react";
+import {
+  AlertTriangle,
+  ExternalLink,
+  MessageSquare,
+  Phone,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import type { CrisisResources } from "@/lib/types";
-import { getCrisisResources } from "@/lib/crisis-resources";
-
-type Pill = { label: string; href?: string };
+import {
+  getCrisisResources,
+  type CrisisResource,
+} from "@/lib/crisis-resources";
 
 type CrisisBannerProps = {
   // Optional WebSocket-pushed resource payload — when present its phone /
@@ -14,90 +22,134 @@ type CrisisBannerProps = {
   onDismiss: () => void;
 };
 
-function pillsFor(
-  resources: CrisisResources | null | undefined,
+// Single source of red. oklch keeps the same warmth as the original banner
+// while letting us derive border/text variants via color-mix.
+const RED = "oklch(0.55 0.14 35)";
+const RED_BG = "oklch(0.95 0.04 35)";
+const RED_TEXT = "oklch(0.42 0.14 35)";
+
+function resourcesFor(
+  ws: CrisisResources | null | undefined,
   locale: string,
-): Pill[] {
-  // 1) Prefer the WebSocket-pushed shape if it carries phone + international.
-  if (resources) {
-    const out: Pill[] = [];
-    const eth = resources.ethiopia?.[0];
-    if (eth) out.push({ label: `Ethiopia · ${eth.phone}`, href: `tel:${eth.phone.replace(/\D/g, "")}` });
-    const intl = resources.international?.find((r) => r.url) ?? resources.international?.[0];
-    if (intl) out.push({ label: intl.name, href: intl.url });
+): CrisisResource[] {
+  if (ws) {
+    const out: CrisisResource[] = [];
+    const eth = ws.ethiopia?.[0];
+    if (eth?.phone) {
+      out.push({
+        id: "ws-et",
+        locale: "et",
+        name: eth.name,
+        contact: eth.phone,
+        type: "phone",
+        href: `tel:${eth.phone.replace(/\D/g, "")}`,
+      });
+    }
+    const intl =
+      ws.international?.find((r) => r.url) ?? ws.international?.[0];
+    if (intl) {
+      const intlPhone = (intl as { phone?: string }).phone;
+      const href = intl.url ?? (intlPhone ? `tel:${intlPhone}` : "#");
+      out.push({
+        id: "ws-intl",
+        locale: "intl",
+        name: intl.name,
+        contact: intl.info ?? intl.url ?? intlPhone ?? "",
+        type: intl.url ? "url" : "phone",
+        href,
+      });
+    }
     if (out.length > 0) return out;
   }
-  // 2) Locale-derived from the shared crisis-resources lib.
-  return getCrisisResources(locale)
-    .slice(0, 2)
-    .map((r) => ({ label: r.contact, href: r.href }));
+  return getCrisisResources(locale).slice(0, 2);
 }
 
-export default function CrisisBanner({ resources, onDismiss }: CrisisBannerProps) {
+function iconFor(type: CrisisResource["type"]): LucideIcon {
+  if (type === "phone") return Phone;
+  if (type === "sms") return MessageSquare;
+  return ExternalLink;
+}
+
+export default function CrisisBanner({
+  resources,
+  onDismiss,
+}: CrisisBannerProps) {
   const t = useTranslations("chat.v2.crisis");
   const locale = useLocale();
-  const pills = pillsFor(resources, locale);
+  const items = resourcesFor(resources, locale);
 
   return (
     <div
       role="alert"
-      className="animate-slide-down grid grid-cols-[auto_1fr_auto] items-center gap-3.5 border-b px-6 py-3.5 md:grid-cols-[auto_1fr_auto_auto]"
+      className="animate-slide-down border-b"
       style={{
-        background: "oklch(0.95 0.04 35)",
-        borderBottomColor: "color-mix(in oklab, oklch(0.55 0.14 35) 25%, transparent)",
+        background: RED_BG,
+        borderBottomColor: `color-mix(in oklab, ${RED} 25%, transparent)`,
       }}
     >
-      <div
-        aria-hidden
-        className="grid h-7 w-7 place-items-center rounded-full text-white"
-        style={{ background: "oklch(0.55 0.14 35)" }}
-      >
-        <AlertTriangle className="h-3.5 w-3.5" strokeWidth={2} />
+      <div className="mx-auto flex w-full max-w-[1100px] flex-wrap items-center gap-x-4 gap-y-2.5 px-5 py-3.5 md:px-6">
+        {/* Headline cluster — fixed width on mobile so it doesn't get crowded;
+            grows on md+ to push resources + dismiss to the right. */}
+        <div className="flex min-w-0 flex-1 basis-full items-center gap-3 md:basis-auto">
+          <span
+            aria-hidden
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-white"
+            style={{ background: RED }}
+          >
+            <AlertTriangle className="h-4 w-4" strokeWidth={2} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[14px] font-semibold leading-snug text-foreground">
+              {t("title")}
+            </p>
+            <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground">
+              {t("sub")}
+            </p>
+          </div>
+        </div>
+
+        {/* Resources — wrap as needed; sit between headline and dismiss. */}
+        <div className="flex flex-1 flex-wrap items-center gap-2 md:flex-initial md:justify-end">
+          {items.map((r) => {
+            const Icon = iconFor(r.type);
+            const external = r.type === "url";
+            return (
+              <a
+                key={r.id}
+                href={r.href}
+                target={external ? "_blank" : undefined}
+                rel={external ? "noopener noreferrer" : undefined}
+                className="inline-flex items-center gap-2 rounded-md border bg-background/80 px-2.5 py-1.5 transition-colors hover:bg-background"
+                style={{
+                  borderColor: `color-mix(in oklab, ${RED} 35%, transparent)`,
+                  color: RED_TEXT,
+                }}
+              >
+                <Icon className="h-3.5 w-3.5 shrink-0" strokeWidth={1.9} />
+                <span className="flex min-w-0 flex-col leading-tight">
+                  <span className="truncate text-[12.5px] font-medium">
+                    {r.name}
+                  </span>
+                  <span className="truncate text-[11px] opacity-80">
+                    {r.contact}
+                  </span>
+                </span>
+              </a>
+            );
+          })}
+        </div>
+
+        {/* Dismiss — always last in flow; sits at the far right on md+. */}
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="ml-auto inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-[12px] text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-foreground"
+          aria-label={t("imOkay")}
+        >
+          <X className="h-3.5 w-3.5" strokeWidth={1.8} />
+          {t("imOkay")}
+        </button>
       </div>
-      <div className="min-w-0">
-        <b className="text-[14px] font-semibold text-foreground">{t("title")}</b>
-        <span className="mt-0.5 block font-mono text-[10.5px] tracking-[0.06em] text-foreground/85">
-          {t("sub")}
-        </span>
-      </div>
-      <div className="hidden gap-2 md:flex">
-        {pills.map((p, i) =>
-          p.href ? (
-            <a
-              key={i}
-              href={p.href}
-              target={p.href.startsWith("http") ? "_blank" : undefined}
-              rel={p.href.startsWith("http") ? "noreferrer" : undefined}
-              className="inline-flex items-center rounded-full border px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] transition-colors hover:bg-foreground/5"
-              style={{
-                borderColor: "color-mix(in oklab, oklch(0.55 0.14 35) 35%, transparent)",
-                color: "oklch(0.42 0.14 35)",
-              }}
-            >
-              {p.label}
-            </a>
-          ) : (
-            <span
-              key={i}
-              className="inline-flex items-center rounded-full border px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em]"
-              style={{
-                borderColor: "color-mix(in oklab, oklch(0.55 0.14 35) 35%, transparent)",
-                color: "oklch(0.42 0.14 35)",
-              }}
-            >
-              {p.label}
-            </span>
-          ),
-        )}
-      </div>
-      <button
-        type="button"
-        onClick={onDismiss}
-        className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-2.5 py-1.5 text-[12px] text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <X className="h-3.5 w-3.5" strokeWidth={1.8} />
-        {t("imOkay")}
-      </button>
     </div>
   );
 }

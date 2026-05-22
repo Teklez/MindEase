@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { getStoredToken, getMe } from "@/lib/api";
 import TopNav from "@/components/layout/TopNav";
+import GuestBanner from "@/components/layout/GuestBanner";
 
 function isMainPath(pathname: string): boolean {
   return (
@@ -51,6 +52,7 @@ export default function MainLayout({
         {tCommon("skipToContent")}
       </a>
       <TopNav />
+      <GuestBanner />
       <main id="main-content" className="flex flex-1 flex-col min-h-0 overflow-auto" tabIndex={-1}>
         {children}
       </main>

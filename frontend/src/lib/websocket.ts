@@ -1,7 +1,7 @@
 export type Resource = { name: string; phone?: string; info?: string; url?: string };
 
 export type ChatEvent = {
-  type: "token" | "done" | "crisis_alert" | "error";
+  type: "token" | "done" | "stopped" | "crisis_alert" | "error";
   content?: string;
   message_id?: string;
   resources?: {
@@ -90,6 +90,12 @@ export class ChatWebSocket {
       const payload: { type: string; content: string; locale?: string } = { type: "message", content };
       if (locale === "en" || locale === "am") payload.locale = locale;
       this.ws.send(JSON.stringify(payload));
+    }
+  }
+
+  stop(): void {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({ type: "stop" }));
     }
   }
 
