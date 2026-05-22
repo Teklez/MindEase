@@ -9,7 +9,12 @@ export type ConnectionStatus = "connecting" | "connected" | "disconnected" | "er
 export function useWebSocket(
   conversationId: string,
   onEvent: (event: ChatEvent) => void
-): { send: (content: string, locale?: string) => void; connectionStatus: ConnectionStatus; disconnect: () => void } {
+): {
+  send: (content: string, locale?: string) => void;
+  stop: () => void;
+  connectionStatus: ConnectionStatus;
+  disconnect: () => void;
+} {
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>("connecting");
   const wsRef = useRef<ChatWebSocket | null>(null);
   const onEventRef = useRef(onEvent);
@@ -49,11 +54,15 @@ export function useWebSocket(
     wsRef.current?.send(content, locale);
   }, []);
 
+  const stop = useCallback(() => {
+    wsRef.current?.stop();
+  }, []);
+
   const disconnect = useCallback(() => {
     wsRef.current?.disconnect();
     wsRef.current = null;
     setConnectionStatus("disconnected");
   }, []);
 
-  return { send, connectionStatus, disconnect };
+  return { send, stop, connectionStatus, disconnect };
 }

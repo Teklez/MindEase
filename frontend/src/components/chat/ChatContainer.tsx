@@ -59,6 +59,7 @@ export default function ChatContainer({ conversationId }: ChatContainerProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [streamingContent, setStreamingContent] = useState<string | null>(null);
   const streamingContentRef = useRef<string | null>(null);
+  const stopRequestedRef = useRef(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [isWaitingForResponse, setIsWaitingForResponse] = useState(false);
   const [crisisResources, setCrisisResources] = useState<CrisisResources | null>(null);
@@ -76,11 +77,16 @@ export default function ChatContainer({ conversationId }: ChatContainerProps) {
   const handleWebSocketEvent = useCallback(
     (event: Parameters<Parameters<typeof useWebSocket>[1]>[0]) => {
       if (event.type === "token") {
+        // Late tokens after a user-initiated stop are noise — discard.
+        if (stopRequestedRef.current) return;
         setIsWaitingForResponse(false);
         setIsStreaming(true);
         streamingContentRef.current = (streamingContentRef.current ?? "") + (event.content ?? "");
         setStreamingContent(streamingContentRef.current);
       } else if (event.type === "done") {
+        // A 'done' that races a 'stop' should not resurrect the cancelled
+        // response. The 'stopped' event resets the flag below.
+        if (stopRequestedRef.current) return;
         const text = streamingContentRef.current ?? "";
         streamingContentRef.current = null;
         setStreamingContent(null);
@@ -101,6 +107,16 @@ export default function ChatContainer({ conversationId }: ChatContainerProps) {
         getConversation(conversationId).then((res) => {
           if (res.ok && res.data.title) setTitle(res.data.title);
         });
+      } else if (event.type === "stopped") {
+        // Server confirms the in-flight stream was cancelled. Drop the
+        // partial response — it was never persisted, so the UI should
+        // forget it too.
+        streamingContentRef.current = null;
+        setStreamingContent(null);
+        setIsStreaming(false);
+        setIsWaitingForResponse(false);
+        stopRequestedRef.current = false;
+        refreshConversations?.();
       } else if (event.type === "crisis_alert") {
         const r = event.resources;
         if (!r) {
@@ -127,7 +143,18 @@ export default function ChatContainer({ conversationId }: ChatContainerProps) {
     [refreshConversations, conversationId, tChat],
   );
 
-  const { send, connectionStatus } = useWebSocket(conversationId, handleWebSocketEvent);
+  const { send, stop, connectionStatus } = useWebSocket(conversationId, handleWebSocketEvent);
+
+  const handleStop = useCallback(() => {
+    // Optimistic clear — UI feels instant even if the server cancel takes a
+    // round-trip to land. stopRequestedRef gates late token/done events.
+    stopRequestedRef.current = true;
+    streamingContentRef.current = null;
+    setStreamingContent(null);
+    setIsStreaming(false);
+    setIsWaitingForResponse(false);
+    stop();
+  }, [stop]);
   const sentInitialRef = useRef(false);
   const prevConnectionStatusRef = useRef<typeof connectionStatus>(connectionStatus);
 
@@ -211,6 +238,9 @@ export default function ChatContainer({ conversationId }: ChatContainerProps) {
       };
       setMessages((prev) => [...prev, userMessage]);
       setStreamingContent(null);
+      streamingContentRef.current = null;
+      // Fresh turn — drop any stop-suppression flag left from the prior one.
+      stopRequestedRef.current = false;
       setIsWaitingForResponse(true);
       send(trimmed, locale === "am" || locale === "en" ? locale : undefined);
     },
@@ -417,6 +447,7 @@ export default function ChatContainer({ conversationId }: ChatContainerProps) {
       {conversationType !== "voice" && (
         <ChatInput
           onSend={handleSend}
+          onStop={handleStop}
           isStreaming={isStreaming || isWaitingForResponse}
           disabled={connectionStatus === "error"}
         />
