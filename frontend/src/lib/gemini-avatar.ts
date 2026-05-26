@@ -1,5 +1,4 @@
-const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY ?? "";
-const BASE = "https://generativelanguage.googleapis.com/v1beta/models";
+import { apiRequest } from "@/lib/api";
 
 export interface Persona {
   name: string;
@@ -29,6 +28,9 @@ export const GEMINI_VOICES = [
   { id: "Charon", label: "Charon", desc: "Deep · calm" },
   { id: "Fenrir", label: "Fenrir", desc: "Steady · grounded" },
   { id: "Puck", label: "Puck", desc: "Upbeat · light" },
+  { id: "Orus", label: "Orus", desc: "Confident · resonant" },
+  { id: "Zephyr", label: "Zephyr", desc: "Bright · breezy" },
+  { id: "Algenib", label: "Algenib", desc: "Gravelly · grounded" },
 ] as const;
 
 export type GeminiVoiceId = (typeof GEMINI_VOICES)[number]["id"];
@@ -39,37 +41,24 @@ export interface TTSResult {
   durationMs: number;
 }
 
-// One-shot Gemini TTS — used by picker previews so personas have a sound
-// before the user opens a Live session. Live calls now go through the backend.
+// One-shot TTS for the picker preview. The request hits our backend, which
+// holds the Gemini API key — so this module no longer needs to ship the key
+// to the browser. Live voice calls already go through the backend WS at
+// BackendVoiceSession.
 export async function fetchTTS(text: string, voiceName: GeminiVoiceId): Promise<TTSResult> {
-  const res = await fetch(
-    `${BASE}/gemini-2.5-flash-preview-tts:generateContent?key=${API_KEY}`,
+  const res = await apiRequest<{ audio: string; sample_rate: number }>(
+    "/api/v1/voice/tts",
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text }] }],
-        generationConfig: {
-          responseModalities: ["AUDIO"],
-          speechConfig: {
-            voiceConfig: { prebuiltVoiceConfig: { voiceName } },
-          },
-        },
-      }),
+      body: JSON.stringify({ text, voice: voiceName }),
     },
   );
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err?.error?.message ?? `Gemini TTS API ${res.status}`);
+    throw new Error(res.error ?? `TTS request failed (${res.status})`);
   }
-  const data = await res.json();
-  const inline = data.candidates?.[0]?.content?.parts?.[0]?.inlineData as
-    | { data?: string; mimeType?: string }
-    | undefined;
-  if (!inline?.data) throw new Error("Gemini TTS returned no audio");
 
-  const srcRate = parseInt(inline.mimeType?.match(/rate=(\d+)/)?.[1] ?? "24000", 10);
-  const bin = atob(inline.data);
+  const { audio, sample_rate: srcRate } = res.data;
+  const bin = atob(audio);
   const raw = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) raw[i] = bin.charCodeAt(i);
 

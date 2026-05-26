@@ -1,18 +1,86 @@
+import base64
+import re
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, status
 from fastapi.websockets import WebSocketDisconnect
+from google import genai
+from google.genai import types
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import get_settings
 from app.core.security import get_current_user, verify_token
 from app.database import async_session_maker, get_db
 from app.models import Conversation, User
 from app.schemas.chat import ConversationResponse
-from app.schemas.voice import VoiceConversationCreate
+from app.schemas.voice import TTSRequest, TTSResponse, VoiceConversationCreate
 from app.services.voice_service import VoiceService
 
 router = APIRouter()
+
+_GEMINI_TTS_MODEL = "gemini-2.5-flash-preview-tts"
+_TTS_VOICES = {
+    "Kore", "Aoede", "Charon", "Fenrir", "Puck", "Orus", "Zephyr",
+    "Leda", "Algenib", "Iapetus",
+}
+_PCM_RATE_RE = re.compile(r"rate=(\d+)")
+
+
+@router.post("/tts", response_model=TTSResponse)
+async def synthesize_tts(
+    body: TTSRequest,
+    current_user: User = Depends(get_current_user),
+) -> TTSResponse:
+    """One-shot Gemini TTS used by the picker preview. Keeps the API key on
+    the server so the frontend never ships it. Mirrors the Gemini REST
+    `generateContent` shape but returns just the bytes the client needs."""
+    if body.voice not in _TTS_VOICES:
+        raise HTTPException(status_code=400, detail=f"Unsupported voice: {body.voice}")
+
+    settings = get_settings()
+    if not settings.GEMINI_API_KEY:
+        raise HTTPException(
+            status_code=503,
+            detail="TTS unavailable (server missing GEMINI_API_KEY)",
+        )
+
+    client = genai.Client(api_key=settings.GEMINI_API_KEY)
+    try:
+        response = await client.aio.models.generate_content(
+            model=_GEMINI_TTS_MODEL,
+            contents=body.text,
+            config=types.GenerateContentConfig(
+                response_modalities=["AUDIO"],
+                speech_config=types.SpeechConfig(
+                    voice_config=types.VoiceConfig(
+                        prebuilt_voice_config=types.PrebuiltVoiceConfig(
+                            voice_name=body.voice,
+                        ),
+                    ),
+                ),
+            ),
+        )
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=502, detail=f"Gemini TTS failed: {exc}") from exc
+
+    try:
+        part = response.candidates[0].content.parts[0]
+        inline = part.inline_data
+        if inline is None or not inline.data:
+            raise HTTPException(status_code=502, detail="Gemini TTS returned no audio")
+        pcm_bytes: bytes = inline.data
+        mime_type: str = inline.mime_type or ""
+    except (AttributeError, IndexError) as exc:
+        raise HTTPException(status_code=502, detail=f"Malformed Gemini TTS response: {exc}") from exc
+
+    rate_match = _PCM_RATE_RE.search(mime_type)
+    sample_rate = int(rate_match.group(1)) if rate_match else 24000
+
+    return TTSResponse(
+        audio=base64.b64encode(pcm_bytes).decode("ascii"),
+        sample_rate=sample_rate,
+    )
 
 
 @router.post(
