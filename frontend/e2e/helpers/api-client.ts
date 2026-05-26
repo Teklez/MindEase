@@ -62,4 +62,18 @@ export class ApiClient {
     }
     return await res.json();
   }
+
+  async logMood(
+    token: string,
+    moodLevel: number,
+    note?: string,
+  ): Promise<void> {
+    const res = await this.request.post(this.url("/mood/entries"), {
+      headers: { Authorization: `Bearer ${token}` },
+      data: { mood_level: moodLevel, note: note ?? null },
+    });
+    if (!res.ok()) {
+      throw new Error(`logMood failed (${res.status()}): ${await res.text()}`);
+    }
+  }
 }
