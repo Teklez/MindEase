@@ -62,4 +62,18 @@ export class ApiClient {
     }
     return await res.json();
   }
+
+  async createConversation(
+    token: string,
+    title?: string,
+  ): Promise<{ conversation_id: string; title: string | null }> {
+    const res = await this.request.post(this.url("/chat/conversations"), {
+      headers: { Authorization: `Bearer ${token}` },
+      data: { title: title ?? null },
+    });
+    if (!res.ok()) {
+      throw new Error(`createConversation failed (${res.status()}): ${await res.text()}`);
+    }
+    return (await res.json()) as { conversation_id: string; title: string | null };
+  }
 }
