@@ -319,7 +319,6 @@ function ExportCard({
 }
 
 function DownloadButton({
-  id: _id,
   label,
   icon,
   state,

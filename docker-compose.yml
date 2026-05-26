@@ -73,6 +73,7 @@ services:
         # WebSocket is not proxied by Next.js; browser must connect to backend directly
         NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-ws://localhost:8000}
         NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID:-}
+        NEXT_PUBLIC_GEMINI_API_KEY: ${GEMINI_API_KEY:-}
         BACKEND_PROXY_URL: http://backend:8000
     ports:
       - "3000:3000"
