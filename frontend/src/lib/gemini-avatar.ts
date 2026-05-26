@@ -30,6 +30,7 @@ export const GEMINI_VOICES = [
   { id: "Puck", label: "Puck", desc: "Upbeat · light" },
   { id: "Orus", label: "Orus", desc: "Confident · resonant" },
   { id: "Zephyr", label: "Zephyr", desc: "Bright · breezy" },
+  { id: "Algenib", label: "Algenib", desc: "Gravelly · grounded" },
 ] as const;
 
 export type GeminiVoiceId = (typeof GEMINI_VOICES)[number]["id"];

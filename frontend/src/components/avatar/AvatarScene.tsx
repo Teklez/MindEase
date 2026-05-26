@@ -83,12 +83,13 @@ const PERSONAS: PersonaStatic[] = [
   { id: "serenity", url: "/avatars/brunette.glb", body: "F", geminiVoice: "Kore" },
   { id: "maya", url: "/avatars/avatar-2026-05-26T19-00-59-230Z.glb", body: "M", geminiVoice: "Fenrir", rig: AVATURN_RIG },
   { id: "alex", url: "/avatars/bereket.glb", body: "M", geminiVoice: "Puck", rig: AVATURN_RIG },
+  { id: "ashenafi", url: "/avatars/ashenafi.glb", body: "M", geminiVoice: "Orus", rig: AVATURN_RIG },
+  { id: "bedru", url: "/avatars/bedru.glb", body: "M", geminiVoice: "Algenib", rig: AVATURN_RIG },
   // Sora and Kai are coming-soon — `url: null` makes the card non-clickable
-  // and disables the play preview until they get their own T2 GLBs.
+  // and disables the play preview until they get their own T2 GLBs. Kept at
+  // the end of the list so the picker shows real personas first.
   { id: "sora", url: null, body: "F", geminiVoice: "Aoede" },
   { id: "kai", url: null, body: "M", geminiVoice: "Charon" },
-  { id: "ashenafi", url: "/avatars/ashenafi.glb", body: "M", geminiVoice: "Orus", rig: AVATURN_RIG },
-  { id: "bedru", url: "/avatars/bedru.glb", body: "M", geminiVoice: "Zephyr", rig: AVATURN_RIG },
 ];
 
 function useLocalizedAvatars(): AvatarOption[] {
