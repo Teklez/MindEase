@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 const LOCALE_COOKIE = "NEXT_LOCALE";
 const COOKIE_MAX_AGE = 365 * 24 * 60 * 60; // 1 year
@@ -6,24 +6,20 @@ const ALLOWED_LOCALES = ["en", "am"] as const;
 
 export async function GET(request: NextRequest) {
   const locale = request.nextUrl.searchParams.get("locale");
-  const next = request.nextUrl.searchParams.get("next") ?? "/";
+  const nextRaw = request.nextUrl.searchParams.get("next") ?? "/";
+  const location = nextRaw.startsWith("/") ? nextRaw : "/";
 
-  if (!locale || !ALLOWED_LOCALES.includes(locale as (typeof ALLOWED_LOCALES)[number])) {
-    const fallback = request.nextUrl.clone();
-    fallback.pathname = next.startsWith("/") ? next : "/";
-    fallback.search = "";
-    return NextResponse.redirect(fallback);
+  const headers = new Headers({
+    Location: location,
+    "Cache-Control": "no-store, no-cache, must-revalidate",
+  });
+
+  if (locale && ALLOWED_LOCALES.includes(locale as (typeof ALLOWED_LOCALES)[number])) {
+    headers.append(
+      "Set-Cookie",
+      `${LOCALE_COOKIE}=${locale}; Path=/; Max-Age=${COOKIE_MAX_AGE}; SameSite=Lax`,
+    );
   }
 
-  const target = request.nextUrl.clone();
-  target.pathname = next.startsWith("/") ? next : "/";
-  target.search = "";
-  const res = NextResponse.redirect(target);
-  res.cookies.set(LOCALE_COOKIE, locale, {
-    path: "/",
-    maxAge: COOKIE_MAX_AGE,
-    sameSite: "lax",
-  });
-  res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
-  return res;
+  return new Response(null, { status: 307, headers });
 }
