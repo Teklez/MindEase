@@ -20,3 +20,13 @@ class VoiceConversationResponse(BaseModel):
     is_continuation: bool
 
     model_config = ConfigDict(from_attributes=False)
+
+
+class TTSRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=2000)
+    voice: str = Field(..., min_length=1, max_length=32)
+
+
+class TTSResponse(BaseModel):
+    audio: str = Field(..., description="base64-encoded PCM int16 audio")
+    sample_rate: int = Field(..., description="sample rate of the returned PCM, Hz")

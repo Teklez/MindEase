@@ -32,6 +32,21 @@ function prefetchViewer() {
   void import("./AvatarViewer");
 }
 
+// MiniHead is the in-card mini TalkingHead used by the picker's play preview.
+// Lazy-loaded so the TalkingHead + three.js bundle isn't pulled in on the
+// initial picker render — same trick as AvatarViewer above.
+const MiniHead = dynamic(() => import("./MiniHead").then((m) => m.MiniHead), {
+  ssr: false,
+});
+
+// AvatarThumbnail renders a static head-shot of the avatar (cached in
+// localStorage) into the card's resting state. First load: lives behind a
+// brief live three.js render that captures the snapshot; thereafter, instant.
+const AvatarThumbnail = dynamic(
+  () => import("./AvatarThumbnail").then((m) => m.AvatarThumbnail),
+  { ssr: false },
+);
+
 // Persona static metadata. Display name, blurb, and intro are pulled from
 // translations so they switch locale (English ↔ Amharic) and use the
 // localised Ethiopian persona names.
@@ -68,8 +83,10 @@ const PERSONAS: PersonaStatic[] = [
   { id: "serenity", url: "/avatars/brunette.glb", body: "F", geminiVoice: "Kore" },
   { id: "maya", url: "/avatars/avatar-2026-05-26T19-00-59-230Z.glb", body: "M", geminiVoice: "Fenrir", rig: AVATURN_RIG },
   { id: "alex", url: "/avatars/bereket.glb", body: "M", geminiVoice: "Puck", rig: AVATURN_RIG },
-  { id: "sora", url: "/avatars/brunette.glb", body: "F", geminiVoice: "Aoede" },
-  { id: "kai", url: "/avatars/brunette.glb", body: "F", geminiVoice: "Charon" },
+  // Sora and Kai are coming-soon — `url: null` makes the card non-clickable
+  // and disables the play preview until they get their own T2 GLBs.
+  { id: "sora", url: null, body: "F", geminiVoice: "Aoede" },
+  { id: "kai", url: null, body: "M", geminiVoice: "Charon" },
   { id: "ashenafi", url: "/avatars/ashenafi.glb", body: "M", geminiVoice: "Orus", rig: AVATURN_RIG },
   { id: "bedru", url: "/avatars/bedru.glb", body: "M", geminiVoice: "Zephyr", rig: AVATURN_RIG },
 ];
@@ -97,7 +114,13 @@ function AvatarPicker({
 }) {
   const t = useTranslations("avatar.picker");
   const locale = useLocale();
+  // The card whose preview is currently mounted (loading or speaking).
   const [playingId, setPlayingId] = useState<string | null>(null);
+  // The TTS payload handed off to MiniHead once we've fetched it.
+  const [playingTTS, setPlayingTTS] = useState<{
+    pcm: ArrayBuffer;
+    sampleRate: number;
+  } | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
 
   // Cache TTS audio per (avatar, locale) so re-clicking doesn't re-fetch AND a
@@ -108,13 +131,6 @@ function AvatarPicker({
   const inflightRef = useRef<Map<string, Promise<{ pcm: ArrayBuffer; sampleRate: number }>>>(
     new Map(),
   );
-  // Tracks the active playback so we can stop it cleanly.
-  const activeRef = useRef<{
-    id: string;
-    cancelled: boolean;
-    src?: AudioBufferSourceNode;
-    ctx?: AudioContext;
-  } | null>(null);
 
   const cacheKey = (id: string) => `${id}:${locale}`;
 
@@ -147,64 +163,38 @@ function AvatarPicker({
     });
   }
 
-  function stopActive() {
-    const cur = activeRef.current;
-    if (!cur) return;
-    cur.cancelled = true;
-    try {
-      cur.src?.stop();
-    } catch {
-      /* already stopped */
-    }
-    cur.ctx?.close().catch(() => {});
-    activeRef.current = null;
+  function stopPreview() {
+    setPlayingId(null);
+    setPlayingTTS(null);
   }
 
   useEffect(() => {
-    return () => stopActive();
+    return () => stopPreview();
   }, []);
 
   async function playPreview(a: AvatarOption) {
     setPreviewError(null);
+    if (!a.url) return;
     // Clicking the currently-playing avatar = toggle off.
     if (playingId === a.id) {
-      stopActive();
-      setPlayingId(null);
+      stopPreview();
       return;
     }
-    stopActive();
-
-    const session: NonNullable<typeof activeRef.current> = { id: a.id, cancelled: false };
-    activeRef.current = session;
     setPlayingId(a.id);
+    setPlayingTTS(null); // clears any stale audio while we fetch the new one
 
     try {
       const audio = await ensureTTS(a);
-      if (session.cancelled) return;
-
-      const ctx = new AudioContext();
-      const int16 = new Int16Array(audio.pcm);
-      const float32 = new Float32Array(int16.length);
-      for (let i = 0; i < int16.length; i++) float32[i] = int16[i] / 32768;
-      const buffer = ctx.createBuffer(1, float32.length, audio.sampleRate);
-      buffer.copyToChannel(float32, 0);
-      const src = ctx.createBufferSource();
-      src.buffer = buffer;
-      src.connect(ctx.destination);
-      src.onended = () => {
-        if (activeRef.current === session) activeRef.current = null;
-        setPlayingId((id) => (id === a.id ? null : id));
-        ctx.close().catch(() => {});
-      };
-      session.src = src;
-      session.ctx = ctx;
-      src.start();
+      // If the user moved on while we were fetching, drop this result.
+      setPlayingId((cur) => {
+        if (cur === a.id) setPlayingTTS(audio);
+        return cur;
+      });
     } catch (err) {
-      if (session.cancelled) return;
       console.error("Preview failed:", err);
       setPreviewError(err instanceof Error ? err.message : String(err));
       setPlayingId(null);
-      activeRef.current = null;
+      setPlayingTTS(null);
     }
   }
 
@@ -260,10 +250,21 @@ function AvatarPicker({
               }}
             >
               <div className="relative mb-4 flex aspect-square w-full items-center justify-center overflow-hidden rounded-md bg-gradient-to-br from-muted to-muted/40">
-                <Sparkles
-                  className="h-10 w-10 text-muted-foreground/60"
-                  strokeWidth={1.25}
-                />
+                {available ? (
+                  <AvatarThumbnail avatar={a} disabled={playing} />
+                ) : (
+                  <Sparkles
+                    className="h-10 w-10 text-muted-foreground/60"
+                    strokeWidth={1.25}
+                  />
+                )}
+                {playing && playingTTS && a.url && (
+                  <MiniHead
+                    avatar={a}
+                    tts={playingTTS}
+                    onEnd={stopPreview}
+                  />
+                )}
                 {!available && (
                   <span className="absolute right-2 top-2 rounded-md border border-border bg-background/90 px-1.5 py-px text-[9.5px] uppercase tracking-wider text-muted-foreground">
                     {t("comingSoon")}
@@ -275,6 +276,7 @@ function AvatarPicker({
                     e.stopPropagation();
                     playPreview(a);
                   }}
+                  disabled={!available}
                   aria-label={
                     playing
                       ? t("stopPreview", { name: a.name })
@@ -285,6 +287,7 @@ function AvatarPicker({
                     playing
                       ? "border-primary bg-primary text-primary-foreground"
                       : "border-border bg-background/90 text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary",
+                    !available && "cursor-not-allowed opacity-50 hover:bg-background/90 hover:text-foreground hover:border-border",
                   )}
                 >
                   {playing ? (

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Avaturn T2 Exporter</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; padding: 16px; background: #111; color: #eee; }
+    h3 { margin: 0 0 8px 0; }
+    p { margin: 0 0 12px 0; color: #aaa; font-size: 14px; }
+    #avaturn-sdk-container { width: 100%; height: calc(100vh - 100px); border: 1px solid #333; border-radius: 8px; background: #000; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; background: #2a4; color: #fff; font-size: 12px; }
+    code { background: #222; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h3>Avaturn T2 Exporter <span class="badge" id="t2-badge">checking…</span></h3>
+  <p>
+    Customize an avatar in the iframe below. When you click <strong>Next / Done</strong>, the GLB will auto-download.
+    Subdomain: <code id="sub">demo</code> — change the <code>SUBDOMAIN</code> constant below to your own dev-portal subdomain to get T2.
+  </p>
+  <div id="avaturn-sdk-container"></div>
+
+  <script type="module">
+    // 1. Sign up at https://developer.avaturn.me (free, instant).
+    // 2. Create a project, enable Type-2 (T2) avatars in project settings.
+    // 3. Replace "demo" below with your own subdomain. The "demo" subdomain
+    //    will probably give you T1 (same broken result as hub.avaturn.me).
+    const SUBDOMAIN = "mindeaseaau";
+
+    document.getElementById("sub").textContent = SUBDOMAIN;
+    document.getElementById("t2-badge").textContent =
+      SUBDOMAIN === "demo" ? "DEMO (T1 likely)" : "your subdomain";
+    document.getElementById("t2-badge").style.background =
+      SUBDOMAIN === "demo" ? "#a42" : "#2a4";
+
+    const { AvaturnSDK } = await import("https://cdn.jsdelivr.net/npm/@avaturn/sdk/dist/index.js");
+    const sdk = new AvaturnSDK();
+    await sdk.init(
+      document.getElementById("avaturn-sdk-container"),
+      { url: `https://${SUBDOMAIN}.avaturn.dev` },
+    );
+
+    sdk.on("export", async (data) => {
+      console.log("Export event:", data);
+      // Fetch the GLB ourselves so we can pick the filename and verify it
+      // landed before signaling the user.
+      const res = await fetch(data.url);
+      const blob = await res.blob();
+      const ts = new Date().toISOString().replace(/[:.]/g, "-");
+      const filename = `avatar-${ts}.glb`;
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      console.log(`Downloaded ${filename} (${(blob.size / 1024 / 1024).toFixed(1)} MB)`);
+      alert(`Downloaded ${filename} (${(blob.size / 1024 / 1024).toFixed(1)} MB). Refresh the page to make another.`);
+    });
+  </script>
+</body>
+</html>
