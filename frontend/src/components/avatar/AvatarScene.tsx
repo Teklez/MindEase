@@ -311,15 +311,18 @@ export function AvatarScene({
   // chunk so it's already cached by the time the user picks an avatar.
   useEffect(() => {
     if (selected) return;
-    const win = window as Window & {
+    const ric = (window as unknown as {
       requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
-    };
-    const trigger = win.requestIdleCallback
-      ? win.requestIdleCallback(prefetchViewer, { timeout: 2000 })
+    }).requestIdleCallback;
+    const cic = (window as unknown as {
+      cancelIdleCallback?: (h: number) => void;
+    }).cancelIdleCallback;
+    const trigger = ric
+      ? ric(prefetchViewer, { timeout: 2000 })
       : window.setTimeout(prefetchViewer, 1500);
     return () => {
-      if (win.requestIdleCallback) {
-        (win as unknown as { cancelIdleCallback?: (h: number) => void }).cancelIdleCallback?.(trigger);
+      if (ric) {
+        cic?.(trigger);
       } else {
         window.clearTimeout(trigger);
       }
