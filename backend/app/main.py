@@ -9,9 +9,6 @@ from app.api.v1.chat import websocket_chat
 from app.api.v1.groups import websocket_group
 from app.api.v1.voice import websocket_voice
 from app.database import async_session_maker
-from app.seeds.badges import seed_badges
-from app.seeds.seed_assessments import seed_assessments
-from app.seeds.seed_resources import seed_resources
 from app.services.auth_service import AuthService
 
 settings = get_settings()
@@ -19,10 +16,6 @@ settings = get_settings()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    async with async_session_maker() as db:
-        await seed_badges(db)
-        await seed_resources(db)
-        await seed_assessments(db)
     async with async_session_maker() as db:
         await AuthService.cleanup_guest_users(db)
     yield

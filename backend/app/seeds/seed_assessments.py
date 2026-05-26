@@ -330,3 +330,14 @@ async def seed_assessments(db: AsyncSession) -> None:
         )
 
     await db.commit()
+
+
+if __name__ == "__main__":
+    import asyncio
+    from app.database import async_session_maker
+
+    async def _main():
+        async with async_session_maker() as db:
+            await seed_assessments(db)
+
+    asyncio.run(_main())
