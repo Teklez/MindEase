@@ -141,7 +141,14 @@ export function AvatarViewer({
 
     head
       .showAvatar(
-        { url: avatar.url, body: avatar.body, lipsyncLang: "en", avatarMood: "neutral" },
+        {
+          url: avatar.url,
+          body: avatar.body,
+          lipsyncLang: "en",
+          avatarMood: "neutral",
+          ...(avatar.rig?.retarget ? { retarget: avatar.rig.retarget } : {}),
+          ...(avatar.rig?.baseline ? { baseline: avatar.rig.baseline } : {}),
+        },
         (ev: ProgressEvent) => {
           if (ev.lengthComputable && ev.total > 0)
             setProgress(Math.round((ev.loaded / ev.total) * 100));

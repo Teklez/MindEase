@@ -7,7 +7,7 @@ import { Loader2, Pause, Play, Sparkles } from "lucide-react";
 import { fetchTTS, type GeminiVoiceId } from "@/lib/gemini-avatar";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import type { AvatarBody, AvatarOption } from "./types";
+import type { AvatarBody, AvatarOption, AvatarRig } from "./types";
 
 // Lazy-load the heavy viewer (TalkingHead + three.js + voice session, ~MB).
 // The picker should not pull this in until the user has chosen a companion.
@@ -40,14 +40,38 @@ type PersonaStatic = {
   url: string | null;
   body: AvatarBody;
   geminiVoice: GeminiVoiceId;
+  rig?: AvatarRig;
+};
+
+// Verified from met4citizen/TalkingHead siteconfig.js — Avaturn skeletons
+// sit slightly hunched without these nudges. RPM (brunette.glb) needs no rig.
+const AVATURN_RIG: AvatarRig = {
+  retarget: {
+    Hips: { y: 0.03 },
+    Spine: { y: 0.02 },
+    Spine1: { y: 0.02, z: 0.01 },
+    Spine2: { y: 0.02, z: 0.01 },
+    Neck: { z: 0.02, y: 0.01 },
+    Head: { z: 0.02 },
+    LeftShoulder: { rx: -0.5 },
+    RightShoulder: { rx: -0.5 },
+    scaleToHipsLevel: 1.0,
+  },
+  baseline: {
+    headRotateX: -0.05,
+    eyeBlinkLeft: 0.15,
+    eyeBlinkRight: 0.15,
+  },
 };
 
 const PERSONAS: PersonaStatic[] = [
   { id: "serenity", url: "/avatars/brunette.glb", body: "F", geminiVoice: "Kore" },
-  { id: "maya", url: "/avatars/brunette.glb", body: "F", geminiVoice: "Fenrir" },
-  { id: "alex", url: "/avatars/brunette.glb", body: "F", geminiVoice: "Puck" },
+  { id: "maya", url: "/avatars/avatar-2026-05-26T19-00-59-230Z.glb", body: "M", geminiVoice: "Fenrir", rig: AVATURN_RIG },
+  { id: "alex", url: "/avatars/bereket.glb", body: "M", geminiVoice: "Puck", rig: AVATURN_RIG },
   { id: "sora", url: "/avatars/brunette.glb", body: "F", geminiVoice: "Aoede" },
   { id: "kai", url: "/avatars/brunette.glb", body: "F", geminiVoice: "Charon" },
+  { id: "ashenafi", url: "/avatars/ashenafi.glb", body: "M", geminiVoice: "Orus", rig: AVATURN_RIG },
+  { id: "bedru", url: "/avatars/bedru.glb", body: "M", geminiVoice: "Zephyr", rig: AVATURN_RIG },
 ];
 
 function useLocalizedAvatars(): AvatarOption[] {

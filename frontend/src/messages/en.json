@@ -1254,9 +1254,9 @@
         "intro": "Hello, I'm Dawit. Let's slow things down and think them through, together."
       },
       "alex": {
-        "name": "Henok",
+        "name": "Bereket",
         "blurb": "Bright and curious.",
-        "intro": "Hey, I'm Henok. What's been on your mind today? I'd love to hear about it."
+        "intro": "Hey, I'm Bereket. What's been on your mind today? I'd love to hear about it."
       },
       "sora": {
         "name": "Saba",
@@ -1267,6 +1267,16 @@
         "name": "Yonas",
         "blurb": "Calm, low and slow.",
         "intro": "Hey, I'm Yonas. Take a breath. I'm right here whenever you're ready."
+      },
+      "ashenafi": {
+        "name": "Ashenafi",
+        "blurb": "Confident and reassuring.",
+        "intro": "Hello, I'm Ashenafi. Whatever you're carrying, you don't have to carry it alone."
+      },
+      "bedru": {
+        "name": "Bedru",
+        "blurb": "Gentle and patient.",
+        "intro": "Hi, I'm Bedru. There's no wrong way to start — just say what's on your heart."
       }
     }
   },
