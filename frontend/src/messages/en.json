@@ -749,7 +749,7 @@
         "earlier": "Earlier"
       },
       "thread": {
-        "connected": "Connected · MindEase v0.4 · {locale}",
+        "connected": "Connected",
         "reconnecting": "Reconnecting…",
         "connectionLost": "We lost the connection. Trying again…",
         "retry": "Retry",

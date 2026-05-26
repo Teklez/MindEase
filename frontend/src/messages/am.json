@@ -749,7 +749,7 @@
         "earlier": "ቀደም ብሎ"
       },
       "thread": {
-        "connected": "ተገናኝቷል · MindEase v0.4 · {locale}",
+        "connected": "ተገናኝቷል",
         "reconnecting": "እንደገና በመገናኘት ላይ…",
         "connectionLost": "ግንኙነቱ ጠፍቷል። እንደገና በመሞከር ላይ…",
         "retry": "እንደገና ሞክር",

@@ -11,11 +11,11 @@ from sqlalchemy.orm import selectinload
 
 from app.database import async_session_maker
 from app.models import Conversation, MemoryChunk, Message
-from app.models.mood_entry import MoodEntry
 from app.services.ai_client import AIClient
 from app.services.fact_extractor import extract_and_index_facts
 from app.services.memory_service import memory_service
 from app.services.profile_service import profile_service
+from app.services.mood_service import auto_log_mood_from_text
 
 
 def _format_chunks(chunks: list) -> str:
@@ -54,36 +54,6 @@ async def _background_index_ai_message(
         logger.warning("background ai-message index failed: %s", exc)
 
 
-def _simple_emotion_to_mood(text: str) -> int:
-    """Keyword-based emotion detection — returns a mood level 1-5."""
-    t = text.lower()
-    if any(w in t for w in [
-        "hopeless", "worthless", "can't go on", "end it", "give up",
-        "terrible", "awful", "devastated", "helpless", "meaningless",
-    ]):
-        return 1
-    if any(w in t for w in [
-        "sad", "depress", "lonely", "crying", "anxious", "worried",
-        "stress", "angry", "frustrated", "scared", "overwhelmed",
-        "upset", "hurt", "pain", "miserable",
-    ]):
-        return 2
-    if any(w in t for w in [
-        "okay", " ok ", "alright", "fine", "so-so", "meh", "neutral",
-        "managing", "coping",
-    ]):
-        return 3
-    if any(w in t for w in [
-        "good", "well", "better", "happy", "positive", "calm",
-        "relaxed", "hopeful", "grateful", "content", "peaceful",
-    ]):
-        return 4
-    if any(w in t for w in [
-        "great", "amazing", "excellent", "wonderful", "fantastic",
-        "excited", "joy", "joyful", "thrilled", "elated", "awesome",
-    ]):
-        return 5
-    return 3
 
 
 class ChatService:
@@ -323,7 +293,6 @@ Core rules:
             prev_total = conversation.total_messages or 0
             was_first_exchange = prev_total == 0
             conversation.total_messages = prev_total + 2
-            should_auto_log_mood = prev_total < 10 and conversation.total_messages >= 10
             if was_first_exchange:
                 conversation.title = (content[:50] + "…") if len(content) > 50 else content
             await db.commit()
@@ -333,21 +302,8 @@ Core rules:
                 "message_id": str(ai_message.message_id),
             }
 
-            # Auto-log mood once when conversation reaches 10 messages (non-blocking)
-            if should_auto_log_mood:
-                try:
-                    mood_level = _simple_emotion_to_mood(content)
-                    auto_entry = MoodEntry(
-                        user_id=user_id,
-                        mood_level=mood_level,
-                        note="Auto-logged from chat session",
-                        entry_source="automatic",
-                    )
-                    db.add(auto_entry)
-                    await db.commit()
-                    logger.info("Auto-logged mood %d for user %s", mood_level, user_id)
-                except Exception as exc:
-                    logger.warning("Auto mood log failed: %s", exc)
+            # Non-blocking mood detection — fires per message, skips if user already logged today
+            asyncio.create_task(auto_log_mood_from_text(user_id, content, source="chat_auto"))
 
         except Exception as e:
             logger.exception("Chat stream failed: %s", e)

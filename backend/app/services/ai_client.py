@@ -41,6 +41,24 @@ class AIClient:
             data = resp.json()
             return data.get("response") or ""
 
+    async def detect_mood(self, text: str) -> int | None:
+        """POST to {base_url}/detect-mood
+        Body: {"text": text} → {"mood_level": 1-5 or null}.
+        Returns None on error or when no mood is expressed.
+        """
+        try:
+            async with httpx.AsyncClient() as client:
+                resp = await client.post(
+                    f"{self.base_url}/detect-mood",
+                    json={"text": text},
+                    timeout=15.0,
+                )
+                resp.raise_for_status()
+                level = resp.json().get("mood_level")
+                return int(level) if level is not None else None
+        except Exception:
+            return None
+
     async def embed(self, texts: list[str]) -> list[list[float]]:
         """POST to {base_url}/embed
         Body: {"texts": [str, ...]} → returns list of 768-d float vectors.

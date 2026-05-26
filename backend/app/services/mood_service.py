@@ -295,6 +295,36 @@ class MoodService:
         return current_streak, max(longest, current_streak)
 
 
+async def auto_log_mood_from_text(
+    user_id: UUID, text: str, source: str = "chat_auto"
+) -> None:
+    """Detect mood from text via Gemini and log it if the user has no entry today.
+    Safe to fire-and-forget — never raises.
+    """
+    if not text or not text.strip():
+        return
+    try:
+        async with async_session_maker() as db:
+            today_entries = await mood_service.get_today_entries(db, user_id)
+            if today_entries:
+                return
+            from app.services.ai_client import AIClient
+            level = await AIClient().detect_mood(text)
+            if level is None:
+                return
+            entry = MoodEntry(
+                user_id=user_id,
+                mood_level=level,
+                note=f"Auto-detected from {source.replace('_', ' ')}",
+                entry_source=source,
+            )
+            db.add(entry)
+            await db.commit()
+            logger.info("Auto-logged mood %d for user %s (source=%s)", level, user_id, source)
+    except Exception as exc:
+        logger.warning("auto_log_mood_from_text failed: %s", exc)
+
+
 async def _background_index_mood_note(
     *, user_id, entry_id, text: str, mood_level: int, entry_source: str,
 ) -> None:

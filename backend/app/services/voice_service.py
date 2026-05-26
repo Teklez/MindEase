@@ -14,6 +14,7 @@ from app.database import async_session_maker
 from app.models import Conversation, Message
 from app.services.ai_client import AIClient
 from app.services.memory_service import memory_service
+from app.services.mood_service import auto_log_mood_from_text
 from app.services.voice_context_service import voice_context_service
 
 logger = logging.getLogger(__name__)
@@ -370,6 +371,10 @@ class VoiceService:
         except Exception as exc:
             import traceback
             print(f"[voice] flush_turn DB EXC: {exc}\n{traceback.format_exc()}", flush=True)
+
+        # Non-blocking mood detection from user's speech
+        if user_text:
+            asyncio.create_task(auto_log_mood_from_text(self.user_id, user_text, source="voice_auto"))
 
         # ----- Phase B: best-effort indexing (each in its own session so an
         # embedding hang/fail can't poison anything else) -----

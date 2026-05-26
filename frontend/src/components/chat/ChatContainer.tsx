@@ -303,9 +303,7 @@ export default function ChatContainer({ conversationId }: ChatContainerProps) {
                 connectionStatus === "disconnected" && "bg-muted-foreground",
               )}
             />
-            {tV2("thread.connected", {
-              locale: locale === "am" ? "አማ" : "EN",
-            })}
+            {tV2("thread.connected")}
           </div>
         </div>
         <div className="flex items-center gap-1">

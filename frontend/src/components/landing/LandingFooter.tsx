@@ -87,7 +87,6 @@ export default function LandingFooter() {
             <span>
               EN · <span className="font-['Noto_Sans_Ethiopic',sans-serif]">አማ</span>
             </span>
-            <span>{t("version")}</span>
           </div>
         </div>
       </div>

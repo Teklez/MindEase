@@ -9,10 +9,16 @@ export async function GET(request: NextRequest) {
   const next = request.nextUrl.searchParams.get("next") ?? "/";
 
   if (!locale || !ALLOWED_LOCALES.includes(locale as (typeof ALLOWED_LOCALES)[number])) {
-    return NextResponse.redirect(new URL(next, request.url));
+    const fallback = request.nextUrl.clone();
+    fallback.pathname = next.startsWith("/") ? next : "/";
+    fallback.search = "";
+    return NextResponse.redirect(fallback);
   }
 
-  const res = NextResponse.redirect(new URL(next, request.url));
+  const target = request.nextUrl.clone();
+  target.pathname = next.startsWith("/") ? next : "/";
+  target.search = "";
+  const res = NextResponse.redirect(target);
   res.cookies.set(LOCALE_COOKIE, locale, {
     path: "/",
     maxAge: COOKIE_MAX_AGE,
