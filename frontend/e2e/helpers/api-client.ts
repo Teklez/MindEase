@@ -76,4 +76,21 @@ export class ApiClient {
     }
     return (await res.json()) as { conversation_id: string; title: string | null };
   }
+
+  async listAssessments(token: string): Promise<AssessmentListItem[]> {
+    const res = await this.request.get(this.url("/assessments"), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok()) {
+      throw new Error(`listAssessments failed (${res.status()}): ${await res.text()}`);
+    }
+    return (await res.json()) as AssessmentListItem[];
+  }
+}
+
+export interface AssessmentListItem {
+  assessment_id: string;
+  name: string;
+  assessment_type: "anxiety" | "depression" | "stress";
+  question_count: number;
 }
