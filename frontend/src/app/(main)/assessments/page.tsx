@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {
   ArrowRight,
-  Bell,
   Brain,
   ChevronRight,
   HeartPulse,
@@ -141,19 +140,6 @@ export default function AssessmentsPage() {
             <Stat label={tStats("taken")} value={isLoading ? "—" : totalTaken.toString()} />
             <Stat label={tStats("thisMonth")} value={isLoading ? "—" : thisMonthCount.toString()} />
           </div>
-          <Button
-            type="button"
-            onClick={() =>
-              toast({
-                title: tList("reminderSoonTitle"),
-                description: tList("reminderSoonBody"),
-              })
-            }
-            className="gap-1.5"
-          >
-            <Bell className="h-3.5 w-3.5" strokeWidth={1.75} />
-            {t("scheduleReminder")}
-          </Button>
         </div>
       </header>
 

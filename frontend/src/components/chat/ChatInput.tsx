@@ -85,10 +85,16 @@ export default function ChatInput({
   const insertMention = () => {
     if (!mention) return;
     const idx = value.lastIndexOf(mention.trigger);
+    // Replace from the trigger character up to the next space (or end), so
+    // partial input like "@mind" is fully replaced, not just the "@".
+    const endIdx = idx === -1 ? idx : (() => {
+      const spaceAfter = value.indexOf(" ", idx);
+      return spaceAfter === -1 ? value.length : spaceAfter;
+    })();
     const next =
       idx === -1
         ? `${mention.insert}${value}`
-        : `${value.slice(0, idx)}${mention.insert}${value.slice(idx + mention.trigger.length)}`;
+        : `${value.slice(0, idx)}${mention.insert}${value.slice(endIdx)}`;
     setValue(next);
     requestAnimationFrame(() => {
       const el = textareaRef.current;
@@ -201,7 +207,6 @@ export default function ChatInput({
           <span className="hidden flex-1 px-3 text-center normal-case tracking-normal sm:inline-block">
             {t("disclaimer")}
           </span>
-          <span className="hidden sm:inline">{t("hint")}</span>
         </div>
       </div>
 

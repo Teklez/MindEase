@@ -448,13 +448,6 @@ export default function GroupChatPage() {
               label: "@MindEase",
             }}
           />
-          <div className="mt-2 flex flex-wrap items-center justify-between gap-2 font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-            <span className="flex items-center gap-1.5 text-primary-deep">
-              <CircleDot className="h-3 w-3" strokeWidth={1.75} />
-              {tRoom("moderatedBy", { name: t("aiModerator") })}
-            </span>
-            <span className="hidden sm:inline">{tRoom("composerHint")}</span>
-          </div>
         </div>
       </div>
 
