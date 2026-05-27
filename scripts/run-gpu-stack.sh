@@ -59,6 +59,7 @@ if [[ -f .env ]]; then
 fi
 
 MODEL_NAME="${MODEL_OVERRIDE:-${MODEL_NAME:-llama3.1:8b}}"
+export MODEL_NAME                                     # ai-service reads this
 export OLLAMA_URL="http://127.0.0.1:${OLLAMA_PORT}"   # ai-service talks to local ollama
 export OLLAMA_HOST="127.0.0.1:${OLLAMA_PORT}"         # ollama daemon binds here
 
@@ -69,10 +70,28 @@ log "  model       ${MODEL_NAME}"
 log "  gemini key  $([[ -n "${GEMINI_API_KEY:-}" ]] && echo set || echo unset)"
 
 # ─── 1. install ollama if missing ────────────────────────────────────────────
+ensure_linux_prereqs() {
+  # ollama installer needs curl + zstd to extract its archive. On a fresh
+  # RunPod container the apt cache is empty, so `apt-get install` will fail
+  # with "Unable to locate package" until you `apt-get update` first.
+  local missing=()
+  command -v curl >/dev/null 2>&1 || missing+=(curl)
+  command -v zstd >/dev/null 2>&1 || missing+=(zstd)
+  [[ ${#missing[@]} -eq 0 ]] && return
+
+  if ! command -v apt-get >/dev/null 2>&1; then
+    die "missing tools (${missing[*]}) and no apt-get — install them manually"
+  fi
+  log "installing prereqs via apt-get: ${missing[*]}"
+  apt-get update -qq
+  DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends "${missing[@]}"
+}
+
 if ! command -v ollama >/dev/null 2>&1; then
   log "ollama not found — installing"
   case "$(uname -s)" in
-    Linux)  curl -fsSL https://ollama.com/install.sh | sh ;;
+    Linux)  ensure_linux_prereqs
+            curl -fsSL https://ollama.com/install.sh | sh ;;
     Darwin) command -v brew >/dev/null || die "install Homebrew or Ollama.app manually"
             brew install ollama ;;
     *)      die "unsupported OS: $(uname -s)" ;;
