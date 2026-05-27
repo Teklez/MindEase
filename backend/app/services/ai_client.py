@@ -59,6 +59,20 @@ class AIClient:
         except Exception:
             return None
 
+    async def summarize_export(self, payload: dict) -> str:
+        """POST to {base_url}/summarize-export
+        Body: { mood_entries, assessments, chat_meta }
+        Returns the narrative summary string.
+        """
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                f"{self.base_url}/summarize-export",
+                json=payload,
+                timeout=60.0,
+            )
+            resp.raise_for_status()
+            return resp.json().get("summary") or ""
+
     async def embed(self, texts: list[str]) -> list[list[float]]:
         """POST to {base_url}/embed
         Body: {"texts": [str, ...]} → returns list of 768-d float vectors.

@@ -13,6 +13,7 @@ import {
   Loader2,
   MessageCircle,
   Package,
+  Sparkles,
 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,6 +27,7 @@ import {
 } from "@/lib/api";
 import {
   exportAll,
+  exportAiSummary,
   exportAssessments,
   exportChat,
   exportMood,
@@ -262,14 +264,24 @@ export default function ExportPage() {
               </p>
             </div>
           </div>
-          <DownloadButton
-            id="all-pdf"
-            label={t("exportAll")}
-            state={buttonState["all-pdf"] ?? "idle"}
-            icon={<Download className="h-4 w-4" strokeWidth={1.75} />}
-            variant="primary"
-            onClick={() => run("all-pdf", () => exportAll())}
-          />
+          <div className="flex flex-wrap items-center gap-2">
+            <DownloadButton
+              id="all-pdf"
+              label={t("exportAll")}
+              state={buttonState["all-pdf"] ?? "idle"}
+              icon={<Download className="h-4 w-4" strokeWidth={1.75} />}
+              variant="primary"
+              onClick={() => run("all-pdf", () => exportAll())}
+            />
+            <DownloadButton
+              id="ai-summary"
+              label="AI Summary"
+              state={buttonState["ai-summary"] ?? "idle"}
+              icon={<Sparkles className="h-4 w-4" strokeWidth={1.75} />}
+              variant="ai"
+              onClick={() => run("ai-summary", () => exportAiSummary())}
+            />
+          </div>
         </div>
       </div>
 
@@ -329,7 +341,7 @@ function DownloadButton({
   label: string;
   icon: React.ReactNode;
   state: ButtonState;
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "ai";
   onClick: () => void;
 }) {
   const disabled = state === "loading";
@@ -343,7 +355,9 @@ function DownloadButton({
         "disabled:cursor-wait disabled:opacity-80",
         variant === "primary"
           ? "bg-foreground text-background hover:bg-foreground/85"
-          : "border border-border bg-background text-foreground hover:bg-muted",
+          : variant === "ai"
+            ? "border border-primary/40 bg-primary/10 text-primary hover:bg-primary/15"
+            : "border border-border bg-background text-foreground hover:bg-muted",
       )}
     >
       {state === "loading" ? (

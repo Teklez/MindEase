@@ -80,3 +80,10 @@ export async function exportAll(): Promise<void> {
     `mindease-export-${today()}.pdf`,
   );
 }
+
+export async function exportAiSummary(): Promise<void> {
+  await fetchAndDownload(
+    `/api/v1/export/ai-summary`,
+    `mindease-ai-summary-${today()}.pdf`,
+  );
+}

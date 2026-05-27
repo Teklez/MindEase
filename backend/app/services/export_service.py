@@ -925,4 +925,86 @@ class ExportService:
             story.append(Paragraph(_esc(result.feedback_text), styles["body"]))
 
 
+    # ----------------------------- AI Summary PDF ----------------------------- #
+
+    async def export_ai_summary_pdf(self, db: AsyncSession, user_id: UUID, user: User) -> bytes:
+        from app.services.ai_client import AIClient
+
+        # Collect mood entries (last 90 days)
+        mood_entries_raw = await self.mood.get_entries(db, user_id, days=90)
+        mood_entries = [
+            {
+                "date": e.created_at.strftime("%Y-%m-%d"),
+                "score": e.mood_level,
+                "note": e.note or "",
+            }
+            for e in sorted(mood_entries_raw, key=lambda x: x.created_at)
+        ]
+
+        # Collect assessment history
+        assessment_history = await self.assessment.get_history(db, user_id)
+        assessments = [
+            {
+                "instrument": item.assessment_type.upper(),
+                "name": item.assessment_name,
+                "score": item.score,
+                "max_score": item.max_score,
+                "level": item.feedback_level,
+                "date": item.completed_at.strftime("%Y-%m-%d"),
+            }
+            for item in sorted(assessment_history.history, key=lambda x: x.completed_at)
+        ]
+
+        # Collect chat metadata (no message content — privacy)
+        conversations = await self.chat.get_user_conversations(db, user_id)
+        total_messages = sum(getattr(c, "total_messages", 0) or 0 for c in conversations)
+        dates = sorted(
+            [c.created_at for c in conversations if c.created_at],
+            key=lambda d: d,
+        )
+        chat_meta = {
+            "total_conversations": len(conversations),
+            "total_messages": total_messages,
+            "first_session": dates[0].strftime("%Y-%m-%d") if dates else None,
+            "last_session": dates[-1].strftime("%Y-%m-%d") if dates else None,
+        }
+
+        if not mood_entries and not assessments and not conversations:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No data to export",
+            )
+
+        payload = {
+            "mood_entries": mood_entries,
+            "assessments": assessments,
+            "chat_meta": chat_meta,
+        }
+
+        summary_text = await AIClient().summarize_export(payload)
+
+        def build() -> bytes:
+            buf = io.BytesIO()
+            doc, story, styles = self._new_doc(buf, "AI Wellness Summary", user)
+            self._render_ai_summary_section(story, styles, summary_text)
+            doc.build(story, onFirstPage=self._draw_footer, onLaterPages=self._draw_footer)
+            return buf.getvalue()
+
+        return await asyncio.to_thread(build)
+
+    def _render_ai_summary_section(self, story: list, styles: dict, text: str) -> None:
+        for block in text.split("\n\n"):
+            block = block.strip()
+            if not block:
+                continue
+            if block.startswith("## "):
+                heading = block[3:].strip()
+                story.append(Spacer(1, 4 * mm))
+                story.append(Paragraph(_esc(heading), styles["h2"]))
+                story.append(Spacer(1, 1.5 * mm))
+            else:
+                story.append(Paragraph(_esc(block), styles["body"]))
+                story.append(Spacer(1, 2 * mm))
+
+
 export_service = ExportService()

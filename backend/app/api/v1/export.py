@@ -105,6 +105,15 @@ async def export_assessments(
     return _stream(pdf, "application/pdf", f"{filename_stem}.pdf")
 
 
+@router.get("/ai-summary")
+async def export_ai_summary(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_registered_user),
+) -> StreamingResponse:
+    pdf = await export_service.export_ai_summary_pdf(db, current_user.user_id, current_user)
+    return _stream(pdf, "application/pdf", f"mindease-ai-summary-{_today_str()}.pdf")
+
+
 @router.get("/all")
 async def export_all(
     format: Literal["pdf"] = Query("pdf"),
