@@ -80,7 +80,6 @@ const AVATURN_RIG: AvatarRig = {
 };
 
 const PERSONAS: PersonaStatic[] = [
-  { id: "serenity", url: "/avatars/brunette.glb", body: "F", geminiVoice: "Kore" },
   { id: "alex", url: "/avatars/bereket.glb", body: "M", geminiVoice: "Puck", rig: AVATURN_RIG },
   { id: "ashenafi", url: "/avatars/ashenafi.glb", body: "M", geminiVoice: "Orus", rig: AVATURN_RIG },
   { id: "bedru", url: "/avatars/bedru.glb", body: "M", geminiVoice: "Algenib", rig: AVATURN_RIG },

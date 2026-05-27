@@ -1242,11 +1242,6 @@
       "audioInitFailed": "Audio init failed"
     },
     "personas": {
-      "serenity": {
-        "name": "Selam",
-        "blurb": "Warm, attentive, easy to talk to.",
-        "intro": "Hi, I'm Selam. I'm here to listen — whatever's on your mind, take your time."
-      },
       "alex": {
         "name": "Bereket",
         "blurb": "Bright and curious.",
