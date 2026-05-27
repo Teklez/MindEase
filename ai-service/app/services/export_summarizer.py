@@ -57,7 +57,7 @@ class ExportSummarizerService:
         prompt = json.dumps(payload, indent=2, default=str)
         try:
             resp = await self._client.aio.models.generate_content(
-                model="gemini-2.0-flash",
+                model="gemini-2.5-flash",
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     system_instruction=_SYSTEM_PROMPT,

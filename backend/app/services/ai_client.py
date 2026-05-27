@@ -1,6 +1,9 @@
 import json
 
 import httpx
+import logging
+
+logger = logging.getLogger(__name__)
 
 from app.config import get_settings
 
@@ -101,6 +104,33 @@ class AIClient:
             resp.raise_for_status()
             data = resp.json()
             return data.get("embeddings") or []
+
+    async def translate(
+        self, text: str, source_lang: str, target_lang: str, *, timeout: float = 15.0
+    ) -> str:
+        """POST {base_url}/translate. Returns the translated string, or the
+        original text on any failure — callers can write the result back into
+        their data shape without extra branching."""
+        if not text or not text.strip() or source_lang == target_lang:
+            return text
+        try:
+            async with httpx.AsyncClient() as client:
+                resp = await client.post(
+                    f"{self.base_url}/translate",
+                    json={
+                        "text": text,
+                        "source_lang": source_lang,
+                        "target_lang": target_lang,
+                    },
+                    timeout=timeout,
+                )
+                resp.raise_for_status()
+                data = resp.json()
+                out = data.get("translated")
+                return out if isinstance(out, str) and out.strip() else text
+        except Exception as exc:
+            logger.warning("translate %s->%s failed: %s", source_lang, target_lang, exc)
+            return text
 
     async def generate_response_stream(
         self, messages: list[dict], *, user_lang: str | None = None

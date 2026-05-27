@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api, formatDate, type UserDetail } from "../lib/api";
+import { useConfirm, useToast } from "./UI";
 
 type Props = {
   userId: string;
@@ -9,6 +10,8 @@ type Props = {
 };
 
 export default function UserDrawer({ userId, onClose, onUpdated, selfUserId }: Props) {
+  const toast = useToast();
+  const confirm = useConfirm();
   const [user, setUser] = useState<UserDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -23,9 +26,9 @@ export default function UserDrawer({ userId, onClose, onUpdated, selfUserId }: P
   async function toggleStatus() {
     if (!user) return;
     const next = user.account_status === "active" ? "suspended" : "active";
-    if (!confirm(`${next === "suspended" ? "Suspend" : "Activate"} ${user.email}?`)) return;
+    if (!await confirm({ title: `${next === "suspended" ? "Suspend" : "Activate"} ${user.email}?` })) return;
     const res = await api.updateUser(user.user_id, { account_status: next });
-    if (!res.ok) { alert("Update failed"); return; }
+    if (!res.ok) { toast({ message: "Update failed", kind: "error" }); return; }
     onUpdated();
     setUser({ ...user, account_status: next });
   }
@@ -33,19 +36,19 @@ export default function UserDrawer({ userId, onClose, onUpdated, selfUserId }: P
   async function toggleAdmin() {
     if (!user) return;
     const next = !user.is_admin;
-    if (!confirm(`${next ? "Grant" : "Revoke"} admin for ${user.email}?`)) return;
+    if (!await confirm({ title: `${next ? "Grant" : "Revoke"} admin for ${user.email}?` })) return;
     const res = await api.updateUser(user.user_id, { is_admin: next });
-    if (!res.ok) { alert("Update failed"); return; }
+    if (!res.ok) { toast({ message: "Update failed", kind: "error" }); return; }
     onUpdated();
     setUser({ ...user, is_admin: next });
   }
 
   async function clearMemory() {
     if (!user) return;
-    if (!confirm(`Clear all AI memory for ${user.email}? This deletes their personal context — irreversible.`)) return;
+    if (!await confirm({ title: `Clear all AI memory for ${user.email}?`, message: "This deletes their personal context — irreversible.", variant: "destructive", confirmLabel: "Clear memory" })) return;
     const res = await api.clearUserMemory(user.user_id);
-    if (!res.ok) { alert("Clear failed"); return; }
-    alert(`Cleared ${"deleted_rows" in res.data ? res.data.deleted_rows : 0} memory chunks.`);
+    if (!res.ok) { toast({ message: "Clear failed", kind: "error" }); return; }
+    toast({ message: `Cleared ${"deleted_rows" in res.data ? res.data.deleted_rows : 0} memory chunks.`, kind: "success" });
   }
 
   async function deleteAccount() {
@@ -53,7 +56,7 @@ export default function UserDrawer({ userId, onClose, onUpdated, selfUserId }: P
     const text = prompt(`This will permanently delete ${user.email} and ALL their data (conversations, mood entries, assessments). Type DELETE to confirm.`);
     if (text !== "DELETE") return;
     const res = await api.deleteUser(user.user_id);
-    if (!res.ok) { alert("Delete failed"); return; }
+    if (!res.ok) { toast({ message: "Delete failed", kind: "error" }); return; }
     onUpdated();
     onClose();
   }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { TalkingHead } from "@met4citizen/talkinghead";
 import { LipsyncEn } from "@met4citizen/talkinghead/modules/lipsync-en.mjs";
 import { ArrowLeft, Loader2, Mic, Phone, PhoneOff } from "lucide-react";
@@ -96,6 +96,7 @@ export function AvatarViewer({
   continueConversationId?: string | null;
 }) {
   const t = useTranslations("avatar.viewer");
+  const locale = useLocale();
   const containerRef = useRef<HTMLDivElement>(null);
   const headRef = useRef<TalkingHead | null>(null);
   const sessionRef = useRef<BackendVoiceSession | null>(null);
@@ -106,6 +107,14 @@ export function AvatarViewer({
   // True once TalkingHead's AudioWorklet has been initialised. Persists across
   // turns; reset when we call streamStop (e.g. endCall).
   const streamReadyRef = useRef(false);
+  // Jitter buffer: collect the first few chunks (~250 ms) before flushing
+  // to TalkingHead's worklet so transient network hiccups don't drain the
+  // playback queue mid-sentence (audible breaks). After warm-up, chunks
+  // are pushed immediately as they arrive.
+  const jitterBufferRef = useRef<Array<{ pcm: ArrayBuffer; sampleRate: number }>>([]);
+  const jitterPrimedRef = useRef(false);
+  const JITTER_PRIME_CHUNKS = 3;
+
 
   const [status, setStatus] = useState<AvatarStatus>("loading");
   const [progress, setProgress] = useState(0);
@@ -262,9 +271,10 @@ export function AvatarViewer({
   }, []);
 
   // Push one Gemini Live chunk into the worklet. The worklet plays consecutive
-  // chunks gap-free, so the avatar can start talking on the first ~100 ms chunk
-  // instead of waiting for `turn_complete`.
-  const pushAudioChunk = useCallback((pcm: ArrayBuffer, sampleRate: number) => {
+  // chunks gap-free as long as its queue stays non-empty. We prime the queue
+  // with the first few chunks before flushing (jitter cushion), then stream
+  // straight through.
+  const flushChunkToHead = useCallback((pcm: ArrayBuffer, sampleRate: number) => {
     const head = headRef.current as unknown as {
       audioCtx?: { sampleRate: number };
       streamAudio: (r: {
@@ -291,13 +301,42 @@ export function AvatarViewer({
     streamOffsetMsRef.current = startedAt + durationMs;
   }, []);
 
+  const pushAudioChunk = useCallback(
+    (pcm: ArrayBuffer, sampleRate: number) => {
+      if (!streamReadyRef.current) return;
+      if (jitterPrimedRef.current) {
+        flushChunkToHead(pcm, sampleRate);
+        return;
+      }
+      jitterBufferRef.current.push({ pcm, sampleRate });
+      if (jitterBufferRef.current.length >= JITTER_PRIME_CHUNKS) {
+        jitterPrimedRef.current = true;
+        const drained = jitterBufferRef.current;
+        jitterBufferRef.current = [];
+        for (const c of drained) flushChunkToHead(c.pcm, c.sampleRate);
+      }
+    },
+    [flushChunkToHead],
+  );
+
   const notifyStreamEnd = useCallback(() => {
+    // Drain any chunks still parked in the jitter buffer — a very short turn
+    // might end before we reach JITTER_PRIME_CHUNKS and otherwise stay silent.
+    if (jitterBufferRef.current.length > 0) {
+      const drained = jitterBufferRef.current;
+      jitterBufferRef.current = [];
+      jitterPrimedRef.current = true;
+      for (const c of drained) flushChunkToHead(c.pcm, c.sampleRate);
+    }
     const head = headRef.current as unknown as {
       streamNotifyEnd: () => void;
     } | null;
     head?.streamNotifyEnd();
     streamOffsetMsRef.current = 0;
-  }, []);
+    // Reset jitter state for the next turn.
+    jitterPrimedRef.current = false;
+    jitterBufferRef.current = [];
+  }, [flushChunkToHead]);
 
   // Resume TalkingHead's audioCtx from within a user gesture. Chrome's
   // autoplay policy leaves the context suspended otherwise, which makes
@@ -377,6 +416,7 @@ export function AvatarViewer({
       persona_name: avatar.name,
       persona_blurb: avatar.blurb,
       voice: avatar.geminiVoice,
+      locale,
       conversation_id: continueConversationId ?? null,
     });
     if (!created.ok) {

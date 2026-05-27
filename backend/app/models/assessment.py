@@ -25,7 +25,7 @@ class Assessment(Base):
         primary_key=True,
         server_default=text("gen_random_uuid()"),
     )
-    name: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
     name_am: Mapped[str | None] = mapped_column(String(100), nullable=True)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     description_am: Mapped[str | None] = mapped_column(Text, nullable=True)

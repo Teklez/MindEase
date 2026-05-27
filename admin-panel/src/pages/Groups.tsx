@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { api, formatDate, type GroupRow } from "../lib/api";
 import GroupDrawer from "../components/GroupDrawer";
+import { useConfirm, useToast } from "../components/UI";
 
 export default function Groups() {
+  const toast = useToast();
+  const confirm = useConfirm();
   const [rows, setRows] = useState<GroupRow[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -22,9 +25,9 @@ export default function Groups() {
   useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [page]);
 
   async function toggleActive(g: GroupRow) {
-    if (!confirm(`${g.is_active ? "Hide" : "Activate"} group "${g.name}"?`)) return;
+    if (!await confirm({ title: `${g.is_active ? "Hide" : "Activate"} group "${g.name}"?` })) return;
     const res = await api.updateGroup(g.group_id, { is_active: !g.is_active });
-    if (!res.ok) { alert("Update failed"); return; }
+    if (!res.ok) { toast({ message: "Update failed", kind: "error" }); return; }
     load();
   }
 

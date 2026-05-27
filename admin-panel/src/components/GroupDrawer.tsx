@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api, type GroupMemberRow } from "../lib/api";
+import { useConfirm, useToast } from "./UI";
 
 type Props = {
   groupId: string;
@@ -9,6 +10,8 @@ type Props = {
 };
 
 export default function GroupDrawer({ groupId, groupName, onClose, onChanged }: Props) {
+  const toast = useToast();
+  const confirm = useConfirm();
   const [members, setMembers] = useState<GroupMemberRow[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -23,17 +26,17 @@ export default function GroupDrawer({ groupId, groupName, onClose, onChanged }: 
   useEffect(loadMembers, [groupId]);
 
   async function removeMember(userId: string, email: string | null) {
-    if (!confirm(`Remove ${email ?? userId.slice(0, 8)} from this group?`)) return;
+    if (!await confirm({ title: `Remove ${email ?? userId.slice(0, 8)} from this group?` })) return;
     const res = await api.removeMember(groupId, userId);
-    if (!res.ok) { alert("Failed"); return; }
+    if (!res.ok) { toast({ message: "Failed", kind: "error" }); return; }
     loadMembers();
     onChanged?.();
   }
 
   async function deleteThisGroup() {
-    if (!confirm(`Permanently delete "${groupName}" and all its messages?`)) return;
+    if (!await confirm({ title: `Permanently delete "${groupName}" and all its messages?`, variant: "destructive", confirmLabel: "Delete group" })) return;
     const res = await api.deleteGroup(groupId);
-    if (!res.ok) { alert("Failed"); return; }
+    if (!res.ok) { toast({ message: "Failed", kind: "error" }); return; }
     onChanged?.();
     onClose();
   }

@@ -60,6 +60,7 @@ class AssessmentResultResponse(BaseModel):
 
 class AssessmentHistoryItem(BaseModel):
     user_assessment_id: UUID
+    assessment_id: UUID
     assessment_name: str
     assessment_type: str
     icon: str

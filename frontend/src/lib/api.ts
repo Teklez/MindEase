@@ -486,6 +486,7 @@ export async function createVoiceConversation(body: {
   persona_name: string;
   persona_blurb: string;
   voice: string;
+  locale?: string;
   conversation_id?: string | null;
 }): Promise<ApiResponse<ConversationResponse>> {
   return apiRequest("/api/v1/voice/conversations", {

@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { api, type ResourceRow } from "../lib/api";
 import CreateResourceDrawer from "../components/CreateResourceDrawer";
+import { useConfirm, useToast } from "../components/UI";
 
 export default function Resources() {
+  const toast = useToast();
+  const confirm = useConfirm();
   const [rows, setRows] = useState<ResourceRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -17,9 +20,9 @@ export default function Resources() {
   useEffect(() => { load(); }, []);
 
   async function toggleActive(r: ResourceRow) {
-    if (!confirm(`${r.is_active ? "Hide" : "Activate"} resource "${r.title}"?`)) return;
+    if (!await confirm({ title: `${r.is_active ? "Hide" : "Activate"} resource "${r.title}"?` })) return;
     const res = await api.updateResource(r.resource_id, { is_active: !r.is_active });
-    if (!res.ok) { alert("Update failed"); return; }
+    if (!res.ok) { toast({ message: "Update failed", kind: "error" }); return; }
     load();
   }
 

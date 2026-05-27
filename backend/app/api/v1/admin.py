@@ -25,6 +25,8 @@ from app.models.message import Message
 from app.models.mood_entry import MoodEntry
 from app.models.resource import Resource, UserResource
 from app.models.user import User
+from app.services.ai_client import AIClient
+import asyncio
 
 router = APIRouter()
 
@@ -635,15 +637,60 @@ async def create_assessment(
     max_value = max(int(o.get("value", 0)) for o in body.response_options)
     max_score = max_value * len(questions)
 
+    # Green->red gradient — admin form / AI generator doesn't supply colors, but the
+    # user-facing result view requires them, so default any missing colors here.
+    _palette = ["#22C55E", "#EAB308", "#F97316", "#EF4444", "#DC2626"]
+    _ranges = [r.model_dump() for r in body.ranges]
+    for _i, _r in enumerate(_ranges):
+        if not _r.get("color"):
+            _r["color"] = _palette[min(_i, len(_palette) - 1)]
+
+    # Auto-translate every user-facing string into Amharic so users on the
+    # Amharic locale see native copy. Each call falls back to English on
+    # failure, so a translator outage downgrades gracefully instead of
+    # blocking assessment creation.
+    name_en = body.name.strip()
+    desc_en = body.description.strip()
+    _client = AIClient()
+
+    async def _to_am(text: str) -> str:
+        return await _client.translate(text, "en", "am")
+
+    # Build a flat list of strings to translate, then re-zip into the right
+    # slots so we can run a single gather() and bound total latency.
+    option_idxs = [i for i, o in enumerate(body.response_options) if (o.get("label") or "").strip()]
+    flat: list[str] = [name_en, desc_en]
+    flat.extend(q["text"] for q in questions)
+    flat.extend(body.response_options[i]["label"] for i in option_idxs)
+    flat.extend(r["label"] for r in _ranges)
+    flat.extend(r["feedback"] for r in _ranges)
+
+    translated = await asyncio.gather(*(_to_am(t) for t in flat))
+
+    cursor = 0
+    name_am = translated[cursor]; cursor += 1
+    desc_am = translated[cursor]; cursor += 1
+    for q in questions:
+        q["text_am"] = translated[cursor]; cursor += 1
+    response_options_am = [dict(o) for o in body.response_options]
+    for idx in option_idxs:
+        response_options_am[idx]["label_am"] = translated[cursor]; cursor += 1
+    for r in _ranges:
+        r["label_am"] = translated[cursor]; cursor += 1
+    for r in _ranges:
+        r["feedback_am"] = translated[cursor]; cursor += 1
+
     scoring_logic = {
         "max_score": max_score,
-        "response_options": body.response_options,
-        "ranges": [r.model_dump() for r in body.ranges],
+        "options": response_options_am,
+        "ranges": _ranges,
     }
 
     a = Assessment(
-        name=body.name.strip(),
-        description=body.description.strip(),
+        name=name_en,
+        name_am=name_am if name_am != name_en else None,
+        description=desc_en,
+        description_am=desc_am if desc_am != desc_en else None,
         assessment_type=body.assessment_type.strip(),
         icon=body.icon.strip() or "📋",
         estimated_time=(body.estimated_time or "").strip() or None,
@@ -655,10 +702,10 @@ async def create_assessment(
         await db.commit()
     except Exception as e:
         await db.rollback()
+        logger.exception("create_assessment commit failed: %s", e)
         raise HTTPException(status_code=400, detail=f"Failed to create: {e}")
     await db.refresh(a)
 
-    import asyncio
     from app.database import async_session_maker
     from app.services.notification_service import broadcast_new_assessment
     async def _fire() -> None:

@@ -8,6 +8,7 @@ class VoiceConversationCreate(BaseModel):
     persona_name: str = Field(..., min_length=1, max_length=64)
     persona_blurb: str = Field("", max_length=512)
     voice: str = Field(..., min_length=1, max_length=32)
+    locale: str | None = Field(None, max_length=8)  # 'en' | 'am' — picked up from the UI
     conversation_id: uuid.UUID | None = None  # set when continuing an existing voice call
 
 

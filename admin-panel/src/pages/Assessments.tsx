@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { api, type AssessmentRow } from "../lib/api";
 import CreateAssessmentDrawer from "../components/CreateAssessmentDrawer";
+import { useConfirm, useToast } from "../components/UI";
 
 export default function Assessments() {
+  const toast = useToast();
+  const confirm = useConfirm();
   const [rows, setRows] = useState<AssessmentRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -17,9 +20,9 @@ export default function Assessments() {
   useEffect(() => { load(); }, []);
 
   async function toggle(r: AssessmentRow) {
-    if (!confirm(`${r.is_active ? "Disable" : "Enable"} "${r.name}"?`)) return;
+    if (!await confirm({ title: `${r.is_active ? "Disable" : "Enable"} "${r.name}"?` })) return;
     const res = await api.updateAssessment(r.assessment_id, { is_active: !r.is_active });
-    if (!res.ok) { alert("Update failed"); return; }
+    if (!res.ok) { toast({ message: "Update failed", kind: "error" }); return; }
     load();
   }
 

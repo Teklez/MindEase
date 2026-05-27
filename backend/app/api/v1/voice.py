@@ -115,6 +115,7 @@ async def create_or_reuse_voice_conversation(
             "persona_name": body.persona_name,
             "persona_blurb": body.persona_blurb,
             "voice": body.voice,
+            "locale": body.locale or (conv.attrs or {}).get("locale") or "en",
         }
         await db.commit()
         await db.refresh(conv)
@@ -129,6 +130,7 @@ async def create_or_reuse_voice_conversation(
             "persona_name": body.persona_name,
             "persona_blurb": body.persona_blurb,
             "voice": body.voice,
+            "locale": body.locale or "en",
         },
     )
     db.add(conv)
@@ -174,6 +176,7 @@ async def websocket_voice(websocket: WebSocket, conversation_id: uuid.UUID):
         persona_name = attrs.get("persona_name") or "Serenity"
         persona_blurb = attrs.get("persona_blurb") or ""
         voice = attrs.get("voice") or "Kore"
+        locale = attrs.get("locale") or "en"
 
     await websocket.accept()
 
@@ -190,6 +193,7 @@ async def websocket_voice(websocket: WebSocket, conversation_id: uuid.UUID):
         persona_name=persona_name,
         persona_blurb=persona_blurb,
         voice=voice,
+        locale=locale,
         send_event=send_event,
     )
 

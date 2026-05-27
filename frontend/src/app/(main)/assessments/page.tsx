@@ -191,7 +191,7 @@ export default function AssessmentsPage() {
                 item={a}
                 lang={locale}
                 lastResult={
-                  history?.history.find((h) => h.assessment_type === a.assessment_type) ?? null
+                  history?.history.find((h) => h.assessment_id === a.assessment_id) ?? null
                 }
                 onStart={() => router.push(`/assessments/${a.assessment_id}`)}
               />

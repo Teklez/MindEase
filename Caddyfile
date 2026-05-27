@@ -1,0 +1,7 @@
+13.60.85.55.nip.io {
+    @ws path /ws/*
+    reverse_proxy @ws backend:8000
+
+    reverse_proxy frontend:3000
+}
+

@@ -99,7 +99,7 @@ class AssessmentGeneratorService:
         if self._client:
             try:
                 resp = await self._client.aio.models.generate_content(
-                    model="gemini-2.0-flash",
+                    model="gemini-2.5-flash",
                     contents=prompt,
                     config=types.GenerateContentConfig(
                         system_instruction=_SYSTEM_PROMPT,

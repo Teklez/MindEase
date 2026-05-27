@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { api, type BadgeRow } from "../lib/api";
 import CreateBadgeDrawer from "../components/CreateBadgeDrawer";
+import { useConfirm, useToast } from "../components/UI";
 
 export default function Badges() {
+  const toast = useToast();
+  const confirm = useConfirm();
   const [rows, setRows] = useState<BadgeRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -17,9 +20,9 @@ export default function Badges() {
   useEffect(() => { load(); }, []);
 
   async function toggle(b: BadgeRow) {
-    if (!confirm(`${b.is_active ? "Disable" : "Enable"} "${b.name}"?`)) return;
+    if (!await confirm({ title: `${b.is_active ? "Disable" : "Enable"} "${b.name}"?` })) return;
     const res = await api.updateBadge(b.badge_id, { is_active: !b.is_active });
-    if (!res.ok) { alert("Update failed"); return; }
+    if (!res.ok) { toast({ message: "Update failed", kind: "error" }); return; }
     load();
   }
 
