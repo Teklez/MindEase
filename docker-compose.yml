@@ -63,6 +63,13 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       AI_SERVICE_URL: http://ai-service:8001
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_USE_TLS: ${SMTP_USE_TLS:-true}
+      FROM_EMAIL: ${FROM_EMAIL:-noreply@mindease.app}
+      FROM_NAME: ${FROM_NAME:-MindEase}
 
   frontend:
     build:
