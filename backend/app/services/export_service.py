@@ -959,7 +959,7 @@ class ExportService:
         conversations = await self.chat.get_user_conversations(db, user_id)
         total_messages = sum(getattr(c, "total_messages", 0) or 0 for c in conversations)
         dates = sorted(
-            [c.created_at for c in conversations if c.created_at],
+            [c.started_at for c in conversations if c.started_at],
             key=lambda d: d,
         )
         chat_meta = {
