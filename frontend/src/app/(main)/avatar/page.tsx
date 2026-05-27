@@ -14,7 +14,8 @@ const AvatarScene = dynamic(
 function AvatarPageInner() {
   const params = useSearchParams();
   const continueId = params.get("conversation");
-  const [preselectPersonaId, setPreselectPersonaId] = useState<string | null>(null);
+  const personaParam = params.get("persona");
+  const [preselectPersonaId, setPreselectPersonaId] = useState<string | null>(personaParam);
   const [loaded, setLoaded] = useState(!continueId);
 
   useEffect(() => {

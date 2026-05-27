@@ -1,6 +1,9 @@
 import json
+import logging
 import httpx
 from app.config import get_settings
+
+logger = logging.getLogger(__name__)
 
 FALLBACK_MESSAGE = (
     "I'm having trouble responding right now. Please try again in a moment."
@@ -10,7 +13,7 @@ FALLBACK_MESSAGE = (
 class InferenceService:
     def __init__(self):
         self.settings = get_settings()
-        self.timeout = 60.0
+        self.timeout = 240.0
 
     async def generate_response(self, messages: list[dict]) -> str:
         """Call Ollama /api/chat with stream=False. Returns full response string."""
@@ -27,9 +30,11 @@ class InferenceService:
                 data = resp.json()
                 message = (data.get("message") or {}).get("content") or ""
                 return message
-        except (httpx.TimeoutException, httpx.ConnectError, httpx.HTTPStatusError):
+        except (httpx.TimeoutException, httpx.ConnectError, httpx.HTTPStatusError) as exc:
+            logger.warning("ollama generate (non-stream) failed: %s", exc)
             return FALLBACK_MESSAGE
         except Exception:
+            logger.exception("ollama generate (non-stream) unexpected error")
             return FALLBACK_MESSAGE
 
     async def generate_response_stream(self, messages: list[dict]):
@@ -53,7 +58,9 @@ class InferenceService:
                             yield content
                         except json.JSONDecodeError:
                             continue
-        except (httpx.TimeoutException, httpx.ConnectError, httpx.HTTPStatusError):
+        except (httpx.TimeoutException, httpx.ConnectError, httpx.HTTPStatusError) as exc:
+            logger.warning("ollama generate (stream) failed: %s", exc)
             yield FALLBACK_MESSAGE
         except Exception:
+            logger.exception("ollama generate (stream) unexpected error")
             yield FALLBACK_MESSAGE

@@ -5,6 +5,7 @@ import { TalkingHead } from "@met4citizen/talkinghead";
 import { LipsyncEn } from "@met4citizen/talkinghead/modules/lipsync-en.mjs";
 import { cn } from "@/lib/utils";
 import type { AvatarOption } from "./types";
+import { resamplePCM } from "@/lib/gemini-avatar";
 
 // Render an in-card mini TalkingHead that loads the avatar's GLB, fades in
 // over the resting thumbnail, speaks the persona's intro with lipsync, and
@@ -61,16 +62,28 @@ export function MiniHead({
           await h.audioCtx.resume().catch(() => {});
         }
 
-        // Estimate word timings from intro text + PCM duration. TalkingHead's
+        // Resample to TalkingHead's internal AudioContext rate. fetchTTS
+        // hardcodes 22050 Hz; the browser's AudioContext typically runs at
+        // 48 kHz, and TalkingHead assumes raw PCM matches its audioCtx rate.
+        // Without this, playback is silent or chipmunked.
+        const targetRate =
+          (head as unknown as { audioCtx?: { sampleRate: number } }).audioCtx?.sampleRate
+          ?? 48000;
+        const src16 = new Int16Array(tts.pcm);
+        const dst16 =
+          tts.sampleRate === targetRate
+            ? src16
+            : resamplePCM(src16, tts.sampleRate, targetRate);
+
+        // Estimate word timings from intro text + audio duration. TalkingHead's
         // English lipsync engine maps these to visemes.
-        const int16Len = tts.pcm.byteLength / 2;
-        const durationMs = (int16Len / tts.sampleRate) * 1000;
+        const durationMs = (dst16.length / targetRate) * 1000;
         const words = avatar.intro.trim().split(/\s+/).filter(Boolean);
         const msPerWord = words.length ? durationMs / words.length : durationMs;
 
         setVisible(true); // fade in
         head.speakAudio({
-          audio: [tts.pcm],
+          audio: [dst16.buffer as ArrayBuffer],
           words,
           wtimes: words.map((_, i) => i * msPerWord),
           wdurations: words.map(() => msPerWord),

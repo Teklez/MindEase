@@ -22,9 +22,18 @@ import {
   LifeBuoy,
   MessageSquare,
   Phone,
+  Sparkles,
   Users2,
   type LucideIcon,
 } from "lucide-react";
+
+const AVATAR_FOR_LEVEL: { id: string; name: string }[] = [
+  { id: "tigist", name: "Tigist" },
+  { id: "alex", name: "Bereket" },
+  { id: "ashenafi", name: "Ashenafi" },
+  { id: "bedru", name: "Bedru" },
+  { id: "sora", name: "Saba" },
+];
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ScoreRing } from "@/components/assessments/ScoreRing";
@@ -69,6 +78,8 @@ export function AssessmentResultView({
 
   const levelIdx = levelToIndex(result.feedback_level);
   const code = instrumentCode(result.assessment_type);
+  const matchedAvatar =
+    AVATAR_FOR_LEVEL[Math.min(levelIdx, AVATAR_FOR_LEVEL.length - 1)] ?? AVATAR_FOR_LEVEL[0];
 
   const range_ = findRange(result.feedback_level, scoring);
   const levelDisplay =
@@ -321,10 +332,10 @@ export function AssessmentResultView({
                 onClick={() => router.push("/chat")}
               />
               <NextStep
-                Icon={Phone}
-                title={t("findClinician")}
-                subtitle={t("findClinicianSub")}
-                onClick={() => router.push("/resources?category=clinician")}
+                Icon={Sparkles}
+                title={t("talkToAvatar", { name: matchedAvatar.name })}
+                subtitle={t("talkToAvatarSub")}
+                onClick={() => router.push(`/avatar?persona=${matchedAvatar.id}`)}
               />
               <NextStep
                 Icon={Users2}

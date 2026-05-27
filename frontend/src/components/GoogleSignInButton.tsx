@@ -56,31 +56,18 @@ export default function GoogleSignInButton({ variant = "signin" }: { variant?: V
           {error}
         </div>
       )}
-      {/* The visual button sits on top with pointer-events disabled, so the
-          invisible Google button underneath receives the click. This keeps
-          the ID-token credential flow that the backend expects while letting
-          us style the visible shell to match the design. */}
-      <div className="group relative h-11 w-full overflow-hidden rounded-[10px]">
-        <div className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center gap-2.5 rounded-[10px] border border-border bg-card text-[14px] font-medium text-foreground transition-colors group-hover:bg-secondary">
-          <GoogleIcon />
-          {label}
-        </div>
-        <div
-          className="absolute inset-0 z-10 opacity-0 [&>*]:!h-full [&>*]:!w-full [&_iframe]:!h-full [&_iframe]:!w-full"
-          aria-hidden
-        >
-          <GoogleLogin
-            onSuccess={({ credential }) => {
-              if (credential) handleSuccess(credential);
-            }}
-            onError={() => setError("Google sign-in was cancelled or failed.")}
-            theme="outline"
-            size="large"
-            text={variant === "signup" ? "signup_with" : "signin_with"}
-            shape="rectangular"
-            width="100%"
-          />
-        </div>
+      <div className="flex w-full justify-center">
+        <GoogleLogin
+          onSuccess={({ credential }) => {
+            if (credential) handleSuccess(credential);
+          }}
+          onError={() => setError("Google sign-in was cancelled or failed.")}
+          theme="outline"
+          size="large"
+          text={variant === "signup" ? "signup_with" : "signin_with"}
+          shape="rectangular"
+          width="400"
+        />
       </div>
     </div>
   );

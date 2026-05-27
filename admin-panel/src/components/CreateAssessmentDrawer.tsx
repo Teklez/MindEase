@@ -181,6 +181,22 @@ export default function CreateAssessmentDrawer({ onClose, onCreated }: Props) {
                 </div>
               </div>
 
+              {options && (
+                <div className="form-section">
+                  <div className="form-section-title">
+                    <span>Response options · {options.length}</span>
+                  </div>
+                  <div className="option-chips">
+                    {options.map((o) => (
+                      <span key={o.value} className="option-chip">
+                        <span className="option-chip-value">{o.value}</span>
+                        <span>{o.label}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="form-section">
                 <div className="form-section-title">
                   <span>Questions · {spec.questions.length}</span>

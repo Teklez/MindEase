@@ -235,6 +235,7 @@ export interface AssessmentResult {
 
 export interface AssessmentHistoryItem {
   user_assessment_id: string;
+  assessment_id: string;
   assessment_name: string;
   assessment_type: string;
   icon: string;

@@ -22,7 +22,12 @@ logger = logging.getLogger(__name__)
 
 # ---------- helpers ----------
 
-def _build_persona_prompt(persona_name: str, persona_blurb: str) -> str:
+def _build_persona_prompt(persona_name: str, persona_blurb: str, locale: str = "en") -> str:
+    # locale kept in the signature for callers that still pass it, but it is
+    # intentionally NOT injected — Gemini Live auto-detects language from the
+    # user's speech, and a hard-coded directive plus the localized persona
+    # name plus past Amharic memory chunks were biasing the model.
+    _ = locale
     return (
         f"You are {persona_name}, a warm and empathetic AI wellness companion. "
         f"Your style: {persona_blurb or 'warm, attentive, easy to talk to.'} "
@@ -61,6 +66,7 @@ class VoiceService:
         persona_id: str,
         voice: str,
         send_event: Callable[[dict], Awaitable[None]],
+        locale: str = "en",
     ) -> None:
         self.user_id = user_id
         self.conversation_id = conversation_id
@@ -68,6 +74,7 @@ class VoiceService:
         self.persona_name = persona_name
         self.persona_blurb = persona_blurb
         self.voice = voice
+        self.locale = locale
         self.send_event = send_event
 
         self._settings = get_settings()
@@ -102,7 +109,7 @@ class VoiceService:
                 logger.warning("voice retrieve failed: %s", exc)
                 retrieved = []
 
-        blocks: list[str] = [_build_persona_prompt(self.persona_name, self.persona_blurb)]
+        blocks: list[str] = [_build_persona_prompt(self.persona_name, self.persona_blurb, self.locale)]
         if dossier:
             blocks.append(dossier)
         if retrieved:

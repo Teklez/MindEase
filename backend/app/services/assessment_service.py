@@ -187,7 +187,7 @@ class AssessmentService:
             feedback_level=bucket.get("level", "unknown"),
             feedback_text=bucket.get("feedback", ""),
             feedback_text_am=bucket.get("feedback_am"),
-            color=bucket.get("color", "#94A3B8"),
+            color=bucket.get("color") or "#94A3B8",
             recommended_avatar=bucket.get("recommended_avatar"),
             recommended_resources=recommended_resources,
             completed_at=ua.completed_at,
@@ -221,13 +221,14 @@ class AssessmentService:
             history.append(
                 AssessmentHistoryItem(
                     user_assessment_id=ua.user_assessment_id,
+                    assessment_id=a.assessment_id,
                     assessment_name=a.name,
                     assessment_type=a.assessment_type,
                     icon=a.icon,
                     score=ua.score,
                     max_score=int(scoring.get("max_score", ua.score)),
                     feedback_level=ua.feedback_level,
-                    color=bucket.get("color", "#94A3B8"),
+                    color=bucket.get("color") or "#94A3B8",
                     completed_at=ua.completed_at,
                 )
             )
@@ -290,7 +291,7 @@ class AssessmentService:
             feedback_level=ua.feedback_level,
             feedback_text=ua.feedback_text,
             feedback_text_am=bucket.get("feedback_am"),
-            color=bucket.get("color", "#94A3B8"),
+            color=bucket.get("color") or "#94A3B8",
             recommended_avatar=bucket.get("recommended_avatar"),
             recommended_resources=recommended_resources,
             completed_at=ua.completed_at,
