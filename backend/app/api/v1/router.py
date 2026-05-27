@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.v1 import (
+    admin,
     assessments,
     auth,
     chat,
@@ -26,3 +27,4 @@ api_router.include_router(groups.router, prefix="/groups", tags=["Groups"])
 api_router.include_router(voice.router, prefix="/voice", tags=["Voice"])
 api_router.include_router(me.router, prefix="/me", tags=["Me"])
 api_router.include_router(export.router, prefix="/export", tags=["Data Export"])
+api_router.include_router(admin.router, prefix="/admin", tags=["Admin"])

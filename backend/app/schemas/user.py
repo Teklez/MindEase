@@ -21,6 +21,7 @@ class UserResponse(BaseModel):
     display_name: str
     is_verified: bool
     account_status: str
+    is_admin: bool = False
     created_at: datetime
 
     model_config = {"from_attributes": True}

@@ -87,7 +87,7 @@ export async function apiRequest<T>(
   return { ok: true, data: data as T };
 }
 
-export async function getMe(): Promise<ApiResponse<{ user_id: string; email: string; display_name: string; is_verified: boolean; account_status: string; created_at: string }>> {
+export async function getMe(): Promise<ApiResponse<{ user_id: string; email: string; display_name: string; is_verified: boolean; account_status: string; is_admin: boolean; created_at: string }>> {
   return apiRequest("/api/v1/auth/me");
 }
 

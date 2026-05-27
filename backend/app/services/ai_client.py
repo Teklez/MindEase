@@ -59,6 +59,20 @@ class AIClient:
         except Exception:
             return None
 
+    async def generate_assessment(self, prompt: str) -> dict:
+        """POST to {base_url}/generate-assessment
+        Body: {"prompt": str} → {"spec": dict} or {"refusal": str}
+        Returns the raw response dict so callers can detect refusals.
+        """
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                f"{self.base_url}/generate-assessment",
+                json={"prompt": prompt},
+                timeout=90.0,
+            )
+            resp.raise_for_status()
+            return resp.json()
+
     async def summarize_export(self, payload: dict) -> str:
         """POST to {base_url}/summarize-export
         Body: { mood_entries, assessments, chat_meta }

@@ -82,6 +82,13 @@ services:
     environment:
       NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID:-}
 
+  admin-panel:
+    build: ./admin-panel
+    ports:
+      - "3001:80"
+    depends_on:
+      backend: { condition: service_healthy }
+
 volumes:
   postgres_data:
   ollama_data:

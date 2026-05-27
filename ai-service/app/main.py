@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.routes import health, generate, crisis, translate, embed, detect_mood, summarize_export
+from app.routes import health, generate, crisis, translate, embed, detect_mood, summarize_export, generate_assessment
 
 app = FastAPI(title="MindEase AI Service")
 
@@ -23,3 +23,4 @@ app.include_router(crisis.router, tags=["crisis"])
 app.include_router(embed.router, prefix="/embed", tags=["embed"])
 app.include_router(detect_mood.router, prefix="/detect-mood", tags=["mood"])
 app.include_router(summarize_export.router, prefix="/summarize-export", tags=["export"])
+app.include_router(generate_assessment.router, prefix="/generate-assessment", tags=["assessment"])
