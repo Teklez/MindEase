@@ -154,7 +154,7 @@ export function AssessmentResultView({
           <Card className="relative overflow-hidden p-6 md:p-8">
             <div
               className="pointer-events-none absolute -top-12 right-[-60px] h-[260px] w-[260px] rounded-full blur-3xl"
-              style={{ background: `color-mix(in oklab, ${ringColor} 22%, transparent)` }}
+              style={{ background: "color-mix(in oklab, var(--primary) 18%, transparent)" }}
               aria-hidden
             />
             <p className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-muted-foreground">
