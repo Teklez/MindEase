@@ -1247,11 +1247,6 @@
         "blurb": "Warm, attentive, easy to talk to.",
         "intro": "Hi, I'm Selam. I'm here to listen — whatever's on your mind, take your time."
       },
-      "maya": {
-        "name": "Dawit",
-        "blurb": "Steady and grounded.",
-        "intro": "Hello, I'm Dawit. Let's slow things down and think them through, together."
-      },
       "alex": {
         "name": "Bereket",
         "blurb": "Bright and curious.",
@@ -1262,11 +1257,6 @@
         "blurb": "Quiet and reflective.",
         "intro": "Hi, I'm Saba. There's no rush here — start anywhere that feels right."
       },
-      "kai": {
-        "name": "Yonas",
-        "blurb": "Calm, low and slow.",
-        "intro": "Hey, I'm Yonas. Take a breath. I'm right here whenever you're ready."
-      },
       "ashenafi": {
         "name": "Ashenafi",
         "blurb": "Confident and reassuring.",
@@ -1276,6 +1266,11 @@
         "name": "Bedru",
         "blurb": "Gentle and patient.",
         "intro": "Hi, I'm Bedru. There's no wrong way to start — just say what's on your heart."
+      },
+      "tigist": {
+        "name": "Tigist",
+        "blurb": "Bright and uplifting.",
+        "intro": "Hi, I'm Tigist. Whatever brought you here today, I'm glad you came. Let's talk."
       }
     }
   },
