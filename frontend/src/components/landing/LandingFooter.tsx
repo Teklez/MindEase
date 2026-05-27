@@ -29,7 +29,7 @@ export default function LandingFooter() {
 
   return (
     <footer className="border-t border-border bg-background">
-      <div className="mx-auto max-w-[1240px] px-10">
+      <div className="mx-auto max-w-[1240px] px-4 sm:px-6 md:px-10">
         <div className="grid gap-12 pb-10 pt-16 md:grid-cols-[1.4fr_1fr_1fr_1fr] md:gap-16">
           <div>
             <Link

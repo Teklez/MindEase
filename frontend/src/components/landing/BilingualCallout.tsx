@@ -13,8 +13,8 @@ export default function BilingualCallout() {
 
   return (
     <section className="pb-24 md:pb-[120px]">
-      <div className="mx-auto max-w-[1240px] px-10">
-        <div className="relative grid items-center gap-12 overflow-hidden rounded-[24px] bg-foreground p-10 text-background md:grid-cols-2 md:gap-16 md:p-16">
+      <div className="mx-auto max-w-[1240px] px-4 sm:px-6 md:px-10">
+        <div className="relative grid items-center gap-12 overflow-hidden rounded-[24px] bg-foreground p-6 text-background sm:p-8 md:grid-cols-2 md:gap-16 md:p-16">
           {/* Sage radial flourish bleeding from bottom-right */}
           <div
             aria-hidden

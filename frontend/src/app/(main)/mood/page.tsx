@@ -78,7 +78,7 @@ export default function MoodPage() {
         ) : null}
 
         <Tabs defaultValue="trends" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-4 rounded-full bg-muted p-1">
+          <TabsList className="grid w-full max-w-md grid-cols-4 rounded-full bg-muted p-1 text-xs sm:text-sm">
             <TabsTrigger value="trends" className="rounded-full">
               {t("trends")}
             </TabsTrigger>

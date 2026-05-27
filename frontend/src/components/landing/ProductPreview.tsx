@@ -64,7 +64,7 @@ export default function ProductPreview() {
 
   return (
     <section id="preview" className="border-y border-border bg-muted/60 py-24 md:py-[120px]">
-      <div className="mx-auto max-w-[1240px] px-10">
+      <div className="mx-auto max-w-[1240px] px-4 sm:px-6 md:px-10">
         <div className="mb-16 grid items-end gap-12 md:grid-cols-2 md:gap-16">
           <div>
             <span className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
@@ -192,13 +192,15 @@ export default function ProductPreview() {
               <div className="mb-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
                 {mood.heatmapLabel}
               </div>
-              <div className="grid grid-cols-14 gap-1" style={{ gridTemplateColumns: "repeat(14, minmax(0, 1fr))" }}>
-                {HEATMAP.map((level, i) => (
-                  <i
-                    key={i}
-                    className={"block aspect-square rounded-[4px] " + (HEATMAP_BG[level] ?? HEATMAP_BG[""])}
-                  />
-                ))}
+              <div className="overflow-x-auto">
+                <div className="grid min-w-[200px] grid-cols-14 gap-1" style={{ gridTemplateColumns: "repeat(14, minmax(0, 1fr))" }}>
+                  {HEATMAP.map((level, i) => (
+                    <i
+                      key={i}
+                      className={"block aspect-square rounded-[4px] " + (HEATMAP_BG[level] ?? HEATMAP_BG[""])}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>

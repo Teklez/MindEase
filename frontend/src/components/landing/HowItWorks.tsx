@@ -11,7 +11,7 @@ export default function HowItWorks() {
 
   return (
     <section id="how" className="py-24 md:py-[120px]">
-      <div className="mx-auto max-w-[1240px] px-10">
+      <div className="mx-auto max-w-[1240px] px-4 sm:px-6 md:px-10">
         <div className="mb-16 grid items-end gap-12 md:grid-cols-2 md:gap-16">
           <div>
             <span className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">

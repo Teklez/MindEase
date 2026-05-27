@@ -10,11 +10,11 @@ const PHOTOS = [
 ];
 
 const POSITIONS = [
-  "col-start-1 col-end-2 row-start-1 row-end-3",
-  "col-start-2 col-end-3 row-start-1 row-end-2",
-  "col-start-3 col-end-4 row-start-1 row-end-2",
-  "col-start-2 col-end-3 row-start-2 row-end-3",
-  "col-start-3 col-end-4 row-start-2 row-end-3",
+  "lg:col-start-1 lg:col-end-2 lg:row-start-1 lg:row-end-3",
+  "lg:col-start-2 lg:col-end-3 lg:row-start-1 lg:row-end-2",
+  "lg:col-start-3 lg:col-end-4 lg:row-start-1 lg:row-end-2",
+  "lg:col-start-2 lg:col-end-3 lg:row-start-2 lg:row-end-3",
+  "lg:col-start-3 lg:col-end-4 lg:row-start-2 lg:row-end-3",
 ];
 
 export default function MomentsGallery() {
@@ -24,7 +24,7 @@ export default function MomentsGallery() {
 
   return (
     <section id="moments" className="pb-24 md:pb-[120px]">
-      <div className="mx-auto max-w-[1240px] px-10">
+      <div className="mx-auto max-w-[1240px] px-4 sm:px-6 md:px-10">
         <div className="mb-10 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
           <div className="max-w-[56ch]">
             <span className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
@@ -44,17 +44,13 @@ export default function MomentsGallery() {
         </div>
 
         <div
-          className="grid gap-4"
-          style={{
-            gridTemplateColumns: "1.4fr 1fr 1fr",
-            gridTemplateRows: "220px 220px",
-          }}
+          className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:[grid-template-columns:1.4fr_1fr_1fr] lg:[grid-template-rows:220px_220px]"
         >
           {captions.map((cap, i) => (
             <div
               key={cap}
               className={
-                "group relative overflow-hidden rounded-2xl border border-border bg-muted " +
+                "group relative h-[200px] overflow-hidden rounded-2xl border border-border bg-muted lg:h-auto " +
                 POSITIONS[i]
               }
             >

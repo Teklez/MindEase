@@ -20,19 +20,19 @@ export default function Hero() {
 
   return (
     <header className="relative overflow-hidden pb-24 pt-16">
-      <div className="mx-auto max-w-[1240px] px-10">
+      <div className="mx-auto max-w-[1240px] px-4 sm:px-6 md:px-10">
         <div className="grid items-center gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-[72px]">
           {/* Copy */}
           <div className="hero-copy">
-            <div className="mb-7 inline-flex items-center gap-2.5 rounded-full border border-border bg-background py-1.5 pl-2 pr-3">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-2 py-[3px] font-mono text-[10.5px] font-medium uppercase tracking-[0.1em] text-primary">
+            <div className="mb-7 inline-flex max-w-full items-center gap-2.5 overflow-hidden rounded-full border border-border bg-background py-1.5 pl-2 pr-3">
+              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary/15 px-2 py-[3px] font-mono text-[10.5px] font-medium uppercase tracking-[0.1em] text-primary">
                 <span className="relative inline-block h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_0_3px_oklch(var(--primary)/0.25)]" />
                 {t("pill")}
               </span>
-              <span className="text-[12.5px] text-muted-foreground">{t("label")}</span>
+              <span className="hidden truncate text-[12.5px] text-muted-foreground sm:block">{t("label")}</span>
             </div>
 
-            <h1 className="font-serif text-[44px] font-[360] leading-[1.06] tracking-[-0.018em] text-foreground text-balance sm:text-[56px] md:text-[64px]">
+            <h1 className="font-serif text-[34px] font-[360] leading-[1.06] tracking-[-0.018em] text-foreground text-balance sm:text-[44px] md:text-[56px] lg:text-[64px]">
               {t("headlineLead")}{" "}
               <em
                 className="font-[360] text-primary"
@@ -42,7 +42,7 @@ export default function Hero() {
               </em>
             </h1>
 
-            <p className="mt-8 max-w-[38em] text-[18px] leading-[1.55] text-muted-foreground">
+            <p className="mt-8 max-w-[38em] text-[16px] leading-[1.55] text-muted-foreground sm:text-[18px]">
               {t("lede")}
             </p>
 
@@ -81,7 +81,7 @@ export default function Hero() {
           {/* Art */}
           <div
             aria-hidden
-            className="relative min-h-[520px] aspect-[1/1.1] lg:min-h-[620px]"
+            className="relative aspect-[1/1.1] min-h-[300px] sm:min-h-[420px] lg:min-h-[620px]"
           >
             {/* Blurred blobs */}
             <div
@@ -122,7 +122,7 @@ export default function Hero() {
             </div>
 
             {/* Chip 1 — MindEase reply */}
-            <div className="absolute left-[-20px] top-[38%] z-[5] flex min-w-[220px] items-center gap-2.5 rounded-[10px] border border-border bg-card p-3 shadow-[0_12px_28px_-16px_rgba(20,30,25,0.22)]">
+            <div className="absolute left-[-20px] top-[38%] z-[5] hidden min-w-[220px] items-center gap-2.5 rounded-[10px] border border-border bg-card p-3 shadow-[0_12px_28px_-16px_rgba(20,30,25,0.22)] sm:flex">
               <span className="grid h-8 w-8 place-items-center rounded-full bg-primary text-[13px] font-semibold text-primary-foreground">
                 M
               </span>
@@ -133,7 +133,7 @@ export default function Hero() {
             </div>
 
             {/* Chip 2 — mood logged */}
-            <div className="absolute bottom-[4%] right-[-20px] z-[5] flex min-w-[220px] items-center gap-2.5 rounded-[10px] border border-border bg-card p-3 shadow-[0_12px_28px_-16px_rgba(20,30,25,0.22)]">
+            <div className="absolute bottom-[4%] right-[-20px] z-[5] hidden min-w-[220px] items-center gap-2.5 rounded-[10px] border border-border bg-card p-3 shadow-[0_12px_28px_-16px_rgba(20,30,25,0.22)] sm:flex">
               <span className="grid h-8 w-8 place-items-center rounded-full border border-border bg-muted text-[13px] font-semibold text-foreground">
                 A
               </span>

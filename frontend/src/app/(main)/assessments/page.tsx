@@ -144,7 +144,7 @@ export default function AssessmentsPage() {
       </header>
 
       {/* Safety banner */}
-      <div className="mt-6 grid grid-cols-[auto_1fr_auto] items-center gap-4 rounded-md border border-honey/25 bg-honey-soft px-4 py-3.5">
+      <div className="mt-6 flex flex-wrap items-center gap-3 rounded-md border border-honey/25 bg-honey-soft px-4 py-3.5 sm:grid sm:grid-cols-[auto_1fr_auto] sm:gap-4">
         <span className="grid h-8 w-8 place-items-center rounded-full border border-honey/30 bg-background text-honey-deep">
           <ShieldAlert className="h-4 w-4" strokeWidth={1.75} />
         </span>

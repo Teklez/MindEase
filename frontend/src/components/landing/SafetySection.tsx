@@ -10,7 +10,7 @@ export default function SafetySection() {
 
   return (
     <section id="safety" className="border-t border-border py-24 md:py-[120px]">
-      <div className="mx-auto max-w-[1240px] px-10">
+      <div className="mx-auto max-w-[1240px] px-4 sm:px-6 md:px-10">
         <div className="grid items-start gap-12 lg:grid-cols-[1fr_1.4fr] lg:gap-16">
           <div>
             <span className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">

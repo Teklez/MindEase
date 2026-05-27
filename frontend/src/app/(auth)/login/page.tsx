@@ -10,7 +10,7 @@ export default async function LoginPage() {
   const t = await getTranslations("auth.v2.login.brand");
 
   return (
-    <div className="grid h-screen overflow-hidden lg:grid-cols-2">
+    <div className="grid min-h-screen overflow-auto lg:grid-cols-2">
       <BrandPanel
         photoSrc={LOGIN_PHOTO}
         eyebrow={t("eyebrow")}

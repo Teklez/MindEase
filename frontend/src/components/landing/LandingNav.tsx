@@ -50,7 +50,7 @@ export default function LandingNav() {
           : "border-b border-transparent bg-background/80 backdrop-blur",
       )}
     >
-      <div className="mx-auto flex h-[68px] max-w-[1240px] items-center justify-between gap-6 px-10">
+      <div className="mx-auto flex h-[68px] max-w-[1240px] items-center justify-between gap-6 px-4 sm:px-6 md:px-10">
         <Link href="/" className="flex items-center gap-2.5 font-serif text-[22px] font-medium tracking-[-0.01em] text-foreground">
           <LeafMark />
           MindEase

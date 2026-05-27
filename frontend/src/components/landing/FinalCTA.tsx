@@ -6,7 +6,7 @@ export default function FinalCTA() {
   const t = useTranslations("landing.v3.finalCta");
   return (
     <section className="border-t border-border bg-muted/60">
-      <div className="mx-auto max-w-[1240px] px-10">
+      <div className="mx-auto max-w-[1240px] px-4 sm:px-6 md:px-10">
         <div className="flex flex-col items-center gap-5 py-24 text-center md:py-[96px]">
           <span className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
             {t("eyebrow")}

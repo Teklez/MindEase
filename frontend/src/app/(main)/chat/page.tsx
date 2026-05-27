@@ -54,7 +54,7 @@ export default function ChatHomePage() {
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <section className="relative grid flex-1 place-items-center overflow-hidden bg-gradient-to-b from-background to-secondary/40 p-10">
+      <section className="relative grid flex-1 place-items-center overflow-hidden bg-gradient-to-b from-background to-secondary/40 p-4 sm:p-6 md:p-10">
         <div
           aria-hidden
           className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-primary opacity-35 blur-3xl"
