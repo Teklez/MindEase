@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
@@ -13,6 +14,7 @@ import {
   YAxis,
 } from "recharts";
 import {
+  ArrowLeft,
   ArrowRight,
   BookOpen,
   Download,
@@ -113,6 +115,14 @@ export function AssessmentResultView({
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-7 md:px-7 md:py-10">
+      <Link
+        href="/assessments"
+        className="mb-6 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <ArrowLeft className="h-3 w-3" strokeWidth={1.75} />
+        Back to assessments
+      </Link>
+
       {/* Header */}
       <header className="grid items-end gap-6 border-b border-border pb-7 md:grid-cols-[1fr_auto]">
         <div className="min-w-0">
