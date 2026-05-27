@@ -15,13 +15,11 @@ import {
 import {
   ArrowRight,
   BookOpen,
-  Clock,
   Download,
   ExternalLink,
   LifeBuoy,
   MessageSquare,
   Phone,
-  Send,
   Users2,
   type LucideIcon,
 } from "lucide-react";
@@ -106,24 +104,6 @@ export function AssessmentResultView({
         variant: "destructive",
       });
     }
-  };
-  const onShare = () =>
-    toast({
-      title: t("toasts.shareSoonTitle"),
-      description: t("toasts.shareSoonBody"),
-    });
-  const onRetakeIn2Weeks = () => {
-    try {
-      const next = new Date();
-      next.setDate(next.getDate() + 14);
-      localStorage.setItem(
-        `mindease.assessment.due.${result.assessment_type}`,
-        next.toISOString(),
-      );
-    } catch {
-      // localStorage may be blocked — non-fatal.
-    }
-    onRetake();
   };
 
   // Headline split
@@ -325,28 +305,24 @@ export function AssessmentResultView({
             </p>
             <ul className="mt-3 flex flex-col gap-1">
               <NextStep
-                tone="sage"
                 Icon={MessageSquare}
                 title={t("talkItThrough")}
                 subtitle={t("talkItThroughSub")}
                 onClick={() => router.push("/chat")}
               />
               <NextStep
-                tone="honey"
                 Icon={Phone}
                 title={t("findClinician")}
                 subtitle={t("findClinicianSub")}
                 onClick={() => router.push("/resources?category=clinician")}
               />
               <NextStep
-                tone="dawn"
                 Icon={Users2}
                 title={t("joinGroup")}
                 subtitle={t("joinGroupSub")}
                 onClick={() => router.push("/groups")}
               />
               <NextStep
-                tone="sage"
                 Icon={BookOpen}
                 title={t("exploreResources")}
                 subtitle={t("exploreResourcesSub")}
@@ -357,9 +333,9 @@ export function AssessmentResultView({
 
           {/* Safety card */}
           {showSafetyCard && (
-            <Card className="border-honey/30 bg-honey-soft/40 p-5">
+            <Card className="border-border bg-muted/40 p-5">
               <div className="flex items-start gap-3">
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-background text-honey-deep">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-border bg-background text-muted-foreground">
                   <LifeBuoy className="h-4 w-4" strokeWidth={1.75} />
                 </span>
                 <div className="min-w-0">
@@ -385,7 +361,7 @@ export function AssessmentResultView({
                             rel={r.type === "url" ? "noopener noreferrer" : undefined}
                             className="flex items-center gap-2 rounded-md px-1.5 py-1 text-[12.5px] text-foreground transition-colors hover:bg-background"
                           >
-                            <Icon className="h-3 w-3 text-honey-deep" strokeWidth={1.75} />
+                            <Icon className="h-3 w-3 text-muted-foreground" strokeWidth={1.75} />
                             <span className="font-medium">{r.name}</span>
                             <span className="ml-auto font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
                               {r.contact}
@@ -415,12 +391,7 @@ export function AssessmentResultView({
             <Download className="h-3.5 w-3.5" strokeWidth={1.75} />
             {tExport("downloadResults")}
           </Button>
-          <Button variant="ghost" onClick={onShare} className="gap-1.5">
-            <Send className="h-3.5 w-3.5" strokeWidth={1.75} />
-            {t("shareClinician")}
-          </Button>
-          <Button onClick={onRetakeIn2Weeks} className="gap-1.5">
-            <Clock className="h-3.5 w-3.5" strokeWidth={1.75} />
+          <Button onClick={onRetake} className="gap-1.5">
             {t("retakeIn")}
           </Button>
         </div>
@@ -430,13 +401,11 @@ export function AssessmentResultView({
 }
 
 function NextStep({
-  tone,
   Icon,
   title,
   subtitle,
   onClick,
 }: {
-  tone: "sage" | "honey" | "dawn";
   Icon: LucideIcon;
   title: string;
   subtitle: string;
@@ -450,12 +419,7 @@ function NextStep({
         className="grid w-full grid-cols-[34px_1fr_auto] items-center gap-3 rounded-md px-2 py-2 text-left transition-colors hover:bg-secondary/60"
       >
         <span
-          className={cn(
-            "grid h-[34px] w-[34px] place-items-center rounded-md",
-            tone === "sage" && "bg-secondary text-primary-deep",
-            tone === "honey" && "bg-honey-soft text-honey-deep",
-            tone === "dawn" && "bg-dawn-soft text-dawn-deep",
-          )}
+          className="grid h-[34px] w-[34px] place-items-center rounded-md bg-secondary text-primary-deep"
           aria-hidden
         >
           <Icon className="h-4 w-4" strokeWidth={1.75} />

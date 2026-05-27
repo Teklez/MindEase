@@ -26,7 +26,6 @@ import { ScoreTrendMini } from "@/components/assessments/ScoreTrendMini";
 import { toast } from "@/hooks/use-toast";
 import {
   instrumentCode,
-  instrumentTone,
   levelToIndex,
 } from "@/lib/assessment-level";
 import { useLevelLabel } from "@/hooks/useLevelLabel";
@@ -144,8 +143,8 @@ export default function AssessmentsPage() {
       </header>
 
       {/* Safety banner */}
-      <div className="mt-6 flex flex-wrap items-center gap-3 rounded-md border border-honey/25 bg-honey-soft px-4 py-3.5 sm:grid sm:grid-cols-[auto_1fr_auto] sm:gap-4">
-        <span className="grid h-8 w-8 place-items-center rounded-full border border-honey/30 bg-background text-honey-deep">
+      <div className="mt-6 flex flex-wrap items-center gap-3 rounded-md border border-border bg-muted/50 px-4 py-3.5 sm:grid sm:grid-cols-[auto_1fr_auto] sm:gap-4">
+        <span className="grid h-8 w-8 place-items-center rounded-full border border-border bg-background text-muted-foreground">
           <ShieldAlert className="h-4 w-4" strokeWidth={1.75} />
         </span>
         <p className="text-[13.5px] leading-relaxed text-foreground/85">
@@ -158,7 +157,7 @@ export default function AssessmentsPage() {
         </p>
         <Link
           href="/assessments/how-we-score"
-          className="hidden items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-honey-deep md:inline-flex"
+          className="hidden items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-primary md:inline-flex"
         >
           {tSafety("howScored")}
           <ArrowRight className="h-3 w-3" strokeWidth={1.75} />
@@ -302,7 +301,6 @@ function AssessmentCard({ item, lang, lastResult, onStart }: CardProps) {
   const description =
     lang === "am" && item.description_am ? item.description_am : item.description;
   const code = instrumentCode(item.assessment_type);
-  const tone = instrumentTone(item.assessment_type);
   const Icon = item.assessment_type === "depression"
     ? Brain
     : item.assessment_type === "anxiety"
@@ -316,25 +314,13 @@ function AssessmentCard({ item, lang, lastResult, onStart }: CardProps) {
       <div className="relative p-6 pb-4">
         <div
           className="pointer-events-none absolute -bottom-12 -right-12 h-40 w-40 rounded-full blur-3xl"
-          style={{
-            background:
-              tone === "sage"
-                ? "color-mix(in oklab, var(--primary) 18%, transparent)"
-                : tone === "honey"
-                  ? "color-mix(in oklab, var(--honey) 22%, transparent)"
-                  : "color-mix(in oklab, var(--dawn) 20%, transparent)",
-          }}
+          style={{ background: "color-mix(in oklab, var(--primary) 16%, transparent)" }}
           aria-hidden
         />
 
         <div className="flex items-start justify-between gap-3">
           <span
-            className={cn(
-              "grid h-[46px] w-[46px] place-items-center rounded-md",
-              tone === "sage" && "bg-secondary text-primary-deep",
-              tone === "honey" && "bg-honey-soft text-honey-deep",
-              tone === "dawn" && "bg-dawn-soft text-dawn-deep",
-            )}
+            className="grid h-[46px] w-[46px] place-items-center rounded-md bg-secondary text-primary-deep"
             aria-hidden
           >
             <Icon className="h-5 w-5" strokeWidth={1.75} />
@@ -425,7 +411,6 @@ function HistoryRow({
   items: AssessmentListItem[];
   locale: string;
 }) {
-  const tone = instrumentTone(item.assessment_type);
   const Icon =
     item.assessment_type === "depression"
       ? Brain
@@ -441,12 +426,7 @@ function HistoryRow({
       className="grid grid-cols-[40px_1fr_auto_auto] items-center gap-3 rounded-md px-2 py-2 transition-colors hover:bg-secondary/50"
     >
       <span
-        className={cn(
-          "grid h-8 w-8 place-items-center rounded-md",
-          tone === "sage" && "bg-secondary text-primary-deep",
-          tone === "honey" && "bg-honey-soft text-honey-deep",
-          tone === "dawn" && "bg-dawn-soft text-dawn-deep",
-        )}
+        className="grid h-8 w-8 place-items-center rounded-md bg-secondary text-primary-deep"
         aria-hidden
       >
         <Icon className="h-3.5 w-3.5" strokeWidth={1.75} />
