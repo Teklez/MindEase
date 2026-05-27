@@ -157,7 +157,7 @@ export default function AssessmentsPage() {
           .
         </p>
         <Link
-          href="/resources?category=scoring"
+          href="/assessments/how-we-score"
           className="hidden items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-honey-deep md:inline-flex"
         >
           {tSafety("howScored")}
