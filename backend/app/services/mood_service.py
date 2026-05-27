@@ -132,19 +132,17 @@ class MoodService:
         all_entries = list(all_result.scalars().all())
 
         total_entries = len(all_entries)
-        average_mood = (
-            round(sum(e.mood_level for e in all_entries) / total_entries, 1)
-            if total_entries
-            else None
-        )
+        # Clamp legacy out-of-range values into the 1-5 scale
+        levels = [max(1, min(5, e.mood_level)) for e in all_entries]
+        average_mood = round(sum(levels) / total_entries, 1) if total_entries else None
 
         # Streak
         entry_dates = sorted({e.created_at.date() for e in all_entries})
         current_streak, longest_streak = self._calculate_streak(all_entries)
 
         # Most common mood
-        if all_entries:
-            counts = Counter(e.mood_level for e in all_entries)
+        if levels:
+            counts = Counter(levels)
             most_common_mood = counts.most_common(1)[0][0]
         else:
             most_common_mood = None
@@ -160,10 +158,11 @@ class MoodService:
             1 for e in all_entries if e.created_at.date() >= month_start
         )
 
-        # Mood distribution
+        # Mood distribution — clamp out-of-range legacy values into the 1-5 bucket
         mood_distribution = {i: 0 for i in range(1, 6)}
         for e in all_entries:
-            mood_distribution[e.mood_level] += 1
+            lvl = max(1, min(5, e.mood_level))
+            mood_distribution[lvl] += 1
 
         # Weekly averages — last 12 weeks
         weekly_averages = _calc_weekly_averages(all_entries, weeks=12)
