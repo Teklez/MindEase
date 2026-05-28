@@ -20,6 +20,11 @@ from app.services.voice_context_service import voice_context_service
 logger = logging.getLogger(__name__)
 
 
+# Max prior in-call turns to replay into each fresh Live session so the model
+# keeps continuity across the native-audio model's per-turn session resets.
+_MAX_REPLAY_TURNS = 6
+
+
 # ---------- helpers ----------
 
 def _build_persona_prompt(persona_name: str, persona_blurb: str, locale: str = "en") -> str:
@@ -89,6 +94,11 @@ class VoiceService:
         self._user_buf: list[str] = []
         self._ai_buf: list[str] = []
 
+        # Rolling in-memory record of completed turns in THIS call. Replayed
+        # into each fresh Live session on reconnect so the model resumes the
+        # dialog instead of greeting again. Independent of long-term RAG.
+        self._history: list[tuple[str, str]] = []
+
     async def _build_system_instruction(self) -> str:
         async with async_session_maker() as db:
             dossier = await voice_context_service.build(db, self.user_id)
@@ -149,6 +159,22 @@ class VoiceService:
         )
         self._session = await self._session_ctx.__aenter__()
         print(f"[voice] Live session OPEN conv={self.conversation_id} persona={self.persona_name} voice={self.voice}", flush=True)
+
+        # Replay prior in-call turns so the model resumes mid-conversation
+        # instead of greeting again. No-op on the first open (empty history).
+        if self._history:
+            try:
+                turns: list[types.Content] = []
+                for u_text, a_text in self._history:
+                    if u_text:
+                        turns.append(types.Content(role="user", parts=[types.Part(text=u_text)]))
+                    if a_text:
+                        turns.append(types.Content(role="model", parts=[types.Part(text=a_text)]))
+                if turns:
+                    await self._session.send_client_content(turns=turns, turn_complete=False)
+                    print(f"[voice] replayed {len(turns)} prior turns into new Live session", flush=True)
+            except Exception as exc:
+                print(f"[voice] history replay failed (continuing): {exc}", flush=True)
 
     async def _close_live_session(self) -> None:
         if self._session_ctx is not None:
@@ -283,6 +309,14 @@ class VoiceService:
                     ai_text = "".join(self._ai_buf).strip()
                     self._user_buf.clear()
                     self._ai_buf.clear()
+                    # Snapshot the turn into in-memory history BEFORE the
+                    # fire-and-forget DB flush. The supervisor may reopen the
+                    # Live session before the DB write commits, and the
+                    # replay path needs the latest turn to be present.
+                    if user_text or ai_text:
+                        self._history.append((user_text, ai_text))
+                        if len(self._history) > _MAX_REPLAY_TURNS:
+                            self._history = self._history[-_MAX_REPLAY_TURNS:]
                     print(
                         f"[voice] turn_complete #{turn_idx} u={len(user_text)} a={len(ai_text)}",
                         flush=True,
