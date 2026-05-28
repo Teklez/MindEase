@@ -171,13 +171,20 @@ class VoiceService:
     async def _build_system_instruction(self) -> str:
         async with async_session_maker() as db:
             dossier = await voice_context_service.build(db, self.user_id)
-            seed_query = f"voice conversation with {self.persona_name}: {self.persona_blurb}"
+            # Use the user's most recent utterance as the similarity seed so
+            # retrieval matches what they're talking about right now. Falls
+            # back to a persona-flavoured static string only on the first
+            # session open (empty history) when we have no user signal yet.
+            seed_query = next(
+                (u for u, _ in reversed(self._history) if u),
+                f"voice conversation with {self.persona_name}: {self.persona_blurb}",
+            )
             try:
                 retrieved = await memory_service.retrieve(
                     db,
                     user_id=self.user_id,
                     query_text=seed_query,
-                    k=10,
+                    k=20,
                     kinds=[
                         "message", "mood_note", "assessment_result",
                         "summary", "profile_fact", "voice_transcript",
