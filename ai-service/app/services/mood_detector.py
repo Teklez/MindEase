@@ -43,10 +43,17 @@ class MoodDetectorService:
                     config=types.GenerateContentConfig(
                         system_instruction=_SYSTEM_PROMPT,
                         temperature=0.1,
-                        max_output_tokens=20,
+                        max_output_tokens=64,
+                        # gemini-2.5-flash is a thinking model — without this it
+                        # spends the whole output budget on internal reasoning
+                        # and returns an empty text, which parses to null.
+                        thinking_config=types.ThinkingConfig(thinking_budget=0),
                     ),
                 )
-                return _parse_level(resp.text)
+                level = _parse_level(resp.text)
+                if level is None:
+                    logger.warning("mood_detector: gemini returned unparseable text: %r", resp.text)
+                return level
             except Exception as exc:
                 logger.warning("Gemini mood detection failed, falling back to Ollama: %s", exc)
         return await self._detect_ollama(text)
