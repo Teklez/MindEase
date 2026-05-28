@@ -32,6 +32,21 @@ function prefetchViewer() {
   void import("./AvatarViewer");
 }
 
+// Warm a specific persona's .glb in the HTTP cache. The Cache-Control headers
+// (see next.config.mjs) keep it in the disk cache for a year, so this only
+// pays the network cost once per browser.
+const glbPrefetched = new Set<string>();
+function prefetchGlb(url: string | null) {
+  if (!url || glbPrefetched.has(url) || typeof window === "undefined") return;
+  glbPrefetched.add(url);
+  const link = document.createElement("link");
+  link.rel = "prefetch";
+  link.as = "fetch";
+  link.href = url;
+  link.crossOrigin = "anonymous";
+  document.head.appendChild(link);
+}
+
 // MiniHead is the in-card mini TalkingHead used by the picker's play preview.
 // Lazy-loaded so the TalkingHead + three.js bundle isn't pulled in on the
 // initial picker render — same trick as AvatarViewer above.
@@ -220,6 +235,7 @@ function AvatarPicker({
           const onIntent = available
             ? () => {
                 prefetchViewer();
+                prefetchGlb(a.url);
                 prefetchPreview(a);
               }
             : undefined;
@@ -331,9 +347,17 @@ export function AvatarScene({
   );
 
   // When the picker mounts, kick off a low-priority prefetch of the viewer
-  // chunk so it's already cached by the time the user picks an avatar.
+  // chunk so it's already cached by the time the user picks an avatar. Also
+  // start warming the first persona's .glb in the background — even if the
+  // user picks someone else, the cost is one extra 12 MB download, paid once
+  // per browser thanks to the immutable Cache-Control header.
   useEffect(() => {
     if (selected) return;
+    const firstUrl = avatars.find((a) => a.url)?.url ?? null;
+    const warm = () => {
+      prefetchViewer();
+      prefetchGlb(firstUrl);
+    };
     const ric = (window as unknown as {
       requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
     }).requestIdleCallback;
@@ -341,8 +365,8 @@ export function AvatarScene({
       cancelIdleCallback?: (h: number) => void;
     }).cancelIdleCallback;
     const trigger = ric
-      ? ric(prefetchViewer, { timeout: 2000 })
-      : window.setTimeout(prefetchViewer, 1500);
+      ? ric(warm, { timeout: 2000 })
+      : window.setTimeout(warm, 1500);
     return () => {
       if (ric) {
         cic?.(trigger);
@@ -350,7 +374,7 @@ export function AvatarScene({
         window.clearTimeout(trigger);
       }
     };
-  }, [selected]);
+  }, [selected, avatars]);
 
   if (!selected) return <AvatarPicker avatars={avatars} onSelect={(a) => setSelectedId(a.id)} />;
   return (
