@@ -99,6 +99,30 @@ class VoiceService:
         # dialog instead of greeting again. Independent of long-term RAG.
         self._history: list[tuple[str, str]] = []
 
+    def _format_history_block(self) -> str:
+        """Render the in-call dialog as text for the system instruction.
+        send_client_content(turn_complete=False) does not influence the
+        native-audio Live model across the per-turn session resets, so we
+        embed the recent exchanges directly into the prompt with an explicit
+        \"do not re-greet, continue from here\" directive."""
+        if not self._history:
+            return ""
+        lines: list[str] = []
+        for u_text, a_text in self._history:
+            if u_text:
+                lines.append(f"User: {u_text}")
+            if a_text:
+                lines.append(f"You: {a_text}")
+        body = "\n".join(lines)
+        return (
+            "## Conversation so far in this call\n"
+            "You have already been talking with this user. Do NOT greet again "
+            "or re-introduce yourself. Continue from where you left off, "
+            "responding to the user's next message naturally based on the "
+            "dialog below.\n\n"
+            f"{body}"
+        )
+
     async def _build_system_instruction(self) -> str:
         async with async_session_maker() as db:
             dossier = await voice_context_service.build(db, self.user_id)
@@ -124,6 +148,9 @@ class VoiceService:
             blocks.append(dossier)
         if retrieved:
             blocks.append("## Relevant past moments\n" + _format_chunks(retrieved))
+        in_call = self._format_history_block()
+        if in_call:
+            blocks.append(in_call)
         assembled = "\n\n".join(blocks)
         logger.info(
             "voice system_instruction assembled for user=%s persona=%s len=%d",
@@ -159,22 +186,6 @@ class VoiceService:
         )
         self._session = await self._session_ctx.__aenter__()
         print(f"[voice] Live session OPEN conv={self.conversation_id} persona={self.persona_name} voice={self.voice}", flush=True)
-
-        # Replay prior in-call turns so the model resumes mid-conversation
-        # instead of greeting again. No-op on the first open (empty history).
-        if self._history:
-            try:
-                turns: list[types.Content] = []
-                for u_text, a_text in self._history:
-                    if u_text:
-                        turns.append(types.Content(role="user", parts=[types.Part(text=u_text)]))
-                    if a_text:
-                        turns.append(types.Content(role="model", parts=[types.Part(text=a_text)]))
-                if turns:
-                    await self._session.send_client_content(turns=turns, turn_complete=False)
-                    print(f"[voice] replayed {len(turns)} prior turns into new Live session", flush=True)
-            except Exception as exc:
-                print(f"[voice] history replay failed (continuing): {exc}", flush=True)
 
     async def _close_live_session(self) -> None:
         if self._session_ctx is not None:
