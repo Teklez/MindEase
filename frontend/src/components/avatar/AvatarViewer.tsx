@@ -126,6 +126,23 @@ export function AvatarViewer({
   const [isRecording, setIsRecording] = useState(false);
   const [callError, setCallError] = useState<string | null>(null);
 
+  // Voice streaming uses AudioWorklet (TalkingHead → audioCtx.audioWorklet.addModule).
+  // The `audioWorklet` property is only exposed on `AudioContext` in secure
+  // contexts (HTTPS, localhost, 127.0.0.1). Over plain HTTP on a LAN/public
+  // hostname, the property is `undefined` and TalkingHead crashes with a
+  // cryptic "Cannot read properties of undefined (reading 'addModule')".
+  // Detect it up front so we can disable the call button and tell the user
+  // exactly why, instead of letting them spam-click into a TypeError loop.
+  const voiceUnsupported =
+    typeof window !== "undefined" && !window.isSecureContext;
+
+  // Preset the error banner so the user sees the cause before clicking.
+  useEffect(() => {
+    if (voiceUnsupported) {
+      setCallError(t("requiresSecureContext", { name: avatar.name }));
+    }
+  }, [voiceUnsupported, avatar.name, t]);
+
   // Mount + unmount the avatar
   useEffect(() => {
     if (!containerRef.current || !avatar.url) return;
@@ -242,6 +259,7 @@ export function AvatarViewer({
   // gesture so the AudioWorklet's AudioContext is allowed to resume.
   const ensureStream = useCallback(async () => {
     const head = headRef.current as unknown as {
+      audioCtx?: { audioWorklet?: unknown };
       streamStart: (
         opt: { lipsyncType?: string },
         onAudioStart: () => void,
@@ -249,6 +267,12 @@ export function AvatarViewer({
       ) => Promise<void>;
     } | null;
     if (!head || streamReadyRef.current) return;
+    // Bail before TalkingHead reaches `audioCtx.audioWorklet.addModule(...)` —
+    // that property is only present in secure contexts. Throwing here surfaces
+    // the real cause to the caller's catch instead of the cryptic TypeError.
+    if (!head.audioCtx?.audioWorklet) {
+      throw new Error("AUDIO_WORKLET_UNAVAILABLE");
+    }
     await head.streamStart(
       { lipsyncType: "words" },
       () => setStatus("speaking"),
@@ -397,6 +421,10 @@ export function AvatarViewer({
 
   async function startCall() {
     if (status !== "ready") return;
+    if (voiceUnsupported) {
+      setCallError(t("requiresSecureContext", { name: avatar.name }));
+      return;
+    }
     resumeAudioCtx();
     setCallStatus("connecting");
     setCallError(null);
@@ -406,7 +434,13 @@ export function AvatarViewer({
     try {
       await ensureStream();
     } catch (err) {
-      setCallError(err instanceof Error ? err.message : t("audioInitFailed"));
+      const msg =
+        err instanceof Error && err.message === "AUDIO_WORKLET_UNAVAILABLE"
+          ? t("requiresSecureContext", { name: avatar.name })
+          : err instanceof Error
+            ? err.message
+            : t("audioInitFailed");
+      setCallError(msg);
       setCallStatus("idle");
       return;
     }
@@ -559,6 +593,12 @@ export function AvatarViewer({
               type="button"
               size="lg"
               onClick={startCall}
+              disabled={voiceUnsupported}
+              title={
+                voiceUnsupported
+                  ? t("requiresSecureContext", { name: avatar.name })
+                  : undefined
+              }
               className="pointer-events-auto"
             >
               <Phone className="mr-2 h-4 w-4" strokeWidth={1.75} />

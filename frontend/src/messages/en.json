@@ -1239,7 +1239,8 @@
       "holdToSpeak": "Hold to speak",
       "endCall": "End call",
       "startCallFailed": "Failed to start call",
-      "audioInitFailed": "Audio init failed"
+      "audioInitFailed": "Audio init failed",
+      "requiresSecureContext": "Voice chat needs a secure connection. Open this site over HTTPS (or use localhost) to talk with {name}."
     },
     "personas": {
       "alex": {
