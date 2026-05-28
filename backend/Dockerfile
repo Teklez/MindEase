@@ -22,6 +22,8 @@ COPY . .
 
 ENV PATH=/home/appuser/.local/bin:$PATH
 
+RUN mkdir -p /app/tts_cache && chown -R appuser:appuser /app/tts_cache
+
 USER appuser
 
 EXPOSE 8000

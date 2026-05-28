@@ -1,5 +1,10 @@
 import base64
+import hashlib
+import json
+import logging
+import pathlib
 import re
+import time
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, status
@@ -18,6 +23,7 @@ from app.schemas.voice import TTSRequest, TTSResponse, VoiceConversationCreate
 from app.services.voice_service import VoiceService
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 _GEMINI_TTS_MODEL = "gemini-2.5-flash-preview-tts"
 _TTS_VOICES = {
@@ -25,6 +31,45 @@ _TTS_VOICES = {
     "Leda", "Algenib", "Iapetus",
 }
 _PCM_RATE_RE = re.compile(r"rate=(\d+)")
+
+
+# ── TTS disk cache ───────────────────────────────────────────────────────────
+# Gemini TTS is on a 100 req/day free-tier quota. Persona intros are static
+# (same text, same voice -> identical audio every time), so cache aggressively
+# to disk. A single round of 5 personas + 2 locales = 10 cache files that live
+# forever; after that, zero quota usage for previews.
+_TTS_CACHE_DIR = pathlib.Path("/app/tts_cache")
+_TTS_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def _tts_cache_key(text: str, voice: str) -> str:
+    h = hashlib.sha256()
+    h.update(voice.encode("utf-8"))
+    h.update(b"\x00")
+    h.update(text.encode("utf-8"))
+    return h.hexdigest()[:24]
+
+
+def _tts_cache_read(text: str, voice: str) -> TTSResponse | None:
+    key = _tts_cache_key(text, voice)
+    path = _TTS_CACHE_DIR / f"{key}.json"
+    if not path.exists():
+        return None
+    try:
+        data = json.loads(path.read_text())
+        return TTSResponse(audio=data["audio"], sample_rate=int(data["sample_rate"]))
+    except Exception:
+        return None
+
+
+def _tts_cache_write(text: str, voice: str, audio_b64: str, sample_rate: int) -> None:
+    key = _tts_cache_key(text, voice)
+    path = _TTS_CACHE_DIR / f"{key}.json"
+    try:
+        path.write_text(json.dumps({"audio": audio_b64, "sample_rate": sample_rate}))
+    except Exception as exc:
+        print(f"[tts] cache write failed: {exc}", flush=True)
+
 
 
 @router.post("/tts", response_model=TTSResponse)
@@ -45,7 +90,17 @@ async def synthesize_tts(
             detail="TTS unavailable (server missing GEMINI_API_KEY)",
         )
 
+    # Disk cache check before touching Gemini. Persona intros are static, so
+    # the same (text, voice) pair always produces identical bytes.
+    cached = _tts_cache_read(body.text, body.voice)
+    if cached is not None:
+        print(f"[tts] cache HIT voice={body.voice} key={_tts_cache_key(body.text, body.voice)}", flush=True)
+        return cached
+
     client = genai.Client(api_key=settings.GEMINI_API_KEY)
+    text_preview = body.text[:60].replace(chr(10), " ")
+    t0 = time.perf_counter()
+    print(f"[tts] start voice={body.voice} len={len(body.text)} preview={text_preview!r}", flush=True)
     try:
         response = await client.aio.models.generate_content(
             model=_GEMINI_TTS_MODEL,
@@ -62,7 +117,23 @@ async def synthesize_tts(
             ),
         )
     except Exception as exc:  # noqa: BLE001
+        dt = time.perf_counter() - t0
+        import traceback
+        err_str = str(exc)
+        print(f"[tts] FAILED voice={body.voice} after={dt:.2f}s err={exc!r}", flush=True)
+        print(traceback.format_exc(), flush=True)
+        # Friendlier message for the daily-quota case. Gemini returns
+        # "429 RESOURCE_EXHAUSTED" with a retryDelay in the body.
+        if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str:
+            retry_match = re.search(r"retry in (\d+h(?:\d+m)?(?:\d+(?:\.\d+)?s)?)", err_str)
+            retry_hint = f" Retry in {retry_match.group(1)}." if retry_match else ""
+            raise HTTPException(
+                status_code=429,
+                detail=f"Voice preview unavailable — Gemini TTS daily quota exhausted.{retry_hint}",
+            ) from exc
         raise HTTPException(status_code=502, detail=f"Gemini TTS failed: {exc}") from exc
+    dt = time.perf_counter() - t0
+    print(f"[tts] OK voice={body.voice} in={dt:.2f}s", flush=True)
 
     try:
         part = response.candidates[0].content.parts[0]
@@ -77,10 +148,11 @@ async def synthesize_tts(
     rate_match = _PCM_RATE_RE.search(mime_type)
     sample_rate = int(rate_match.group(1)) if rate_match else 24000
 
-    return TTSResponse(
-        audio=base64.b64encode(pcm_bytes).decode("ascii"),
-        sample_rate=sample_rate,
-    )
+    audio_b64 = base64.b64encode(pcm_bytes).decode("ascii")
+    # Write to cache so the next request for this (text, voice) hits disk.
+    _tts_cache_write(body.text, body.voice, audio_b64, sample_rate)
+
+    return TTSResponse(audio=audio_b64, sample_rate=sample_rate)
 
 
 @router.post(

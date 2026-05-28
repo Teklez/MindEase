@@ -1,7 +1,20 @@
 13.60.85.55.nip.io {
+    # WebSockets → backend directly (Next.js doesn't proxy WS)
     @ws path /ws/*
     reverse_proxy @ws backend:8000
 
+    # Large static avatar models served straight from disk — Next.js's
+    # standalone server was returning ERR_HTTP2_PROTOCOL_ERROR on these 13 MB
+    # files. Caddy is much better at large static responses.
+    handle_path /avatars/* {
+        root * /srv/avatars
+        # 30-day cache; GLB filenames change when the model itself is replaced,
+        # so we can be aggressive. `immutable` tells the browser to never
+        # revalidate within the max-age window.
+        header Cache-Control "public, max-age=2592000, immutable"
+        file_server
+    }
+
+    # Everything else → frontend (which proxies /api/* to backend internally)
     reverse_proxy frontend:3000
 }
-

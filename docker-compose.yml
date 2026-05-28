@@ -44,6 +44,8 @@ services:
     build: ./backend
     ports:
       - "8000:8000"
+    volumes:
+      - tts_cache_data:/app/tts_cache
     depends_on:
       db: { condition: service_healthy }
       redis: { condition: service_started }
@@ -79,6 +81,7 @@ services:
       - "443:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./frontend/public/avatars:/srv/avatars:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
@@ -111,6 +114,7 @@ services:
       backend: { condition: service_healthy }
 
 volumes:
+  tts_cache_data:
   postgres_data:
   ollama_data:
   caddy_data:

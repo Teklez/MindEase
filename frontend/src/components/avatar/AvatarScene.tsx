@@ -32,6 +32,17 @@ function prefetchViewer() {
   void import("./AvatarViewer");
 }
 
+const prefetchedModels = new Set<string>();
+function prefetchModel(a: { url: string | null }) {
+  if (!a.url || prefetchedModels.has(a.url)) return;
+  prefetchedModels.add(a.url);
+  // Browser caches a normal fetch; using HEAD would skip the body and defeat
+  // the purpose. The response is ignored — we just want it in the HTTP cache.
+  void fetch(a.url, { credentials: "omit" }).catch(() => {
+    prefetchedModels.delete(a.url!);
+  });
+}
+
 // MiniHead is the in-card mini TalkingHead used by the picker's play preview.
 // Lazy-loaded so the TalkingHead + three.js bundle isn't pulled in on the
 // initial picker render — same trick as AvatarViewer above.
@@ -217,10 +228,15 @@ function AvatarPicker({
         {avatars.map((a) => {
           const available = !!a.url;
           const playing = playingId === a.id;
+          // On hover: prefetch the viewer JS bundle AND the 13 MB GLB model
+          // into the browser cache. The GLB has no quota cost (just bytes),
+          // and downloading it during hover means click → viewer mount is
+          // instant. TTS audio is NOT prefetched here — Gemini TTS has a
+          // 100/day quota that hover-prefetch would quickly exhaust.
           const onIntent = available
             ? () => {
                 prefetchViewer();
-                prefetchPreview(a);
+                prefetchModel(a);
               }
             : undefined;
           return (
