@@ -33,12 +33,14 @@ PORT="${PORT:-8002}"
 OLLAMA_PORT="${OLLAMA_PORT:-11434}"
 DO_PULL=1
 KILL_PORT=0
+NO_RELOAD=0
 MODEL_OVERRIDE=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --no-pull)     DO_PULL=0 ;;
     --kill-port)   KILL_PORT=1 ;;
+    --no-reload)   NO_RELOAD=1 ;;
     --model)       MODEL_OVERRIDE="$2"; shift ;;
     --host)        HOST="$2"; shift ;;
     --port)        PORT="$2"; shift ;;
@@ -161,4 +163,5 @@ fi
 log "launching ai-service on ${HOST}:${PORT}"
 AI_ARGS=(--host "$HOST" --port "$PORT")
 [[ "$KILL_PORT" == "1" ]] && AI_ARGS+=(--kill-port)
+[[ "$NO_RELOAD" == "1" ]] && AI_ARGS+=(--no-reload)
 exec ./scripts/run-ai-service-native.sh "${AI_ARGS[@]}"
