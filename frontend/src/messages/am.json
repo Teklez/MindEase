@@ -1239,7 +1239,8 @@
       "holdToSpeak": "ለመናገር ይያዙ",
       "endCall": "ጥሪውን ያቁሙ",
       "startCallFailed": "ጥሪ ለመጀመር አልተቻለም",
-      "audioInitFailed": "ድምጽ ለመጀመር አልተቻለም"
+      "audioInitFailed": "ድምጽ ለመጀመር አልተቻለም",
+      "requiresSecureContext": "የድምፅ ውይይት ደህንነቱ የተጠበቀ ግንኙነት ይፈልጋል። ከ{name} ጋር ለመነጋገር ጣቢያውን በ HTTPS (ወይም localhost) ይክፈቱ።"
     },
     "personas": {
       "alex": {

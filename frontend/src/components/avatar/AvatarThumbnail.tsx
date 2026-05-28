@@ -27,10 +27,52 @@ const setCached = (url: string, dataUrl: string): void => {
   }
 };
 
-// Serialize renders so multiple thumbnails don't fight for GPU contexts and
-// overwhelm slower devices. Cards still get their thumbnails one-by-one over
-// a few seconds on first load; on subsequent loads it's all cached.
-let renderQueue: Promise<unknown> = Promise.resolve();
+// Derive the precomputed thumbnail path from an avatar's .glb URL.
+// e.g. /avatars/bereket.glb -> /avatars/bereket.webp
+const staticThumbUrl = (glbUrl: string): string =>
+  glbUrl.replace(/\.glb($|\?)/, ".webp$1");
+
+// Module-level cache: once we know a static thumb exists (or doesn't), don't
+// re-probe it on every mount. Maps thumb URL -> "ok" | "missing".
+const staticThumbProbe = new Map<string, "ok" | "missing">();
+
+function probeStaticThumb(url: string): Promise<boolean> {
+  const cached = staticThumbProbe.get(url);
+  if (cached) return Promise.resolve(cached === "ok");
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      staticThumbProbe.set(url, "ok");
+      resolve(true);
+    };
+    img.onerror = () => {
+      staticThumbProbe.set(url, "missing");
+      resolve(false);
+    };
+    img.src = url;
+  });
+}
+
+// Limit concurrent GPU snapshot renders. Strict serial (=1) makes a cold load
+// feel like forever; unlimited fights for GPU contexts on weaker devices.
+// Two-at-a-time is the sweet spot empirically.
+const RENDER_CONCURRENCY = 2;
+let activeRenders = 0;
+const renderWaiters: Array<() => void> = [];
+
+async function acquireRenderSlot(): Promise<void> {
+  if (activeRenders < RENDER_CONCURRENCY) {
+    activeRenders++;
+    return;
+  }
+  await new Promise<void>((resolve) => renderWaiters.push(resolve));
+  activeRenders++;
+}
+function releaseRenderSlot(): void {
+  activeRenders--;
+  const next = renderWaiters.shift();
+  if (next) next();
+}
 
 type ActiveHead = { dispose?: () => void; stop?: () => void };
 
@@ -47,19 +89,49 @@ export function AvatarThumbnail({
   const [dataUrl, setDataUrl] = useState<string | null>(() =>
     avatar.url ? getCached(avatar.url) : null,
   );
+  const [staticThumb, setStaticThumb] = useState<string | null>(() => {
+    if (!avatar.url) return null;
+    const url = staticThumbUrl(avatar.url);
+    // Synchronously hand back known-good static thumbs on remount.
+    return staticThumbProbe.get(url) === "ok" ? url : null;
+  });
 
   useEffect(() => {
-    if (!avatar.url || dataUrl || disabled) return;
+    if (!avatar.url || disabled) return;
     let cancelled = false;
     let activeHead: ActiveHead | null = null;
+    let acquired = false;
 
-    renderQueue = renderQueue.then(async () => {
+    (async () => {
+      if (!avatar.url) return;
+
+      // Fast path: shipped a static thumbnail next to the .glb? Use it.
+      // This is the only path that makes the picker feel instant on first
+      // visit — the GPU fallback below is a developer-mode safety net.
+      const thumbUrl = staticThumbUrl(avatar.url);
+      const hit = await probeStaticThumb(thumbUrl);
+      if (cancelled) return;
+      if (hit) {
+        setStaticThumb(thumbUrl);
+        return;
+      }
+
+      // No static thumb available — fall through to the legacy live render.
+      if (dataUrl) return;
+      const cached = getCached(avatar.url);
+      if (cached) {
+        setDataUrl(cached);
+        return;
+      }
+
+      await acquireRenderSlot();
+      acquired = true;
       if (cancelled || !containerRef.current || !avatar.url) return;
       // Re-check cache: another instance may have rendered the same avatar
       // while we were queued.
-      const cached = getCached(avatar.url);
-      if (cached) {
-        if (!cancelled) setDataUrl(cached);
+      const cached2 = getCached(avatar.url);
+      if (cached2) {
+        if (!cancelled) setDataUrl(cached2);
         return;
       }
 
@@ -144,6 +216,8 @@ export function AvatarThumbnail({
         }
         activeHead = null;
       }
+    })().finally(() => {
+      if (acquired) releaseRenderSlot();
     });
 
     return () => {
@@ -162,6 +236,18 @@ export function AvatarThumbnail({
     // when avatar/disabled flips, never because the render itself completed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [avatar.id, disabled]);
+
+  if (staticThumb) {
+    return (
+      <img
+        src={staticThumb}
+        alt={avatar.name}
+        className="h-full w-full object-cover"
+        decoding="async"
+        loading="eager"
+      />
+    );
+  }
 
   if (dataUrl) {
     return (
